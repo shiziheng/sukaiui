@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  Bot, ChevronDown, ClipboardList, CreditCard, Gift, Languages,
-  Minus, PackageCheck, Plus, ShieldCheck, Sparkles, UserRound,
+  Bot, ClipboardList, Gift, Minus, Plus, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,11 +54,11 @@ const products: Product[] = [
   { id: "claude-max-recharge", businessType: "recharge", brand: "claude", name: "Claude Max 代充", subtitle: "Claude Max套餐充值", tags: ["Max", "代充"], price: 629, status: "available" },
 ];
 
-const menuItems: Array<{ id: MenuId; label: string; icon: typeof Bot }> = [
-  { id: "account", label: "成品号", icon: PackageCheck },
-  { id: "recharge", label: "代充", icon: CreditCard },
-  { id: "orders", label: "我的订单", icon: ClipboardList },
-  { id: "invite", label: "我的邀请", icon: Gift },
+const menuItems: Array<{ id: MenuId; label: string }> = [
+  { id: "account", label: "成品号" },
+  { id: "recharge", label: "代充" },
+  { id: "orders", label: "我的订单" },
+  { id: "invite", label: "我的邀请" },
 ];
 
 const tagStyle: Record<string, string> = {
@@ -144,81 +143,61 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      <SidebarProvider style={{ "--sidebar-width": "15rem" } as React.CSSProperties}>
+      <SidebarProvider style={{ "--sidebar-width": "13.5rem" } as React.CSSProperties}>
       <header className="site-header">
         <div className="header-left">
           <SidebarTrigger className="mobile-menu-trigger" aria-label="打开导航" />
           <div className="logo-mark" aria-hidden="true">S</div>
           <div className="brand-name">SUKAI</div>
-          <span className="demo-chip">UI DEMO</span>
         </div>
         <div className="header-actions">
-          <button className="header-action" type="button" aria-label="语言：简体中文">
-            <Languages aria-hidden="true" /><span>简体中文</span><ChevronDown aria-hidden="true" />
-          </button>
-          <button className="avatar-button" type="button" aria-label="用户入口"><UserRound aria-hidden="true" /></button>
+          <button className="login-link" type="button">登录</button>
+          <button className="register-button" type="button">注册</button>
         </div>
       </header>
         <Sidebar collapsible="offcanvas" className="demo-sidebar">
           <SidebarContent>
             <SidebarGroup className="sidebar-group">
-              <div className="sidebar-caption">商品服务</div>
               <SidebarGroupContent>
                 <SidebarMenu className="sidebar-menu">
-                  {menuItems.map((item, index) => {
-                    const Icon = item.icon;
-                    return (
-                      <SidebarMenuItem key={item.id} className={index === 2 ? "sidebar-break" : ""}>
+                  {menuItems.map((item) => (
+                      <SidebarMenuItem key={item.id}>
                         <SidebarMenuButton className="sidebar-item" isActive={selectedMenu === item.id}
                           onClick={() => setSelectedMenu(item.id)} tooltip={item.label}>
-                          <Icon aria-hidden="true" /><span>{item.label}</span>
+                          <span>{item.label}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
-                    );
-                  })}
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            <div className="sidebar-trust">
-              <ShieldCheck aria-hidden="true" />
-              <div><strong>安心体验</strong><span>全程仅为前端交互演示</span></div>
-            </div>
           </SidebarContent>
         </Sidebar>
 
         <SidebarInset className="content-inset">
           <main className="main-content">
             {isProductsPage ? (
-              <>
-                <div className="content-heading">
-                  <div>
-                    <p className="eyebrow">AI SERVICE MARKET</p>
-                    <h1>{selectedMenu === "account" ? "成品账号" : "套餐代充"}</h1>
-                    <p className="heading-copy">选择 AI 品牌，查看当前可体验的 Mock 商品方案。</p>
+              <section className="commerce-panel">
+                <div className="panel-toolbar">
+                  <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">
+                    <TabsList className="brand-tabs-list" aria-label="选择 AI 品牌">
+                      {brands.map((brand) => (
+                        <TabsTrigger className="brand-tab" value={brand.id} key={brand.id}>
+                          <BrandMark brand={brand.id} small />{brand.name}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                  <div className="panel-context">
+                    <strong>{currentBrand.name}</strong>
+                    <span>{selectedMenu === "account" ? "成品号" : "代充"} · {visibleProducts.length} 个方案</span>
                   </div>
-                  <div className="mock-note"><span />页面数据均为演示内容</div>
-                </div>
-
-                <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">
-                  <TabsList className="brand-tabs-list" aria-label="选择 AI 品牌">
-                    {brands.map((brand) => (
-                      <TabsTrigger className="brand-tab" value={brand.id} key={brand.id}>
-                        <BrandMark brand={brand.id} small />{brand.name}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
-
-                <div className="section-meta">
-                  <div><strong>{currentBrand.name}</strong><span>{selectedMenu === "account" ? "成品账号" : "官方套餐代充"}</span></div>
-                  <span>共 {visibleProducts.length} 个方案</span>
                 </div>
                 <section className="product-grid" aria-live="polite">
                   {visibleProducts.map((product) => <ProductCard product={product} onBuy={openPurchase} key={product.id} />)}
                 </section>
-                <div className="service-note"><ShieldCheck aria-hidden="true" /><span>本页仅用于确认界面与操作体验，不代表真实售价、库存或服务承诺。</span></div>
-              </>
-            ) : <PlaceholderPage type={selectedMenu} />}
+              </section>
+            ) : <section className="commerce-panel placeholder-panel"><PlaceholderPage type={selectedMenu} /></section>}
           </main>
         </SidebarInset>
       </SidebarProvider>
