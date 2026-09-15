@@ -116,6 +116,36 @@ export type DemoContent = {
   accountOrdersTab: string;
   rechargeOrdersTab: string;
   allStatus: string;
+  orderPendingStat: string;
+  orderAccountStat: string;
+  orderRechargeStat: string;
+  orderSearchPlaceholder: string;
+  orderStatusLabel: string;
+  orderTimeRangeLabel: string;
+  orderAllTime: string;
+  orderLast7Days: string;
+  orderLast30Days: string;
+  orderLast90Days: string;
+  orderCustomTime: string;
+  orderReset: string;
+  orderDetailTitle: string;
+  orderProgressTitle: string;
+  queryProgress: string;
+  clearFilters: string;
+  noMatchingOrders: string;
+  noMatchingOrdersHint: string;
+  moreActions: string;
+  copyOrderNumber: string;
+  copyAccount: string;
+  copyPassword: string;
+  cancelOrderConfirmTitle: string;
+  cancelOrderConfirmDescription: string;
+  cancelOrderConfirmAction: string;
+  transactionTime: string;
+  productCategory: string;
+  orderAmount: string;
+  orderStatusColumn: string;
+  orderActionsColumn: string;
   completedOrders: string;
   viewDetails: string;
   cancelOrder: string;
@@ -286,16 +316,46 @@ export const defaultContent: DemoContent = {
   viewAllOrders: "查看全部订单",
   goBrowse: "去逛逛",
   ordersPageTitle: "我的订单",
-  ordersPageSubtitle: "查看你的成品号和代充服务订单。",
+  ordersPageSubtitle: "查看和管理你的成品号与代充服务订单。",
   allOrdersTab: "全部订单",
   accountOrdersTab: "成品号订单",
   rechargeOrdersTab: "代充订单",
   allStatus: "全部状态",
+  orderPendingStat: "待处理",
+  orderAccountStat: "成品号",
+  orderRechargeStat: "代充",
+  orderSearchPlaceholder: "搜索订单号或商品名称",
+  orderStatusLabel: "订单状态",
+  orderTimeRangeLabel: "时间范围",
+  orderAllTime: "全部时间",
+  orderLast7Days: "近7天",
+  orderLast30Days: "近30天",
+  orderLast90Days: "近90天",
+  orderCustomTime: "自定义时间",
+  orderReset: "重置",
+  orderDetailTitle: "订单详情",
+  orderProgressTitle: "订单进度",
+  queryProgress: "查询进度",
+  clearFilters: "清除筛选",
+  noMatchingOrders: "没有找到符合条件的订单",
+  noMatchingOrdersHint: "尝试调整搜索或筛选条件。",
+  moreActions: "更多操作",
+  copyOrderNumber: "复制订单号",
+  copyAccount: "复制账号",
+  copyPassword: "复制密码",
+  cancelOrderConfirmTitle: "取消订单？",
+  cancelOrderConfirmDescription: "订单取消后将无法继续处理。",
+  cancelOrderConfirmAction: "确认取消",
+  transactionTime: "交易时间",
+  productCategory: "商品类别",
+  orderAmount: "订单金额",
+  orderStatusColumn: "订单状态",
+  orderActionsColumn: "操作",
   completedOrders: "已完成",
-  viewDetails: "详情",
+  viewDetails: "查看详情",
   cancelOrder: "取消订单",
   viewCredentials: "查看凭据",
-  downloadAction: "下载",
+  downloadAction: "下载凭据",
   invitePageTitle: "我的邀请",
   invitePageSubtitle: "邀请好友注册并消费，可获得返佣奖励。",
   downloadQr: "下载二维码",

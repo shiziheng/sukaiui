@@ -473,6 +473,9 @@ export default function Home() {
         if (config.content.storeAction === "商城") config.content.storeAction = "购买成品号";
         if (config.content.logoText === "SUKAI") config.content.logoText = "Sukai 速开";
         if (config.content.homeActionSubtitle === "选择服务，快速开始办理。") config.content.homeActionSubtitle = "一站式获取和升级 AI 账号，简单 · 快速 · 安全";
+        if (config.content.ordersPageSubtitle === "查看你的成品号和代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充服务订单。";
+        if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
+        if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
         setContent(config.content);
         setBrands(config.brands);
         setProducts(config.products);
