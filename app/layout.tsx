@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SUKAI AI 账号商城 Demo",
-  description: "AI 账号与订阅服务商城高保真前端交互 Demo。",
+  title: "SUKAI AI 服务 Demo",
+  description: "AI 成品号与订阅代充服务高保真前端交互 Demo。",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 
