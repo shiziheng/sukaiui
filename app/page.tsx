@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type CSSProperties,
   type ChangeEvent,
   type ReactNode,
   useEffect,
@@ -9,8 +10,8 @@ import {
   useState,
 } from "react";
 import {
-  ArrowDown, ArrowUp, Bot, Check, ChevronDown, ClipboardList, Download, ExternalLink, Gift,
-  Headphones, House, LogOut, Minus, PackageOpen, Pencil, Plus, RotateCcw, Send, ShieldCheck, Sparkles, Trash2, Upload, UserRound, WalletCards, Zap,
+  ArrowDown, ArrowUp, Check, ChevronDown, ClipboardList, Download, ExternalLink, Gift,
+  Headphones, House, LogOut, Minus, PackageOpen, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -211,17 +212,46 @@ function sanitizeConfig(input: unknown): DemoConfig {
   return fallback;
 }
 
-function BrandMark({ brand, small = false }: { brand: BrandId; small?: boolean }) {
-  const Icon = brand === "chatgpt" ? Bot : Sparkles;
+function BrandMark({ brand, small = false }: { brand: Brand; small?: boolean }) {
   return (
-    <span className={`brand-mark brand-mark-${brand} ${small ? "brand-mark-small" : ""}`}>
-      <Icon aria-hidden="true" />
+    <span className={`brand-mark brand-mark-${brand.id} ${small ? "brand-mark-small" : ""}`} style={{ "--brand-accent": brand.accentColor } as CSSProperties}>
+      <img src={brand.logo} alt="" aria-hidden="true" />
     </span>
   );
 }
 
+type PurchaseMode = "purchase" | "preorder" | "soldout";
+
+function getPurchaseMode(product: Product): PurchaseMode {
+  if (product.status === "soldout") return "soldout";
+  if (product.fulfillment === "preorder" || product.stock === 0) return "preorder";
+  return "purchase";
+}
+
+function getPurchaseLimit(product: Product, mode: PurchaseMode) {
+  const configuredLimit = Math.max(1, product.maxQuantity ?? 1);
+  if (mode !== "purchase" || product.stock === undefined) return configuredLimit;
+  return Math.max(1, Math.min(configuredLimit, product.stock));
+}
+
+function getStockLabel(product: Product, mode: PurchaseMode, soldOutLabel: string) {
+  if (mode === "soldout") return soldOutLabel;
+  if (mode === "preorder") return product.stock === 0 ? "暂时缺货 · 支持预定" : "需备货 · 支持预定";
+  if (product.stock !== undefined && product.stock <= 3) return `仅剩 ${product.stock} 个`;
+  if (product.stock !== undefined) return `库存 ${product.stock}`;
+  return product.stockText;
+}
+
+function getProductButtonKey(product: Product): keyof DemoContent {
+  const mode = getPurchaseMode(product);
+  if (mode === "soldout") return "soldOut";
+  if (product.businessType === "recharge") return "rechargeNow";
+  return mode === "preorder" ? "preorderNow" : "buyNow";
+}
+
 function ProductCard({
   product,
+  brand,
   content,
   editMode,
   updateContent,
@@ -230,6 +260,7 @@ function ProductCard({
   onEdit,
 }: {
   product: Product;
+  brand: Brand;
   content: DemoContent;
   editMode: boolean;
   updateContent: (key: keyof DemoContent, value: string) => void;
@@ -237,13 +268,25 @@ function ProductCard({
   onBuy: (product: Product) => void;
   onEdit: (id: string) => void;
 }) {
-  const soldOut = product.status === "soldout";
+  const purchaseMode = getPurchaseMode(product);
+  const soldOut = purchaseMode === "soldout";
+  const buttonKey = getProductButtonKey(product);
+  const stockLabel = editMode
+    ? product.stockText
+    : product.businessType === "account"
+      ? getStockLabel(product, purchaseMode, content.soldOut)
+      : soldOut ? content.soldOut : product.stockText;
   const visibleTags = product.tags
     .map((tag, originalIndex) => ({ tag, originalIndex }))
     .filter(({ tag }) => tag !== "推荐" && tag !== "热门")
     .slice(0, 2);
   return (
-    <article className={`product-card ${product.highlight ? "product-card-highlight" : ""}`}>
+    <article className={`product-card product-card-${product.businessType} ${product.highlight ? "product-card-highlight" : ""}`}>
+      {product.businessType === "account" ? (
+        <span className={`product-brand-watermark product-brand-watermark-${brand.id}`} style={{ "--brand-accent": brand.accentColor } as CSSProperties} aria-hidden="true">
+          <img src={brand.logoWatermark} alt="" />
+        </span>
+      ) : null}
       <div className="product-card-header">
         <div className="product-card-title-row">
           <h3>
@@ -301,8 +344,8 @@ function ProductCard({
         <Button className="buy-button" disabled={soldOut} onClick={() => onBuy(product)}>
           <EditableText
             active={editMode}
-            value={soldOut ? content.soldOut : product.businessType === "recharge" ? content.rechargeNow : content.buyNow}
-            onChange={(value) => updateContent(soldOut ? "soldOut" : product.businessType === "recharge" ? "rechargeNow" : "buyNow", value)}
+            value={content[buttonKey]}
+            onChange={(value) => updateContent(buttonKey, value)}
           />
         </Button>
         <div className="product-card-meta">
@@ -322,7 +365,7 @@ function ProductCard({
           <div className={`stock ${product.stock !== undefined && product.stock <= 3 ? "stock-low" : ""}`}>
             <EditableText
               active={editMode}
-              value={soldOut ? content.soldOut : product.stockText}
+              value={stockLabel}
               onChange={(value) => soldOut ? updateContent("soldOut", value) : updateProduct(product.id, { stockText: value })}
             />
           </div>
@@ -477,6 +520,11 @@ export default function Home() {
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
         if (config.content.invitePageSubtitle === "邀请好友注册并消费，可获得返佣奖励。") config.content.invitePageSubtitle = "邀请好友使用 SUKAI，查看你的邀请奖励与记录。";
+        if (config.content.buyNow === "选择方案" || config.content.buyNow === "立即预定") config.content.buyNow = "立即购买";
+        if (config.content.modalKicker === "PURCHASE DEMO") config.content.modalKicker = "购买信息";
+        if (config.content.modalDescription === "请确认商品与数量，本操作不会发起真实支付。") config.content.modalDescription = "请确认商品信息和购买数量。";
+        if (config.content.purchaseSuccess === "Demo：商品购买成功") config.content.purchaseSuccess = "购买信息已确认";
+        if (config.content.purchaseSuccessDescription === "这是交互演示，不会创建订单或发起支付。") config.content.purchaseSuccessDescription = "交互演示已完成，不会发起真实支付。";
         setContent(config.content);
         setBrands(config.brands);
         setProducts(config.products);
@@ -506,6 +554,14 @@ export default function Home() {
     return products.filter((product) => product.businessType === selectedMenu && product.brand === selectedBrand);
   }, [isProductsPage, products, selectedBrand, selectedMenu]);
   const currentBrand = brands.find((brand) => brand.id === selectedBrand) ?? brands[0];
+  const selectedProductBrand = selectedProduct
+    ? brands.find((brand) => brand.id === selectedProduct.brand) ?? defaultBrands[0]
+    : null;
+  const selectedPurchaseMode = selectedProduct ? getPurchaseMode(selectedProduct) : null;
+  const selectedPurchaseLimit = selectedProduct && selectedPurchaseMode
+    ? getPurchaseLimit(selectedProduct, selectedPurchaseMode)
+    : 1;
+  const selectedPurchaseTotal = selectedProduct ? selectedProduct.price * quantity : 0;
   const editorProduct = products.find((product) => product.id === editorProductId) ?? null;
   const wizardFlow = wizardProduct ? rechargeFlows.find((flow) => flow.brand === wizardProduct.brand) : undefined;
   const currentFaqGroup = faqs.find((group) => group.businessType === selectedMenu && group.brand === selectedBrand);
@@ -548,7 +604,13 @@ export default function Home() {
     setSelectedProduct(product);
   };
   const confirmPurchase = () => {
+    if (!selectedProduct) return;
+    const mode = getPurchaseMode(selectedProduct);
     setSelectedProduct(null);
+    if (mode === "preorder") {
+      toast.success(content.reservationSuccess, { description: content.reservationSuccessDescription });
+      return;
+    }
     toast.success(content.purchaseSuccess, { description: content.purchaseSuccessDescription });
   };
   const resetDefaults = () => {
@@ -819,7 +881,7 @@ export default function Home() {
                     <TabsList className="brand-tabs-list" aria-label="选择 AI 品牌">
                       {brands.map((brand) => (
                         <TabsTrigger className="brand-tab" value={brand.id} key={brand.id}>
-                          <BrandMark brand={brand.id} small />
+                          <BrandMark brand={brand} small />
                           <EditableText active={editMode} value={brand.name} onChange={(name) => updateBrand(brand.id, name)} />
                         </TabsTrigger>
                       ))}
@@ -836,6 +898,7 @@ export default function Home() {
                   {visibleProducts.map((product) => (
                     <ProductCard
                       product={product}
+                      brand={currentBrand}
                       content={content}
                       editMode={editMode}
                       updateContent={updateContent}
@@ -898,8 +961,85 @@ export default function Home() {
       </div>
 
       <Dialog open={Boolean(selectedProduct)} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        <DialogContent className="purchase-dialog">
-          {selectedProduct ? (
+        <DialogContent className={`purchase-dialog ${selectedProduct?.businessType === "account" ? "purchase-dialog-account" : ""}`}>
+          {selectedProduct && selectedProductBrand && selectedPurchaseMode ? selectedProduct.businessType === "account" ? (
+            <>
+              <DialogHeader>
+                {editMode ? <div className="dialog-kicker"><EditableText active value={content.modalKicker} onChange={(value) => updateContent("modalKicker", value)} /></div> : null}
+                <DialogTitle>
+                  <EditableText
+                    active={editMode}
+                    value={selectedPurchaseMode === "preorder" ? content.confirmReservation : content.modalTitle}
+                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "confirmReservation" : "modalTitle", value)}
+                  />
+                </DialogTitle>
+                <DialogDescription>
+                  <EditableText
+                    active={editMode}
+                    value={selectedPurchaseMode === "preorder" ? content.reservationModalDescription : content.modalDescription}
+                    multiline
+                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "reservationModalDescription" : "modalDescription", value)}
+                  />
+                </DialogDescription>
+              </DialogHeader>
+              <div className="dialog-product">
+                <BrandMark brand={selectedProductBrand} />
+                <div className="dialog-product-copy">
+                  <strong><EditableText active={editMode} value={selectedProduct.name} onChange={(name) => updateProduct(selectedProduct.id, { name })} /></strong>
+                  <span><EditableText active={editMode} value={selectedProduct.subtitle} multiline onChange={(subtitle) => updateProduct(selectedProduct.id, { subtitle })} /></span>
+                </div>
+                <div className="dialog-unit-price"><strong>${selectedProduct.price}</strong><span>{selectedProduct.priceSuffix}</span></div>
+              </div>
+              <div className="quantity-row">
+                <div>
+                  <strong><EditableText active={editMode} value={content.quantityLabel} onChange={(value) => updateContent("quantityLabel", value)} /></strong>
+                  <span>
+                    {selectedPurchaseMode === "purchase" && selectedProduct.stock !== undefined
+                      ? `${content.currentStockLabel} ${selectedProduct.stock} · ${content.maxQuantityLabel} ${selectedPurchaseLimit} ${content.accountUnit}`
+                      : `${content.maxReservationLabel} ${selectedPurchaseLimit} ${content.accountUnit}`}
+                  </span>
+                </div>
+                <div className="quantity-control">
+                  <button type="button" aria-label="减少数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><Minus /></button>
+                  <span>{quantity}</span>
+                  <button type="button" aria-label="增加数量" disabled={quantity >= selectedPurchaseLimit} onClick={() => setQuantity((value) => Math.min(selectedPurchaseLimit, value + 1))}><Plus /></button>
+                </div>
+              </div>
+              <section className="purchase-notes">
+                <h3><EditableText active={editMode} value={content.purchaseNotesTitle} onChange={(value) => updateContent("purchaseNotesTitle", value)} /></h3>
+                <ul>
+                  <li><EditableText active={editMode} value={content.purchaseNoteOfficial} multiline onChange={(value) => updateContent("purchaseNoteOfficial", value)} /></li>
+                  <li><EditableText active={editMode} value={content.purchaseNoteOrder} multiline onChange={(value) => updateContent("purchaseNoteOrder", value)} /></li>
+                  <li><EditableText active={editMode} value={content.purchaseNoteBatch} multiline onChange={(value) => updateContent("purchaseNoteBatch", value)} /></li>
+                  <li>{selectedProduct.credentialFormatDescription}</li>
+                  {selectedPurchaseMode === "preorder" ? <li><EditableText active={editMode} value={content.preorderNote} multiline onChange={(value) => updateContent("preorderNote", value)} /></li> : null}
+                </ul>
+              </section>
+              {selectedProduct.afterSalesDescription ? (
+                <section className="after-sales-note">
+                  <strong><ShieldCheck aria-hidden="true" /><EditableText active={editMode} value={content.afterSalesTitle} onChange={(value) => updateContent("afterSalesTitle", value)} /></strong>
+                  <p>{selectedProduct.afterSalesDescription}</p>
+                </section>
+              ) : null}
+              <div className="total-row">
+                <div><span><EditableText active={editMode} value={content.totalLabel} onChange={(value) => updateContent("totalLabel", value)} /></span><small>${selectedProduct.price} × {quantity} {content.accountUnit}</small></div>
+                <strong><small>$</small>{selectedPurchaseTotal}</strong>
+              </div>
+              <DialogFooter className="dialog-actions">
+                <DialogClose asChild>
+                  <Button variant="outline" className="dialog-cancel"><EditableText active={editMode} value={content.cancel} onChange={(value) => updateContent("cancel", value)} /></Button>
+                </DialogClose>
+                <Button className="dialog-confirm" onClick={confirmPurchase}>
+                  <EditableText
+                    active={editMode}
+                    value={selectedPurchaseMode === "preorder" ? content.confirmReservation : content.confirmPurchase}
+                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "confirmReservation" : "confirmPurchase", value)}
+                  />
+                  <span>${selectedPurchaseTotal}</span>
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
             <>
               <DialogHeader>
                 <div className="dialog-kicker"><EditableText active={editMode} value={content.modalKicker} onChange={(value) => updateContent("modalKicker", value)} /></div>
@@ -907,7 +1047,7 @@ export default function Home() {
                 <DialogDescription><EditableText active={editMode} value={content.modalDescription} multiline onChange={(value) => updateContent("modalDescription", value)} /></DialogDescription>
               </DialogHeader>
               <div className="dialog-product">
-                <BrandMark brand={selectedProduct.brand} />
+                <BrandMark brand={selectedProductBrand} />
                 <div>
                   <strong><EditableText active={editMode} value={selectedProduct.name} onChange={(name) => updateProduct(selectedProduct.id, { name })} /></strong>
                   <span><EditableText active={editMode} value={selectedProduct.subtitle} multiline onChange={(subtitle) => updateProduct(selectedProduct.id, { subtitle })} /></span>
@@ -915,26 +1055,11 @@ export default function Home() {
                 <div className="dialog-unit-price">${selectedProduct.price}</div>
               </div>
               <div className="quantity-row">
-                <div>
-                  <strong><EditableText active={editMode} value={content.quantityLabel} onChange={(value) => updateContent("quantityLabel", value)} /></strong>
-                  <span><EditableText active={editMode} value={content.quantityHint} onChange={(value) => updateContent("quantityHint", value)} /></span>
-                </div>
-                <div className="quantity-control">
-                  <button type="button" aria-label="减少数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><Minus /></button>
-                  <span>{quantity}</span>
-                  <button type="button" aria-label="增加数量" disabled={quantity >= 9} onClick={() => setQuantity((value) => Math.min(9, value + 1))}><Plus /></button>
-                </div>
+                <div><strong><EditableText active={editMode} value={content.quantityLabel} onChange={(value) => updateContent("quantityLabel", value)} /></strong><span><EditableText active={editMode} value={content.quantityHint} onChange={(value) => updateContent("quantityHint", value)} /></span></div>
+                <div className="quantity-control"><button type="button" aria-label="减少数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><Minus /></button><span>{quantity}</span><button type="button" aria-label="增加数量" disabled={quantity >= 9} onClick={() => setQuantity((value) => Math.min(9, value + 1))}><Plus /></button></div>
               </div>
-              <div className="total-row">
-                <span><EditableText active={editMode} value={content.totalLabel} onChange={(value) => updateContent("totalLabel", value)} /></span>
-                <strong><small>$</small>{selectedProduct.price * quantity}</strong>
-              </div>
-              <DialogFooter className="dialog-actions">
-                <DialogClose asChild>
-                  <Button variant="outline" className="dialog-cancel"><EditableText active={editMode} value={content.cancel} onChange={(value) => updateContent("cancel", value)} /></Button>
-                </DialogClose>
-                <Button className="dialog-confirm" onClick={confirmPurchase}><EditableText active={editMode} value={content.confirmPurchase} onChange={(value) => updateContent("confirmPurchase", value)} /></Button>
-              </DialogFooter>
+              <div className="total-row"><span><EditableText active={editMode} value={content.totalLabel} onChange={(value) => updateContent("totalLabel", value)} /></span><strong><small>$</small>{selectedPurchaseTotal}</strong></div>
+              <DialogFooter className="dialog-actions"><DialogClose asChild><Button variant="outline" className="dialog-cancel"><EditableText active={editMode} value={content.cancel} onChange={(value) => updateContent("cancel", value)} /></Button></DialogClose><Button className="dialog-confirm" onClick={confirmPurchase}><EditableText active={editMode} value={content.confirmPurchase} onChange={(value) => updateContent("confirmPurchase", value)} /></Button></DialogFooter>
             </>
           ) : null}
         </DialogContent>
@@ -987,7 +1112,7 @@ export default function Home() {
               </div>
               <EditorField label={content.stockQuantityLabel}><input type="number" min="0" value={editorProduct.stock ?? ""} onChange={(event) => updateProduct(editorProduct.id, { stock: event.target.value === "" ? undefined : Math.max(0, Number(event.target.value)) })} /></EditorField>
               <EditorField label={content.stockTextLabel}><input value={editorProduct.stockText} onChange={(event) => updateProduct(editorProduct.id, { stockText: event.target.value })} /></EditorField>
-              <EditorField label={content.buyButtonLabel}><input value={editorProduct.businessType === "recharge" ? content.rechargeNow : content.buyNow} onChange={(event) => updateContent(editorProduct.businessType === "recharge" ? "rechargeNow" : "buyNow", event.target.value)} /></EditorField>
+              <EditorField label={content.buyButtonLabel}><input value={content[getProductButtonKey(editorProduct)]} onChange={(event) => updateContent(getProductButtonKey(editorProduct), event.target.value)} /></EditorField>
               <EditorField label={content.statusLabel}>
                 <select value={editorProduct.status} onChange={(event) => updateProduct(editorProduct.id, { status: event.target.value as ProductStatus })}>
                   <option value="available">{content.availableLabel}</option>

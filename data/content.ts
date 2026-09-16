@@ -26,6 +26,7 @@ export type DemoContent = {
   planUnit: string;
   featuredBadge: string;
   buyNow: string;
+  preorderNow: string;
   rechargeNow: string;
   soldOut: string;
   ordersEmptyTitle: string;
@@ -36,13 +37,27 @@ export type DemoContent = {
   modalKicker: string;
   modalTitle: string;
   modalDescription: string;
+  reservationModalDescription: string;
   quantityLabel: string;
   quantityHint: string;
+  currentStockLabel: string;
+  maxQuantityLabel: string;
+  maxReservationLabel: string;
+  accountUnit: string;
   totalLabel: string;
   cancel: string;
   confirmPurchase: string;
+  confirmReservation: string;
+  purchaseNotesTitle: string;
+  purchaseNoteOfficial: string;
+  purchaseNoteOrder: string;
+  purchaseNoteBatch: string;
+  preorderNote: string;
+  afterSalesTitle: string;
   purchaseSuccess: string;
   purchaseSuccessDescription: string;
+  reservationSuccess: string;
+  reservationSuccessDescription: string;
   editingNow: string;
   editProduct: string;
   editorTitle: string;
@@ -231,7 +246,8 @@ export const defaultContent: DemoContent = {
   rechargePageSubtitle: "选择服务方案，快速完成 AI 账号升级",
   planUnit: "个方案",
   featuredBadge: "推荐",
-  buyNow: "选择方案",
+  buyNow: "立即购买",
+  preorderNow: "立即预定",
   rechargeNow: "选择方案",
   soldOut: "已售罄",
   ordersEmptyTitle: "我的订单",
@@ -239,16 +255,30 @@ export const defaultContent: DemoContent = {
   walletEmptyTitle: "钱包 / 充值",
   placeholderDescription: "该功能将在下一版本设计",
   placeholderHint: "当前页面仅用于确认 Demo 导航与布局效果",
-  modalKicker: "PURCHASE DEMO",
+  modalKicker: "购买信息",
   modalTitle: "确认购买",
-  modalDescription: "请确认商品与数量，本操作不会发起真实支付。",
+  modalDescription: "请确认商品信息和购买数量。",
+  reservationModalDescription: "当前商品需备货，确认后将提交预定申请。",
   quantityLabel: "购买数量",
-  quantityHint: "每次最多 9 件",
+  quantityHint: "数量上限以商品库存为准",
+  currentStockLabel: "当前库存",
+  maxQuantityLabel: "每次最多购买",
+  maxReservationLabel: "每次最多预定",
+  accountUnit: "个账号",
   totalLabel: "应付金额",
   cancel: "取消",
   confirmPurchase: "确认购买",
-  purchaseSuccess: "Demo：商品购买成功",
-  purchaseSuccessDescription: "这是交互演示，不会创建订单或发起支付。",
+  confirmReservation: "确认预定",
+  purchaseNotesTitle: "购买说明",
+  purchaseNoteOfficial: "官方成品号，支持购买后交付",
+  purchaseNoteOrder: "订单交付后可在「我的订单」查看凭据",
+  purchaseNoteBatch: "单笔订单按当前购买数量创建并统一交付",
+  preorderNote: "当前商品需预定，运营确认库存后安排交付",
+  afterSalesTitle: "售后说明",
+  purchaseSuccess: "购买信息已确认",
+  purchaseSuccessDescription: "交互演示已完成，不会发起真实支付。",
+  reservationSuccess: "预定已提交",
+  reservationSuccessDescription: "交互演示已完成，不会创建真实预定或扣款。",
   editingNow: "文案编辑中",
   editProduct: "编辑",
   editorTitle: "编辑商品",
