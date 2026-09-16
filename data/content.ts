@@ -389,7 +389,7 @@ export const defaultContent: DemoContent = {
   editProfile: "编辑资料",
   registeredAt: "注册时间",
   walletTitle: "钱包",
-  walletSubtitle: "管理账户余额与资金记录。",
+  walletSubtitle: "管理账户余额、充值与资金记录。",
   walletRecharge: "充值",
   accountFlowTab: "账户流水",
   rechargeRecordTab: "充值记录",

@@ -799,7 +799,7 @@ export default function Home() {
             ) : selectedMenu === "invite" ? (
               <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "wallet" ? (
-              <WalletPage content={content} editMode={editMode} updateContent={updateContent} />
+              <WalletPage content={content} editMode={editMode} updateContent={updateContent} onNavigate={setSelectedMenu} />
             ) : selectedMenu === "profile" ? (
               <ProfilePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "security" ? (
