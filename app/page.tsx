@@ -22,6 +22,7 @@ import { InvitePage } from "@/components/invite-page";
 import { OrdersPage } from "@/components/orders-page";
 import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
 import { ProfilePage } from "@/components/profile-page";
+import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
 import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
@@ -497,7 +498,7 @@ export default function Home() {
   const [editMode, setEditMode] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -672,6 +673,12 @@ export default function Home() {
     setSelectedMenu("wallet");
     setPaymentRequest({ mode: "wallet_recharge", amount: 100 });
   };
+  const handleDemoLogin = () => {
+    setIsLoggedIn(true);
+    setSelectedMenu("home");
+    toast.success("登录成功（Demo）");
+  };
+  const handleDemoRegister = () => toast.info("注册为 Demo 交互");
   const openBatchRecharge = () => {
     const product = visibleProducts.find((item) => item.businessType === "recharge" && item.status === "available");
     if (!product || product.brand !== "chatgpt") {
@@ -832,7 +839,7 @@ export default function Home() {
     { id: "recharge", key: "navRecharge" },
     { id: "orders", key: "navOrders" },
   ];
-  const menuItems = isLoggedIn ? loggedInMenuItems : loggedInMenuItems.filter((item) => item.id === "account" || item.id === "recharge");
+  const menuItems = isLoggedIn ? loggedInMenuItems : loggedInMenuItems.filter((item) => item.id === "home" || item.id === "account" || item.id === "recharge");
 
   return (
     <div className={`app-shell ${editMode ? "edit-mode" : ""}`}>
@@ -864,7 +871,7 @@ export default function Home() {
           </div>
         </nav>
         <div className="header-actions">
-          {editMode ? (
+          {isLoggedIn && editMode ? (
             <div className="editor-toolbar" aria-label="文案编辑工具">
               <span className="editing-indicator"><Pencil aria-hidden="true" />{content.editingNow}</span>
               <button type="button" onClick={() => setResetOpen(true)}><RotateCcw aria-hidden="true" />{content.resetDefaults}</button>
@@ -873,11 +880,11 @@ export default function Home() {
               <button className="exit-edit-button" type="button" onClick={() => setEditMode(false)}>{content.exitEdit}</button>
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
-          ) : (
+          ) : isLoggedIn ? (
             <button className="edit-copy-button" type="button" onClick={() => setEditMode(true)}>
               <Pencil aria-hidden="true" />{content.editCopy}
             </button>
-          )}
+          ) : null}
           {isLoggedIn ? <button className="header-balance" type="button" onClick={() => setSelectedMenu("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
           <div
             className="top-support"
@@ -921,11 +928,11 @@ export default function Home() {
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={() => setLogoutOpen(true)}><LogOut />{content.logout}</DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu> : <div className="guest-actions"><button className="login-link" type="button" onClick={() => { setIsLoggedIn(true); setSelectedMenu("home"); toast.success("登录成功（Demo）"); }}>{content.login}</button><button className="register-button" type="button" onClick={() => toast.info("注册为 Demo 交互")}>{content.register}</button></div>}
+          </DropdownMenu> : <div className="guest-actions"><button className="login-link" type="button" onClick={handleDemoLogin}>{content.login}</button><button className="register-button" type="button" onClick={handleDemoRegister}>{content.register}</button></div>}
         </div>
       </header>
 
-      <div className={`content-inset ${wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {wizardProduct && wizardFlow ? (
               <RechargeWizard
@@ -942,7 +949,7 @@ export default function Home() {
                 onExit={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} />
+              isLoggedIn ? <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={setSelectedMenu} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
@@ -1301,7 +1308,7 @@ export default function Home() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{content.cancel}</AlertDialogCancel>
-            <AlertDialogAction className="logout-confirm-button" onClick={() => { setIsLoggedIn(false); setSelectedMenu("account"); toast.info("已退出登录（Demo）"); }}><EditableText active={editMode} value={content.logoutConfirmAction} onChange={(value) => updateContent("logoutConfirmAction", value)} /></AlertDialogAction>
+            <AlertDialogAction className="logout-confirm-button" onClick={() => { setIsLoggedIn(false); setSelectedMenu("home"); toast.info("已退出登录（Demo）"); }}><EditableText active={editMode} value={content.logoutConfirmAction} onChange={(value) => updateContent("logoutConfirmAction", value)} /></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
