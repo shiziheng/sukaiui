@@ -1,27 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, Check, Clipboard, ExternalLink, Inbox,
-  LoaderCircle, LockKeyhole, Play, ShieldCheck, Sparkles,
+  LoaderCircle, LockKeyhole, Play, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
+import { PaymentExperience } from "@/components/payment-experience";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import type { DemoContent } from "@/data/content";
+import type { PaymentCompletion, ProductOrder } from "@/data/payment-mocks";
 import type { Product } from "@/data/products";
 import type {
-  RechargeFlow, RechargePaymentMethod, RechargeStep,
+  RechargeFlow, RechargeStep,
 } from "@/data/recharge-flows";
 
 type MockSessionRecord = {
@@ -76,6 +77,8 @@ export function RechargeWizard({
   onContentChange,
   onFlowChange,
   onExit,
+  availableBalance,
+  onPaymentComplete,
 }: {
   product: Product;
   flow: RechargeFlow;
@@ -85,6 +88,8 @@ export function RechargeWizard({
   onContentChange: (key: keyof DemoContent, value: string) => void;
   onFlowChange: (flow: RechargeFlow) => void;
   onExit: () => void;
+  availableBalance: number;
+  onPaymentComplete: (completion: PaymentCompletion) => void;
 }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
@@ -92,8 +97,6 @@ export function RechargeWizard({
   const [sessionRecords, setSessionRecords] = useState<MockSessionRecord[]>([]);
   const [duplicateCount, setDuplicateCount] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<SelectedAccount[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("balance");
-  const [processing, setProcessing] = useState(false);
   const [finalConfirmed, setFinalConfirmed] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
   const [delayOpen, setDelayOpen] = useState(false);
@@ -110,15 +113,19 @@ export function RechargeWizard({
   const accountCount = selectedAccounts.length;
   const unitPrice = Number(product.price);
   const totalAmount = unitPrice * accountCount;
+  const paymentOrder = useMemo<ProductOrder>(() => ({
+    id: `DO-DEMO-${product.id}-${Math.max(accountCount, 1)}`,
+    amount: totalAmount,
+    type: "recharge",
+    productName: product.name,
+    paymentStatus: "pending",
+  }), [accountCount, product.id, product.name, totalAmount]);
   const formatAmount = (amount: number) => Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
   const updateCopy = (key: keyof RechargeFlow["copy"], value: string) => {
     onFlowChange({ ...flow, copy: { ...flow.copy, [key]: value } });
   };
   const updateStep = (id: RechargeStep["id"], patch: Partial<RechargeStep>) => {
     onFlowChange({ ...flow, steps: flow.steps.map((item) => item.id === id ? { ...item, ...patch, id: item.id } : item) });
-  };
-  const updatePayment = (id: RechargePaymentMethod["id"], patch: Partial<RechargePaymentMethod>) => {
-    onFlowChange({ ...flow, paymentMethods: flow.paymentMethods.map((item) => item.id === id ? { ...item, ...patch, id: item.id } : item) });
   };
   const E = ({ field, multiline = false }: { field: keyof RechargeFlow["copy"]; multiline?: boolean }) => (
     <EditableText active={editMode} value={flow.copy[field]} multiline={multiline} onChange={(value) => updateCopy(field, value)} />
@@ -208,15 +215,6 @@ export function RechargeWizard({
       completionTimers.forEach((timer) => window.clearTimeout(timer));
     };
   }, [pasteValue]);
-  const processPayment = () => {
-    if (processing || accountCount === 0) return;
-    setProcessing(true);
-    window.setTimeout(() => {
-      setProcessing(false);
-      goToStep(flow.steps.length);
-    }, 1100);
-  };
-
   const tutorial = (
     <button className="wizard-tutorial-link" type="button" onClick={() => toast.info(flow.copy.videoDemoToast)}>
       <Play aria-hidden="true" /><E field="viewTutorial" />
@@ -305,17 +303,15 @@ export function RechargeWizard({
               <div className="is-total"><span><E field="paymentOrderTotalLabel" /></span><strong>${formatAmount(totalAmount)}</strong><small>${formatAmount(unitPrice)} × {accountCount} <E field="paymentAccountUnit" /></small></div>
             </div>
           </section>
-          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="payment-methods">
-            {flow.paymentMethods.map((method) => (
-              <label className="payment-method" data-selected={paymentMethod === method.id} key={method.id}>
-                <RadioGroupItem value={method.id} />
-                <div><strong><EditableText active={editMode} value={method.name} onChange={(name) => updatePayment(method.id, { name })} /></strong><span><EditableText active={editMode} value={method.description} onChange={(description) => updatePayment(method.id, { description })} /></span>{method.note ? <small className="payment-method-note"><EditableText active={editMode} value={method.note} onChange={(note) => updatePayment(method.id, { note })} /></small> : null}</div>
-                <small><EditableText active={editMode} value={method.meta} onChange={(meta) => updatePayment(method.id, { meta })} /></small>
-              </label>
-            ))}
-          </RadioGroup>
-          {paymentMethod !== "balance" ? <p className="payment-network-reminder"><ShieldCheck aria-hidden="true" /><E field="paymentNetworkReminder" /></p> : null}
-          <div className="wizard-payment-footer"><div><span><E field="paymentDue" /></span><strong>${formatAmount(totalAmount)}</strong></div><div className="wizard-actions">{commonBack}<Button className="wizard-primary" disabled={processing || accountCount === 0} onClick={processPayment}>{processing ? <><LoaderCircle className="spin" /><E field="paymentProcessingText" /></> : <><StepText field="primaryButtonText" /> ${formatAmount(totalAmount)}</>}</Button></div></div>
+          <section className="wizard-unified-payment">
+            <PaymentExperience
+              request={{ mode: "order_payment", order: paymentOrder }}
+              availableBalance={availableBalance}
+              onComplete={onPaymentComplete}
+              onClose={() => goToStep(flow.steps.length)}
+            />
+          </section>
+          <div className="wizard-actions wizard-payment-back">{commonBack}</div>
         </>
       );
     }

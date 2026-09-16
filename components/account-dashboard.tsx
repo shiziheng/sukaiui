@@ -8,8 +8,10 @@ import { OrderTable, formatMoney, type CopyUpdater } from "@/components/user-cen
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
 
-export function AccountDashboard({ onNavigate, content, editMode, updateContent }: {
+export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, content, editMode, updateContent }: {
   onNavigate: (destination: DashboardDestination) => void;
+  onOpenRecharge: () => void;
+  availableBalance: number;
   content: DemoContent;
   editMode: boolean;
   updateContent: CopyUpdater;
@@ -41,10 +43,10 @@ export function AccountDashboard({ onNavigate, content, editMode, updateContent 
       <section className="home-quick-section uc-card">
         <div className="uc-section-heading home-quick-heading"><div><span className="quick-heading-icon"><WalletCards /></span><div><h2><EditableText active={editMode} value={content.accountQuickInfo} onChange={(value) => updateContent("accountQuickInfo", value)} /></h2><p>账户状态与常用入口</p></div></div><span className="quick-heading-badge">ACCOUNT OVERVIEW</span></div>
         <div className="home-quick-layout"><div className="home-quick-grid">
-          <button type="button" onClick={() => onNavigate("wallet")}><WalletCards /><span><EditableText active={editMode} value={content.availableBalance} onChange={(value) => updateContent("availableBalance", value)} /></span><strong>{formatMoney(data.summary.availableBalance)}</strong><small><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /><ArrowRight /></small></button>
+          <button type="button" onClick={onOpenRecharge}><WalletCards /><span><EditableText active={editMode} value={content.availableBalance} onChange={(value) => updateContent("availableBalance", value)} /></span><strong>{formatMoney(availableBalance)}</strong><small><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /><ArrowRight /></small></button>
           <button type="button" onClick={() => onNavigate("orders")}><Clock3 /><span><EditableText active={editMode} value={content.pendingOrders} onChange={(value) => updateContent("pendingOrders", value)} /></span><strong>{pending}</strong><small>查看处理进度<ArrowRight /></small></button>
           <button type="button" onClick={() => onNavigate("orders")}><ReceiptText /><span><EditableText active={editMode} value={content.recentOrderCount} onChange={(value) => updateContent("recentOrderCount", value)} /></span><strong>{data.orders.length}</strong><small><EditableText active={editMode} value={content.viewAllOrders} onChange={(value) => updateContent("viewAllOrders", value)} /><ArrowRight /></small></button>
-        </div><div className="home-quick-actions"><button className="is-primary" type="button" onClick={() => onNavigate("wallet")}><WalletCards /><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /></button><button type="button" onClick={() => onNavigate("wallet")}>查看钱包<ArrowRight /></button></div></div>
+        </div><div className="home-quick-actions"><button className="is-primary" type="button" onClick={onOpenRecharge}><WalletCards /><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /></button><button type="button" onClick={() => onNavigate("wallet")}>查看钱包<ArrowRight /></button></div></div>
       </section>
 
       <section className="home-lower-grid">

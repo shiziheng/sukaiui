@@ -39,9 +39,9 @@ export const accountDashboardMock = {
     { id: "WAL-0910", time: "2026-09-10 10:18", type: "充值到账", amount: 300, balance: 376.43, orderId: "—", note: "TRC20 USDT" },
   ],
   topUpRecords: [
-    { id: "R020260910001", amount: 300, method: "TRC20 USDT", status: "已完成", createdAt: "2026-09-10 10:02", completedAt: "2026-09-10 10:18" },
-    { id: "R020260901004", amount: 500, method: "ERC20 USDT", status: "已完成", createdAt: "2026-09-01 08:51", completedAt: "2026-09-01 09:05" },
-    { id: "R020260830012", amount: 100, method: "TRC20 USDT", status: "待支付", createdAt: "2026-08-30 12:20", completedAt: "—" },
+    { id: "R020260910001", amount: 300, method: "TRC20 USDT", status: "已完成", purpose: "钱包充值", orderId: "—", createdAt: "2026-09-10 10:02", completedAt: "2026-09-10 10:18" },
+    { id: "R020260901004", amount: 500, method: "ERC20 USDT", status: "已完成", purpose: "钱包充值", orderId: "—", createdAt: "2026-09-01 08:51", completedAt: "2026-09-01 09:05" },
+    { id: "R020260830012", amount: 100, method: "TRC20 USDT", status: "待支付", purpose: "钱包充值", orderId: "—", createdAt: "2026-08-30 12:20", completedAt: "—" },
   ],
   frozenRecords: [
     { id: "FRZ-0914", time: "2026-09-14 14:32", amount: 18, reason: "成品号订单冻结", orderId: "M0202609140018", status: "冻结中" },

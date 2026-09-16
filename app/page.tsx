@@ -20,6 +20,7 @@ import { AccountDashboard } from "@/components/account-dashboard";
 import { EditableText } from "@/components/editable-text";
 import { InvitePage } from "@/components/invite-page";
 import { OrdersPage } from "@/components/orders-page";
+import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
 import { ProfilePage } from "@/components/profile-page";
 import { RechargeWizard } from "@/components/recharge-wizard";
 import { SecurityPage } from "@/components/security-page";
@@ -50,6 +51,7 @@ import { defaultBrands, type Brand, type BrandId } from "@/data/brands";
 import { defaultContent, type DemoContent } from "@/data/content";
 import { defaultFaqs, type FAQGroup, type FAQItem } from "@/data/faqs";
 import { defaultRechargeFlows, type RechargeFlow } from "@/data/recharge-flows";
+import type { PaymentCompletion, ProductOrder } from "@/data/payment-mocks";
 import {
   defaultProducts, type BusinessType, type Product, type ProductStatus,
 } from "@/data/products";
@@ -504,6 +506,10 @@ export default function Home() {
   const [openFaqId, setOpenFaqId] = useState<string | undefined>();
   const [supportSurface, setSupportSurface] = useState<"top" | "floating" | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [walletBalance, setWalletBalance] = useState(accountDashboardMock.summary.availableBalance);
+  const [walletRecords, setWalletRecords] = useState(() => accountDashboardMock.walletRecords.map((item) => ({ ...item })));
+  const [topUpRecords, setTopUpRecords] = useState(() => accountDashboardMock.topUpRecords.map((item) => ({ ...item })));
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -606,12 +612,56 @@ export default function Home() {
   const confirmPurchase = () => {
     if (!selectedProduct) return;
     const mode = getPurchaseMode(selectedProduct);
+    const purchasedProduct = selectedProduct;
+    const purchasedTotal = selectedProduct.price * quantity;
     setSelectedProduct(null);
     if (mode === "preorder") {
       toast.success(content.reservationSuccess, { description: content.reservationSuccessDescription });
       return;
     }
-    toast.success(content.purchaseSuccess, { description: content.purchaseSuccessDescription });
+    const order: ProductOrder = {
+      id: `${purchasedProduct.businessType === "account" ? "MO" : "DO"}${Date.now().toString().slice(-11)}`,
+      amount: purchasedTotal,
+      type: purchasedProduct.businessType,
+      productName: purchasedProduct.name,
+      paymentStatus: "pending",
+    };
+    setPaymentRequest({ mode: "order_payment", order });
+  };
+  const applyPaymentCompletion = (completion: PaymentCompletion) => {
+    const time = new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-");
+    let runningBalance = walletBalance;
+    const nextWalletRows = completion.walletTransactions.map((item) => {
+      runningBalance = Number((runningBalance + item.amount).toFixed(4));
+      const isCredit = item.type === "crypto_credit";
+      return {
+        id: item.id,
+        time,
+        type: isCredit ? "链上充值到账" : completion.order?.type === "recharge" ? "代充消费" : "成品号消费",
+        amount: item.amount,
+        balance: runningBalance,
+        orderId: item.relatedOrderId ?? "—",
+        note: isCredit ? `${completion.paymentIntent.network.toUpperCase()} USDT · 同一支付单` : "订单支付完成",
+      };
+    });
+    setWalletBalance(completion.newBalance);
+    if (nextWalletRows.length) setWalletRecords((current) => [...nextWalletRows.reverse(), ...current]);
+    if (completion.rechargeRecord) {
+      setTopUpRecords((current) => [{
+        id: completion.rechargeRecord!.id,
+        amount: completion.rechargeRecord!.amount,
+        method: `${completion.rechargeRecord!.network.toUpperCase()} USDT`,
+        status: "已完成",
+        purpose: completion.rechargeRecord!.purpose === "order_payment" ? "订单支付" : "钱包充值",
+        orderId: completion.rechargeRecord!.relatedOrderId ?? "—",
+        createdAt: time,
+        completedAt: time,
+      }, ...current]);
+    }
+  };
+  const openWalletRecharge = () => {
+    setSelectedMenu("wallet");
+    setPaymentRequest({ mode: "wallet_recharge", amount: 100 });
   };
   const resetDefaults = () => {
     const config = cloneDefaults();
@@ -753,6 +803,8 @@ export default function Home() {
         onFlowChange={(nextFlow) => setRechargeFlows((current) => current.map((flow) => flow.id === nextFlow.id
           ? { ...nextFlow, id: flow.id, brand: flow.brand }
           : flow))}
+        availableBalance={walletBalance}
+        onPaymentComplete={applyPaymentCompletion}
         onExit={() => {
           setWizardProduct(null);
           setSelectedMenu("recharge");
@@ -806,7 +858,7 @@ export default function Home() {
               <Pencil aria-hidden="true" />{content.editCopy}
             </button>
           )}
-          {isLoggedIn ? <button className="header-balance" type="button" onClick={() => setSelectedMenu("wallet")}><WalletCards aria-hidden="true" />${accountDashboardMock.summary.availableBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-balance" type="button" onClick={() => setSelectedMenu("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
           <div
             className="top-support"
             onMouseEnter={() => setSupportSurface("top")}
@@ -856,13 +908,22 @@ export default function Home() {
       <div className={`content-inset ${["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "home" ? (
-              <AccountDashboard onNavigate={setSelectedMenu} content={content} editMode={editMode} updateContent={updateContent} />
+              <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "invite" ? (
               <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "wallet" ? (
-              <WalletPage content={content} editMode={editMode} updateContent={updateContent} onNavigate={setSelectedMenu} />
+              <WalletPage
+                content={content}
+                editMode={editMode}
+                updateContent={updateContent}
+                onNavigate={setSelectedMenu}
+                availableBalance={walletBalance}
+                walletRecords={walletRecords}
+                topUpRecords={topUpRecords}
+                onPaymentComplete={applyPaymentCompletion}
+              />
             ) : selectedMenu === "profile" ? (
               <ProfilePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "security" ? (
@@ -1064,6 +1125,17 @@ export default function Home() {
           ) : null}
         </DialogContent>
       </Dialog>
+
+      <PaymentFlowSheet
+        open={Boolean(paymentRequest)}
+        request={paymentRequest}
+        availableBalance={walletBalance}
+        onOpenChange={(open) => !open && setPaymentRequest(null)}
+        onComplete={(completion) => {
+          applyPaymentCompletion(completion);
+          if (completion.order) toast.success("订单支付成功", { description: "订单已提交，正在进入后续处理流程。" });
+        }}
+      />
 
       <Sheet open={Boolean(editorProduct)} onOpenChange={(open) => !open && setEditorProductId(null)}>
         <SheetContent className="product-editor-sheet">

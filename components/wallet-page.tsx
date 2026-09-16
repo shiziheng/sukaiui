@@ -20,14 +20,15 @@ import {
   WalletCards,
   Zap,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
+import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
 import { PageHeading, type CopyUpdater } from "@/components/user-center-shared";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
+import type { PaymentCompletion } from "@/data/payment-mocks";
 
 type WalletTab = "flow" | "recharge" | "frozen";
 
@@ -53,18 +54,26 @@ export function WalletPage({
   editMode,
   updateContent,
   onNavigate,
+  availableBalance,
+  walletRecords,
+  topUpRecords,
+  onPaymentComplete,
 }: {
   content: DemoContent;
   editMode: boolean;
   updateContent: CopyUpdater;
   onNavigate: (destination: DashboardDestination) => void;
+  availableBalance: number;
+  walletRecords: typeof accountDashboardMock.walletRecords;
+  topUpRecords: typeof accountDashboardMock.topUpRecords;
+  onPaymentComplete: (completion: PaymentCompletion) => void;
 }) {
   const [tab, setTab] = useState<WalletTab>("flow");
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const data = accountDashboardMock;
 
   const openRecharge = () => {
-    setTab("recharge");
-    toast.info("已进入充值记录，充值面板为 Demo");
+    setPaymentRequest({ mode: "wallet_recharge", amount: 100 });
   };
 
   return <section className="user-center-page wallet-page">
@@ -81,7 +90,7 @@ export function WalletPage({
     <section className="wallet-overview" aria-label="资金概览">
       <article className="wallet-balance-card is-primary">
         <span className="wallet-stat-icon"><WalletCards /></span>
-        <div><span><EditableText active={editMode} value={content.availableBalance} onChange={(value) => updateContent("availableBalance", value)} /></span><strong>{formatWalletMoney(data.summary.availableBalance)}</strong><small>可用于下单与代充</small></div>
+        <div><span><EditableText active={editMode} value={content.availableBalance} onChange={(value) => updateContent("availableBalance", value)} /></span><strong>{formatWalletMoney(availableBalance)}</strong><small>可用于下单与代充</small></div>
       </article>
       <article className="wallet-balance-card">
         <span className="wallet-stat-icon"><LockKeyhole /></span>
@@ -111,12 +120,23 @@ export function WalletPage({
             <TabsTrigger value="frozen"><LockKeyhole /><EditableText active={editMode} value={content.frozenDetailTab} onChange={(value) => updateContent("frozenDetailTab", value)} /></TabsTrigger>
           </TabsList>
         </Tabs>
-        <span className="wallet-result-count">{tab === "flow" ? data.walletRecords.length : tab === "recharge" ? data.topUpRecords.length : data.frozenRecords.length} 条记录</span>
+        <span className="wallet-result-count">{tab === "flow" ? walletRecords.length : tab === "recharge" ? topUpRecords.length : data.frozenRecords.length} 条记录</span>
       </div>
 
-      {tab === "flow" ? data.walletRecords.length ? <div className="uc-table-wrap wallet-table-wrap"><table className="uc-table wallet-table"><thead><tr><th>时间</th><th>类型</th><th>金额</th><th>变动后余额</th><th>关联订单</th><th>备注</th></tr></thead><tbody>{data.walletRecords.map((item) => <tr key={item.id}><td><time>{item.time}</time></td><td><span className="wallet-flow-type"><i><FlowIcon type={item.type} /></i><strong>{item.type}</strong></span></td><td className={`wallet-amount ${item.amount > 0 ? "is-income" : "is-expense"}`}>{item.amount > 0 ? "+" : "−"}{formatWalletMoney(Math.abs(item.amount))}</td><td className="wallet-balance-after">{formatWalletMoney(item.balance)}</td><td><code>{item.orderId}</code></td><td>{item.note}</td></tr>)}</tbody></table></div> : <WalletEmpty icon={<List />} title="暂无账户流水" />
-        : tab === "recharge" ? data.topUpRecords.length ? <div className="uc-table-wrap wallet-table-wrap"><table className="uc-table wallet-table is-recharge-table"><thead><tr><th>充值单号</th><th>充值金额</th><th>支付方式</th><th>状态</th><th>创建时间</th><th>完成时间</th><th>操作</th></tr></thead><tbody>{data.topUpRecords.map((item) => <tr key={item.id}><td><code>{item.id}</code></td><td className="wallet-amount">{formatWalletMoney(item.amount)}</td><td><span className="wallet-payment-method"><CreditCard />{item.method}</span></td><td><span className={`wallet-status ${item.status === "已完成" ? "is-completed" : "is-pending"}`}><i />{item.status}</span></td><td><time>{item.createdAt}</time></td><td><time>{item.completedAt}</time></td><td><button className="uc-link-button" type="button" onClick={() => toast.info("充值详情为 Demo 交互")}>详情</button></td></tr>)}</tbody></table></div> : <WalletEmpty icon={<ReceiptText />} title="暂无充值记录" />
+      {tab === "flow" ? walletRecords.length ? <div className="uc-table-wrap wallet-table-wrap"><table className="uc-table wallet-table"><thead><tr><th>时间</th><th>类型</th><th>金额</th><th>变动后余额</th><th>关联订单</th><th>备注</th></tr></thead><tbody>{walletRecords.map((item) => <tr key={item.id}><td><time>{item.time}</time></td><td><span className="wallet-flow-type"><i><FlowIcon type={item.type} /></i><strong>{item.type}</strong></span></td><td className={`wallet-amount ${item.amount > 0 ? "is-income" : "is-expense"}`}>{item.amount > 0 ? "+" : "−"}{formatWalletMoney(Math.abs(item.amount))}</td><td className="wallet-balance-after">{formatWalletMoney(item.balance)}</td><td><code>{item.orderId}</code></td><td>{item.note}</td></tr>)}</tbody></table></div> : <WalletEmpty icon={<List />} title="暂无账户流水" />
+        : tab === "recharge" ? topUpRecords.length ? <div className="uc-table-wrap wallet-table-wrap"><table className="uc-table wallet-table is-recharge-table"><thead><tr><th>充值单号</th><th>充值金额</th><th>支付方式</th><th>用途</th><th>关联订单</th><th>状态</th><th>创建时间</th><th>完成时间</th><th>操作</th></tr></thead><tbody>{topUpRecords.map((item) => <tr key={item.id}><td><code>{item.id}</code></td><td className="wallet-amount">{formatWalletMoney(item.amount)}</td><td><span className="wallet-payment-method"><CreditCard />{item.method}</span></td><td>{item.purpose}</td><td><code>{item.orderId}</code></td><td><span className={`wallet-status ${item.status === "已完成" ? "is-completed" : "is-pending"}`}><i />{item.status}</span></td><td><time>{item.createdAt}</time></td><td><time>{item.completedAt}</time></td><td><button className="uc-link-button" type="button" onClick={() => setPaymentRequest({ mode: "wallet_recharge", amount: item.amount, history: item })}>查看详情</button></td></tr>)}</tbody></table></div> : <WalletEmpty icon={<ReceiptText />} title="暂无充值记录" />
           : data.frozenRecords.length ? <div className="uc-table-wrap wallet-table-wrap"><table className="uc-table wallet-table is-frozen-table"><thead><tr><th>时间</th><th>冻结金额</th><th>原因</th><th>关联订单</th><th>状态</th></tr></thead><tbody>{data.frozenRecords.map((item) => <tr key={item.id}><td><time>{item.time}</time></td><td className="wallet-amount">{formatWalletMoney(item.amount)}</td><td><span className="wallet-flow-type"><i><Snowflake /></i><strong>{item.reason}</strong></span></td><td><code>{item.orderId}</code></td><td><span className={`wallet-status ${item.status === "已释放" ? "is-completed" : "is-processing"}`}><i />{item.status}</span></td></tr>)}</tbody></table></div> : <WalletEmpty icon={<FileText />} title="暂无冻结记录" />}
     </section>
+
+    <PaymentFlowSheet
+      open={Boolean(paymentRequest)}
+      request={paymentRequest}
+      availableBalance={availableBalance}
+      onOpenChange={(open) => !open && setPaymentRequest(null)}
+      onComplete={(completion) => {
+        onPaymentComplete(completion);
+        setTab(completion.paymentIntent.mode === "wallet_recharge" ? "recharge" : "flow");
+      }}
+    />
   </section>;
 }
