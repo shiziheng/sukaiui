@@ -159,6 +159,7 @@ export type DemoContent = {
   shareTemplates: string;
   copyAction: string;
   inviteDetails: string;
+  rewardRecordsTitle: string;
   exchangeRecordsTitle: string;
   pointsRatio: string;
   exchangeInput: string;
@@ -357,13 +358,14 @@ export const defaultContent: DemoContent = {
   viewCredentials: "查看凭据",
   downloadAction: "下载凭据",
   invitePageTitle: "我的邀请",
-  invitePageSubtitle: "邀请好友注册并消费，可获得返佣奖励。",
+  invitePageSubtitle: "邀请好友使用 SUKAI，查看你的邀请奖励与记录。",
   downloadQr: "下载二维码",
   currentPoints: "当前积分",
   exchangePoints: "积分兑换",
   shareTemplates: "分享文案模板",
   copyAction: "复制",
   inviteDetails: "邀请明细",
+  rewardRecordsTitle: "奖励记录",
   exchangeRecordsTitle: "兑换记录",
   pointsRatio: "100 积分 = $1",
   exchangeInput: "兑换积分",

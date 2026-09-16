@@ -62,6 +62,10 @@ export const accountDashboardMock = {
     { id: "moments", title: "朋友圈", content: "推荐 SUKAI AI 服务：流程清晰、交付透明，注册还有优惠。" },
     { id: "short", title: "简单一句", content: "用我的邀请码 SHI-0001 注册，你我都有优惠。" },
   ],
+  invitedUserRecords: [
+    { id: "USR-0912", user: "L***@gmail.com", registeredAt: "2026-09-12 18:20", status: "已生效", spending: 153, reward: 1.53 },
+    { id: "USR-0905", user: "M***@outlook.com", registeredAt: "2026-09-05 10:21", status: "已注册", spending: 18, reward: 0.18 },
+  ],
   inviteRecords: [
     { id: "INV-0912", time: "2026-09-12 19:46", type: "消费返佣", amount: 1.53, orderId: "D0202609120026", note: "好友完成代充订单" },
     { id: "INV-0905", time: "2026-09-05 10:21", type: "注册奖励", amount: 0.18, orderId: "—", note: "好友完成注册" },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, KeyRound, Mail } from "lucide-react";
+import { BadgeCheck, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
@@ -16,7 +16,7 @@ export function SecurityPage({ content, editMode, updateContent }: { content: De
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const save = () => { toast.success("密码已更新（Demo）"); setOpen(false); setForm({ current: "", next: "", confirm: "" }); };
   return <section className="user-center-page compact-account-page">
-    <PageHeading titleKey="securityTitle" subtitleKey="securitySubtitle" content={content} editMode={editMode} updateContent={updateContent} />
+    <PageHeading titleKey="securityTitle" subtitleKey="securitySubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<ShieldCheck />} />
     <section className="uc-card security-list">
       <div><span className="security-icon"><Mail /></span><div><span><EditableText active={editMode} value={content.loginEmail} onChange={(value) => updateContent("loginEmail", value)} /></span><strong>{accountDashboardMock.user.email}</strong></div><span className="security-verified"><BadgeCheck />已验证</span></div>
       <div><span className="security-icon"><KeyRound /></span><div><span><EditableText active={editMode} value={content.loginPassword} onChange={(value) => updateContent("loginPassword", value)} /></span><strong>••••••••••••</strong></div><Button variant="outline" onClick={() => setOpen(true)}><EditableText active={editMode} value={content.modifyPassword} onChange={(value) => updateContent("modifyPassword", value)} /></Button></div>

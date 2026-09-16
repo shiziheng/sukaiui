@@ -476,6 +476,7 @@ export default function Home() {
         if (config.content.ordersPageSubtitle === "查看你的成品号和代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充服务订单。";
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
+        if (config.content.invitePageSubtitle === "邀请好友注册并消费，可获得返佣奖励。") config.content.invitePageSubtitle = "邀请好友使用 SUKAI，查看你的邀请奖励与记录。";
         setContent(config.content);
         setBrands(config.brands);
         setProducts(config.products);
