@@ -43,8 +43,8 @@ function withinTimeRange(order: ManagedOrder, range: TimeFilter, customFrom: str
   return created >= cutoff && created <= DEMO_NOW;
 }
 
-export function OrdersPage({ content, editMode, updateContent }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater }) {
-  const [orders, setOrders] = useState(() => orderManagementMock.map((order) => ({ ...order })));
+export function OrdersPage({ content, editMode, updateContent, extraOrders = [] }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; extraOrders?: ManagedOrder[] }) {
+  const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");

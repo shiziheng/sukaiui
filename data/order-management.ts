@@ -10,6 +10,7 @@ export type AccountOrderStatus =
 export type RechargeOrderStatus =
   | "recharge_pending"
   | "recharge_processing"
+  | "recharge_partial"
   | "recharge_success"
   | "recharge_failed";
 
@@ -35,6 +36,19 @@ export type RechargeOrderDetails = {
   failureReason?: string;
 };
 
+export type BatchOrderDetails = {
+  taskId: string;
+  accountCount: number;
+  taskStatus: "processing" | "partial" | "completed";
+  items: Array<{
+    id: string;
+    email: string;
+    targetPlan: string;
+    status: "processing" | "success" | "failed";
+    result: string;
+  }>;
+};
+
 export type ManagedOrder = {
   id: string;
   kind: ManagedOrderKind;
@@ -46,6 +60,7 @@ export type ManagedOrder = {
   createdAt: string;
   accountDetails?: AccountOrderDetails;
   rechargeDetails?: RechargeOrderDetails;
+  batchDetails?: BatchOrderDetails;
 };
 
 export type OrderActionId = "cancel" | "progress" | "credentials" | "download" | "details";
@@ -59,6 +74,7 @@ export const managedStatusDisplay: Record<ManagedOrderStatus, { label: string; t
   account_cancelled: { label: "已取消", tone: "cancelled", unified: "cancelled" },
   recharge_pending: { label: "待处理", tone: "pending", unified: "processing" },
   recharge_processing: { label: "处理中", tone: "processing", unified: "processing" },
+  recharge_partial: { label: "部分完成", tone: "failed", unified: "processing" },
   recharge_success: { label: "成功", tone: "completed", unified: "completed" },
   recharge_failed: { label: "失败", tone: "failed", unified: "error" },
 };
@@ -84,6 +100,7 @@ export const rechargeStatusOptions: Array<{ value: "all" | RechargeOrderStatus; 
   { value: "all", label: "全部状态" },
   { value: "recharge_pending", label: "待处理" },
   { value: "recharge_processing", label: "处理中" },
+  { value: "recharge_partial", label: "部分完成" },
   { value: "recharge_success", label: "成功" },
   { value: "recharge_failed", label: "失败" },
 ];

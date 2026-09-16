@@ -248,7 +248,7 @@ export const defaultContent: DemoContent = {
   featuredBadge: "推荐",
   buyNow: "立即购买",
   preorderNow: "立即预定",
-  rechargeNow: "选择方案",
+  rechargeNow: "立即办理",
   soldOut: "已售罄",
   ordersEmptyTitle: "我的订单",
   inviteEmptyTitle: "我的邀请",

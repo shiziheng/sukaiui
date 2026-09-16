@@ -75,7 +75,7 @@ export const defaultProducts: Product[] = [
   {
     id: "gpt-plus-recharge", businessType: "recharge", brand: "chatgpt",
     name: "ChatGPT Plus 代充", subtitle: "官方套餐代充值", tags: ["Plus", "代充"],
-    price: 135, priceSuffix: "/月", features: ["官方Plus套餐充值", "支持GPT-5.6", "支持绘图 / Canvas", "充值完成即可使用"],
+    price: 18, priceSuffix: "/账号", features: ["官方Plus套餐充值", "支持GPT-5.6", "支持绘图 / Canvas", "充值完成即可使用"],
     stock: 20, stockText: "库存充足", status: "available", highlight: false, highlightLabel: "",
   },
   {

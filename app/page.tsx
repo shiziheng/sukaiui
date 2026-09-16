@@ -22,7 +22,7 @@ import { InvitePage } from "@/components/invite-page";
 import { OrdersPage } from "@/components/orders-page";
 import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
 import { ProfilePage } from "@/components/profile-page";
-import { RechargeWizard } from "@/components/recharge-wizard";
+import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
 import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
 import {
@@ -51,6 +51,8 @@ import { defaultBrands, type Brand, type BrandId } from "@/data/brands";
 import { defaultContent, type DemoContent } from "@/data/content";
 import { defaultFaqs, type FAQGroup, type FAQItem } from "@/data/faqs";
 import { defaultRechargeFlows, type RechargeFlow } from "@/data/recharge-flows";
+import type { ManagedOrder } from "@/data/order-management";
+import type { BatchTask } from "@/data/recharge-batch";
 import type { PaymentCompletion, ProductOrder } from "@/data/payment-mocks";
 import {
   defaultProducts, type BusinessType, type Product, type ProductStatus,
@@ -500,6 +502,8 @@ export default function Home() {
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [wizardProduct, setWizardProduct] = useState<Product | null>(null);
+  const [wizardInitialMode, setWizardInitialMode] = useState<RechargeMode | null>(null);
+  const [generatedOrders, setGeneratedOrders] = useState<ManagedOrder[]>([]);
   const [editorProductId, setEditorProductId] = useState<string | null>(null);
   const [faqDraft, setFaqDraft] = useState<FAQDraft | null>(null);
   const [faqDeleteTarget, setFaqDeleteTarget] = useState<FAQItem | null>(null);
@@ -531,6 +535,10 @@ export default function Home() {
         if (config.content.modalDescription === "请确认商品与数量，本操作不会发起真实支付。") config.content.modalDescription = "请确认商品信息和购买数量。";
         if (config.content.purchaseSuccess === "Demo：商品购买成功") config.content.purchaseSuccess = "购买信息已确认";
         if (config.content.purchaseSuccessDescription === "这是交互演示，不会创建订单或发起支付。") config.content.purchaseSuccessDescription = "交互演示已完成，不会发起真实支付。";
+        if (config.content.rechargeNow === "选择方案") config.content.rechargeNow = "立即办理";
+        config.products = config.products.map((product) => product.id === "gpt-plus-recharge" && product.price === 135
+          ? { ...product, price: 18, priceSuffix: "/账号" }
+          : product);
         setContent(config.content);
         setBrands(config.brands);
         setProducts(config.products);
@@ -603,6 +611,7 @@ export default function Home() {
   };
   const openPurchase = (product: Product) => {
     if (product.businessType === "recharge" && product.brand === "chatgpt") {
+      setWizardInitialMode(null);
       setWizardProduct(product);
       return;
     }
@@ -662,6 +671,40 @@ export default function Home() {
   const openWalletRecharge = () => {
     setSelectedMenu("wallet");
     setPaymentRequest({ mode: "wallet_recharge", amount: 100 });
+  };
+  const openBatchRecharge = () => {
+    const product = visibleProducts.find((item) => item.businessType === "recharge" && item.status === "available");
+    if (!product || product.brand !== "chatgpt") {
+      toast.info("请先选择一个支持批量办理的 ChatGPT 代充商品");
+      return;
+    }
+    setWizardInitialMode("batch");
+    setWizardProduct(product);
+  };
+  const addBatchOrder = (task: BatchTask) => {
+    setGeneratedOrders((current) => current.some((order) => order.id === task.orderId) ? current : [{
+      id: task.orderId,
+      kind: "recharge",
+      productName: `${task.productName} ×${task.accountCount}`,
+      productMeta: `批量代充 · 目标套餐：${task.targetPlan}`,
+      amount: task.amount,
+      currency: "USD",
+      status: task.status === "partial" ? "recharge_partial" : "recharge_processing",
+      createdAt: task.createdAt,
+      rechargeDetails: {
+        email: `${task.accountCount} 个账号`,
+        currentPlan: "Free",
+        targetPlan: task.targetPlan,
+        quoteAmount: task.amount,
+        actualAmount: task.amount,
+      },
+      batchDetails: {
+        taskId: task.id,
+        accountCount: task.accountCount,
+        taskStatus: task.status,
+        items: task.items,
+      },
+    }, ...current]);
   };
   const resetDefaults = () => {
     const config = cloneDefaults();
@@ -791,29 +834,6 @@ export default function Home() {
   ];
   const menuItems = isLoggedIn ? loggedInMenuItems : loggedInMenuItems.filter((item) => item.id === "account" || item.id === "recharge");
 
-  if (wizardProduct && wizardFlow) {
-    return (
-      <RechargeWizard
-        product={wizardProduct}
-        flow={wizardFlow}
-        content={content}
-        editMode={editMode}
-        onEditModeChange={setEditMode}
-        onContentChange={updateContent}
-        onFlowChange={(nextFlow) => setRechargeFlows((current) => current.map((flow) => flow.id === nextFlow.id
-          ? { ...nextFlow, id: flow.id, brand: flow.brand }
-          : flow))}
-        availableBalance={walletBalance}
-        onPaymentComplete={applyPaymentCompletion}
-        onExit={() => {
-          setWizardProduct(null);
-          setSelectedMenu("recharge");
-          setSelectedBrand("chatgpt");
-        }}
-      />
-    );
-  }
-
   return (
     <div className={`app-shell ${editMode ? "edit-mode" : ""}`}>
       <header className="site-header">
@@ -905,12 +925,26 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
-            {selectedMenu === "home" ? (
+            {wizardProduct && wizardFlow ? (
+              <RechargeWizard
+                product={wizardProduct}
+                flow={wizardFlow}
+                content={content}
+                editMode={editMode}
+                initialMode={wizardInitialMode}
+                onFlowChange={(nextFlow) => setRechargeFlows((current) => current.map((flow) => flow.id === nextFlow.id ? { ...nextFlow, id: flow.id, brand: flow.brand } : flow))}
+                availableBalance={walletBalance}
+                onPaymentComplete={applyPaymentCompletion}
+                onTaskCreated={addBatchOrder}
+                onNavigateOrders={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("orders"); }}
+                onExit={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("recharge"); setSelectedBrand("chatgpt"); }}
+              />
+            ) : selectedMenu === "home" ? (
               <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "orders" ? (
-              <OrdersPage content={content} editMode={editMode} updateContent={updateContent} />
+              <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
               <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "wallet" ? (
@@ -936,6 +970,7 @@ export default function Home() {
                     <h1><EditableText active={editMode} value={selectedMenu === "account" ? content.accountLabel : content.rechargeLabel} onChange={(value) => updateContent(selectedMenu === "account" ? "accountLabel" : "rechargeLabel", value)} /></h1>
                     <p><EditableText active={editMode} value={selectedMenu === "account" ? content.accountPageSubtitle : content.rechargePageSubtitle} onChange={(value) => updateContent(selectedMenu === "account" ? "accountPageSubtitle" : "rechargePageSubtitle", value)} /></p>
                   </div>
+                  {selectedMenu === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
                 </header>
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, KeyRound, PackageCheck, ReceiptText, Route, WalletCards } from "lucide-react";
+import { Check, Copy, Download, KeyRound, PackageCheck, ReceiptText, Route, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
@@ -80,6 +80,16 @@ export function OrderDetailDrawer({
       toast.info(`${label}复制为 Demo 交互`);
     }
   };
+  const exportFailedAccounts = () => {
+    const failed = order.batchDetails?.items.filter((item) => item.status === "failed") ?? [];
+    const csv = `email,target_plan,result\n${failed.map((item) => `${item.email},${item.targetPlan},${item.result}`).join("\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${order.batchDetails?.taskId ?? order.id}-failed.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -126,14 +136,27 @@ export function OrderDetailDrawer({
             </>
           ) : (
             <>
-              <section className="order-drawer-section">
+              {order.batchDetails ? <section className="order-drawer-section batch-order-detail">
+                <div className="order-drawer-section-title"><PackageCheck aria-hidden="true" /><h3>批量任务信息</h3></div>
+                <DetailGrid>
+                  <DetailItem label="BatchTask ID" value={<code>{order.batchDetails.taskId}</code>} wide />
+                  <DetailItem label="账号数量" value={`${order.batchDetails.accountCount} 个`} />
+                  <DetailItem label="处理状态" value={order.batchDetails.taskStatus === "partial" ? "部分完成" : order.batchDetails.taskStatus === "completed" ? "已完成" : "处理中"} />
+                  <DetailItem label="支付状态" value="已支付（Mock）" wide />
+                </DetailGrid>
+                <div className="batch-order-items">
+                  <div><strong>账号处理明细</strong><span>{order.batchDetails.items.filter((item) => item.status === "success").length} 成功 · {order.batchDetails.items.filter((item) => item.status === "failed").length} 失败</span></div>
+                  <div className="batch-order-items-table"><table><thead><tr><th>账号邮箱</th><th>目标套餐</th><th>状态</th><th>处理结果</th></tr></thead><tbody>{order.batchDetails.items.map((item) => <tr key={item.id}><td>{item.email}</td><td>{item.targetPlan}</td><td><span className={`batch-status is-${item.status}`}>{item.status === "success" ? "成功" : item.status === "failed" ? "失败" : "处理中"}</span></td><td>{item.result}</td></tr>)}</tbody></table></div>
+                  {order.batchDetails.items.some((item) => item.status === "failed") ? <Button variant="outline" onClick={exportFailedAccounts}><Download />导出失败账号 CSV</Button> : null}
+                </div>
+              </section> : <section className="order-drawer-section">
                 <div className="order-drawer-section-title"><PackageCheck aria-hidden="true" /><h3>充值信息</h3></div>
                 <DetailGrid>
                   <DetailItem label="充值账号" value={order.rechargeDetails?.email ?? "—"} wide />
                   <DetailItem label="当前套餐" value={order.rechargeDetails?.currentPlan ?? "—"} />
                   <DetailItem label="目标套餐" value={order.rechargeDetails?.targetPlan ?? "—"} />
                 </DetailGrid>
-              </section>
+              </section>}
               <section className="order-drawer-section">
                 <div className="order-drawer-section-title"><WalletCards aria-hidden="true" /><h3>金额与结果</h3></div>
                 <DetailGrid>

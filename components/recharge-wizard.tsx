@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
 import { PaymentExperience } from "@/components/payment-experience";
+import { RechargeBatchFlow } from "@/components/recharge-batch-flow";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,6 +22,7 @@ import {
 import type { DemoContent } from "@/data/content";
 import type { PaymentCompletion, ProductOrder } from "@/data/payment-mocks";
 import type { Product } from "@/data/products";
+import type { BatchTask } from "@/data/recharge-batch";
 import type {
   RechargeFlow, RechargeStep,
 } from "@/data/recharge-flows";
@@ -68,13 +70,11 @@ function buildMockAccount(value: string, reference: number): MockSessionRecord {
   };
 }
 
-export function RechargeWizard({
+function SingleRechargeFlow({
   product,
   flow,
   content,
   editMode,
-  onEditModeChange,
-  onContentChange,
   onFlowChange,
   onExit,
   availableBalance,
@@ -84,8 +84,6 @@ export function RechargeWizard({
   flow: RechargeFlow;
   content: DemoContent;
   editMode: boolean;
-  onEditModeChange: (active: boolean) => void;
-  onContentChange: (key: keyof DemoContent, value: string) => void;
   onFlowChange: (flow: RechargeFlow) => void;
   onExit: () => void;
   availableBalance: number;
@@ -331,15 +329,7 @@ export function RechargeWizard({
   };
 
   return (
-    <div className={`wizard-shell ${editMode ? "edit-mode" : ""}`}>
-      <header className="site-header wizard-header">
-        <div className="header-left"><div className="logo-mark" aria-hidden="true">S</div><div className="brand-name"><EditableText active={editMode} value={content.logoText} onChange={(value) => onContentChange("logoText", value)} /></div></div>
-        <div className="header-actions">
-          {editMode ? <button className="wizard-exit-edit" type="button" onClick={() => onEditModeChange(false)}>{content.exitEdit}</button> : <button className="edit-copy-button" type="button" onClick={() => onEditModeChange(true)}>{content.editCopy}</button>}
-          <button className="login-link" type="button">{content.login}</button><button className="register-button" type="button">{content.register}</button>
-        </div>
-      </header>
-      <main className="wizard-main">
+    <section className="single-recharge-flow">
         <section className="wizard-container">
           <div className="wizard-topbar"><button type="button" onClick={requestExit}><ArrowLeft aria-hidden="true" /><E field="returnStore" /></button><div><strong><E field="flowName" /></strong><span><E field="demoBadge" /></span></div></div>
           <nav className="recharge-progress" aria-label="充值步骤">
@@ -353,10 +343,64 @@ export function RechargeWizard({
           <div className="wizard-step-heading"><span><E field="stepLabel" /> {currentStep} / {flow.steps.length}</span><h1><StepText field="title" /></h1><p><StepText field="description" multiline /></p></div>
           <div className="wizard-step-content">{renderStep()}</div>
         </section>
-      </main>
 
       <Dialog open={exitOpen} onOpenChange={setExitOpen}><DialogContent><DialogHeader><DialogTitle><E field="exitTitle" /></DialogTitle><DialogDescription><E field="exitDescription" multiline /></DialogDescription></DialogHeader><DialogFooter><Button variant="secondary" onClick={() => setExitOpen(false)}><E field="continueRecharge" /></Button><Button variant="ghost" className="exit-flow-button" onClick={onExit}><E field="exitFlow" /></Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={delayOpen} onOpenChange={setDelayOpen}><DialogContent><DialogHeader><DialogTitle><E field="delayTitle" /></DialogTitle><DialogDescription><E field="delayDescription" multiline /></DialogDescription></DialogHeader><DialogFooter><Button className="wizard-primary" onClick={() => setDelayOpen(false)}><E field="understood" /></Button></DialogFooter></DialogContent></Dialog>
-    </div>
+    </section>
   );
+}
+
+export type RechargeMode = "single" | "batch";
+
+export function RechargeWizard({
+  product,
+  flow,
+  content,
+  editMode,
+  onFlowChange,
+  onExit,
+  availableBalance,
+  onPaymentComplete,
+  initialMode = null,
+  onTaskCreated,
+  onNavigateOrders,
+}: {
+  product: Product;
+  flow: RechargeFlow;
+  content: DemoContent;
+  editMode: boolean;
+  onFlowChange: (flow: RechargeFlow) => void;
+  onExit: () => void;
+  availableBalance: number;
+  onPaymentComplete: (completion: PaymentCompletion) => void;
+  initialMode?: RechargeMode | null;
+  onTaskCreated: (task: BatchTask) => void;
+  onNavigateOrders: () => void;
+}) {
+  const [mode, setMode] = useState<RechargeMode | null>(initialMode);
+  const [modeKey, setModeKey] = useState(0);
+  const [exitOpen, setExitOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const targetPlan = product.tags.find((tag) => tag === "Plus" || tag === "Pro" || tag === "Max") ?? product.name.replace(/\s*代充.*$/, "");
+  const switchMode = (next: RechargeMode) => {
+    if (mode && mode !== next) setExitOpen(true);
+    else { setMode(next); setModeKey((value) => value + 1); }
+  };
+  const confirmSwitch = () => {
+    setMode(mode === "single" ? "batch" : "single");
+    setModeKey((value) => value + 1);
+    setExitOpen(false);
+  };
+  const requestLeave = () => mode ? setLeaveOpen(true) : onExit();
+
+  return <section className="recharge-workspace">
+    <header className="recharge-workspace-header">
+      <button type="button" onClick={requestLeave}><ArrowLeft />返回代充页面</button>
+      <div><span>当前办理商品</span><h1>{product.name}</h1><p>目标套餐：<strong>{targetPlan}</strong> · 单价 ${product.price}{product.priceSuffix}</p></div>
+      <div className="recharge-mode-context"><span>{mode === "single" ? "单账号办理" : mode === "batch" ? "批量办理" : "请选择办理方式"}</span>{mode ? <button type="button" onClick={() => switchMode(mode === "single" ? "batch" : "single")}>切换到{mode === "single" ? "批量" : "单账号"}</button> : null}</div>
+    </header>
+    {!mode ? <section className="recharge-mode-select"><div className="recharge-mode-intro"><span>RECHARGE WORKSPACE</span><h2>选择办理方式</h2><p>商品与目标套餐已经锁定。根据账号数量选择单账号或批量流程。</p></div><div className="recharge-mode-grid"><button type="button" onClick={() => switchMode("single")}><span>01</span><div><h3>单账号办理</h3><p>适合 1 个账号，沿用登录、获取 Session、提交、支付和完成流程。</p></div><strong>进入单账号流程 →</strong></button><button type="button" onClick={() => switchMode("batch")}><span>02</span><div><h3>批量办理</h3><p>支持粘贴 Session 或导入 TXT / CSV / JSON，统一解析、筛选和结算。</p></div><strong>进入批量工作台 →</strong></button></div><div className="batch-local-notice"><LockKeyhole /><span><strong>仅用于前端交互演示</strong>不接入真实 Session 接口、后台或支付系统。</span></div></section> : mode === "single" ? <SingleRechargeFlow key={`single-${modeKey}`} product={product} flow={flow} content={content} editMode={editMode} onFlowChange={onFlowChange} onExit={onExit} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} /> : <RechargeBatchFlow key={`batch-${modeKey}`} product={product} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} onTaskCreated={onTaskCreated} onNavigateOrders={onNavigateOrders} onExit={requestLeave} />}
+    <Dialog open={exitOpen} onOpenChange={setExitOpen}><DialogContent><DialogHeader><DialogTitle>离开当前流程？</DialogTitle><DialogDescription>切换办理方式会清空当前页面中的未提交内容。</DialogDescription></DialogHeader><DialogFooter><Button variant="secondary" onClick={() => setExitOpen(false)}>继续当前流程</Button><Button className="exit-flow-button" variant="ghost" onClick={confirmSwitch}>离开并切换</Button></DialogFooter></DialogContent></Dialog>
+    <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}><DialogContent><DialogHeader><DialogTitle>离开当前流程？</DialogTitle><DialogDescription>当前未提交的 Session 和办理进度会被清空。</DialogDescription></DialogHeader><DialogFooter><Button variant="secondary" onClick={() => setLeaveOpen(false)}>继续当前流程</Button><Button className="exit-flow-button" variant="ghost" onClick={onExit}>确认离开</Button></DialogFooter></DialogContent></Dialog>
+  </section>;
 }
