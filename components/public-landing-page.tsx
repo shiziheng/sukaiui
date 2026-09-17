@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  ArrowRight, Bot, Boxes, Check, CircleDollarSign, ClipboardCheck,
+  ArrowRight, BookOpen, Bot, Boxes, Check, CircleDollarSign, ClipboardCheck,
   CreditCard, FileStack, Headphones, MapPin, PackageOpen, RefreshCcw,
   Sparkles, UserRound, Zap,
 } from "lucide-react";
@@ -187,7 +187,7 @@ export function PublicLandingPage({
     </section>
 
     <section className="landing-section landing-faq" id="landing-faq" aria-labelledby="landing-faq-title">
-      <header className="landing-section-heading"><span>FAQ</span><h2 id="landing-faq-title">购买前常见问题</h2><p>先确认自己有没有账号，再选择购买账号或升级套餐。</p><button type="button" onClick={onSupport}><Headphones />还有问题？联系在线客服</button></header>
+      <header className="landing-section-heading"><span>FAQ</span><h2 id="landing-faq-title">购买前常见问题</h2><p>先确认自己有没有账号，再选择购买账号或升级套餐。</p><button type="button" onClick={() => onNavigate("help")}><BookOpen />查看完整帮助中心</button></header>
       <Accordion type="single" collapsible value={openFaq} onValueChange={setOpenFaq}>{faqs.map((faq) => <AccordionItem value={faq.id} key={faq.id}><AccordionTrigger>{faq.question}</AccordionTrigger><AccordionContent>{faq.answer}</AccordionContent></AccordionItem>)}</Accordion>
     </section>
 
@@ -197,6 +197,6 @@ export function PublicLandingPage({
       <div><Button onClick={() => onNavigate("account")}>购买 ChatGPT / Claude 账号</Button><Button variant="outline" onClick={() => onNavigate("recharge")}>为现有账号升级套餐</Button></div>
     </section>
 
-    <footer className="landing-footer"><div><span className="logo-mark">S</span><div><strong>Sukai 速开</strong><p>AI 账号与订阅服务平台</p></div></div><nav aria-label="页脚导航"><button type="button" onClick={() => onNavigate("account")}>购买账号</button><button type="button" onClick={() => onNavigate("recharge")}>套餐升级</button><a href="#landing-faq">常见问题</a><button type="button" onClick={onSupport}><Headphones />在线客服</button></nav><div className="landing-footer-actions"><button type="button" onClick={onLogin}>登录</button><button type="button" onClick={onRegister}>注册</button></div><p>“官方套餐”指对应平台提供的订阅套餐；SUKAI 并非 OpenAI、Anthropic 或其他 AI 平台的官方合作方。实际服务、区域、库存、价格与售后范围以商品及结账页面为准。</p><small>© 2026 Sukai · 链上支付，订单全程留痕。</small></footer>
+    <footer className="landing-footer"><div><span className="logo-mark">S</span><div><strong>Sukai 速开</strong><p>AI 账号与订阅服务平台</p></div></div><nav aria-label="页脚导航"><button type="button" onClick={() => onNavigate("account")}>购买账号</button><button type="button" onClick={() => onNavigate("recharge")}>套餐升级</button><button type="button" onClick={() => onNavigate("help")}><BookOpen />帮助中心</button><a href="#landing-faq">常见问题</a><button type="button" onClick={onSupport}><Headphones />在线客服</button></nav><div className="landing-footer-actions"><button type="button" onClick={onLogin}>登录</button><button type="button" onClick={onRegister}>注册</button></div><p>“官方套餐”指对应平台提供的订阅套餐；SUKAI 并非 OpenAI、Anthropic 或其他 AI 平台的官方合作方。实际服务、区域、库存、价格与售后范围以商品及结账页面为准。</p><small>© 2026 Sukai · 链上支付，订单全程留痕。</small></footer>
   </div>;
 }

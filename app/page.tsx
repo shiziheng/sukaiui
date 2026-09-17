@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import {
-  ArrowDown, ArrowUp, Check, ChevronDown, ClipboardList, Download, ExternalLink, Gift,
+  ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, Download, ExternalLink, Gift,
   Headphones, House, LogOut, Minus, PackageOpen, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { AccountDashboard } from "@/components/account-dashboard";
 import { EditableText } from "@/components/editable-text";
 import { InvitePage } from "@/components/invite-page";
+import { HelpCenter } from "@/components/help-center";
 import { OrdersPage } from "@/components/orders-page";
 import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
 import { ProfilePage } from "@/components/profile-page";
@@ -388,10 +389,12 @@ function SupportCard({
   content,
   editMode,
   updateContent,
+  onHelp,
 }: {
   content: DemoContent;
   editMode: boolean;
   updateContent: (key: keyof DemoContent, value: string) => void;
+  onHelp: () => void;
 }) {
   return (
     <div className="support-card" role="status">
@@ -400,6 +403,7 @@ function SupportCard({
         <strong><EditableText active={editMode} value={content.supportTitle} onChange={(value) => updateContent("supportTitle", value)} /></strong>
         <b>{content.supportAccount}</b>
         <p><EditableText active={editMode} value={content.supportHelper} multiline onChange={(value) => updateContent("supportHelper", value)} /></p>
+        <button className="support-help-link" type="button" onClick={onHelp}><BookOpen />帮助中心</button>
       </div>
     </div>
   );
@@ -516,6 +520,15 @@ export default function Home() {
   const [topUpRecords, setTopUpRecords] = useState(() => accountDashboardMock.topUpRecords.map((item) => ({ ...item })));
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const syncHelpHash = () => {
+      if (window.location.hash === "#help" || window.location.hash.startsWith("#help/")) setSelectedMenu("help");
+    };
+    syncHelpHash();
+    window.addEventListener("hashchange", syncHelpHash);
+    return () => window.removeEventListener("hashchange", syncHelpHash);
+  }, []);
 
   useEffect(() => {
     try {
@@ -839,19 +852,23 @@ export default function Home() {
     { id: "recharge", key: "navRecharge" },
     { id: "orders", key: "navOrders" },
   ];
-  const publicMenuItems: Array<{ id: "home" | "account" | "recharge" | "faq"; label: string }> = [
+  const publicMenuItems: Array<{ id: "home" | "account" | "recharge" | "help" | "faq"; label: string }> = [
     { id: "home", label: "首页" },
     { id: "account", label: "购买账号" },
     { id: "recharge", label: "套餐升级" },
+    { id: "help", label: "帮助中心" },
     { id: "faq", label: "常见问题" },
   ];
-  const handlePublicNavigation = (destination: "home" | "account" | "recharge" | "faq") => {
+  const handlePublicNavigation = (destination: "home" | "account" | "recharge" | "help" | "faq") => {
     if (destination === "faq") {
       setSelectedMenu("home");
+      window.history.replaceState(null, "", "#landing-faq");
       window.setTimeout(() => document.getElementById("landing-faq")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
       return;
     }
     setSelectedMenu(destination);
+    if (destination === "help") window.history.replaceState(null, "", "#help");
+    else window.history.replaceState(null, "", window.location.pathname);
     if (destination === "home") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -874,7 +891,7 @@ export default function Home() {
                 onClick={() => setSelectedMenu(item.id)}
                 key={item.id}
               >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
                 <EditableText
                   active={editMode}
                   value={content[item.key]}
@@ -931,7 +948,7 @@ export default function Home() {
               <Headphones aria-hidden="true" />
               <EditableText active={editMode} value={content.supportNav} onChange={(value) => updateContent("supportNav", value)} />
             </button>
-            {supportSurface === "top" ? <SupportCard content={content} editMode={editMode} updateContent={updateContent} /> : null}
+            {supportSurface === "top" ? <SupportCard content={content} editMode={editMode} updateContent={updateContent} onHelp={() => { setSelectedMenu("help"); setSupportSurface(null); window.history.replaceState(null, "", "#help"); }} /> : null}
           </div>
           {isLoggedIn ? <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -957,7 +974,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {wizardProduct && wizardFlow ? (
               <RechargeWizard
@@ -974,7 +991,7 @@ export default function Home() {
                 onExit={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={setSelectedMenu} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { setSelectedMenu(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
@@ -994,6 +1011,8 @@ export default function Home() {
               <ProfilePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "security" ? (
               <SecurityPage content={content} editMode={editMode} updateContent={updateContent} />
+            ) : selectedMenu === "help" ? (
+              <HelpCenter onNavigate={(destination) => { setSelectedMenu(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
             ) : isProductsPage ? (
               <section className="commerce-panel">
                 <header className="commerce-page-heading">
@@ -1073,7 +1092,7 @@ export default function Home() {
       </div>
 
       <div className="floating-support">
-        {supportSurface === "floating" ? <SupportCard content={content} editMode={editMode} updateContent={updateContent} /> : null}
+        {supportSurface === "floating" ? <SupportCard content={content} editMode={editMode} updateContent={updateContent} onHelp={() => { setSelectedMenu("help"); setSupportSurface(null); window.history.replaceState(null, "", "#help"); }} /> : null}
         <button
           className="floating-support-button"
           type="button"
