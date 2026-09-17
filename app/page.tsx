@@ -839,12 +839,26 @@ export default function Home() {
     { id: "recharge", key: "navRecharge" },
     { id: "orders", key: "navOrders" },
   ];
-  const menuItems = isLoggedIn ? loggedInMenuItems : loggedInMenuItems.filter((item) => item.id === "home" || item.id === "account" || item.id === "recharge");
+  const publicMenuItems: Array<{ id: "home" | "account" | "recharge" | "faq"; label: string }> = [
+    { id: "home", label: "首页" },
+    { id: "account", label: "购买账号" },
+    { id: "recharge", label: "套餐升级" },
+    { id: "faq", label: "常见问题" },
+  ];
+  const handlePublicNavigation = (destination: "home" | "account" | "recharge" | "faq") => {
+    if (destination === "faq") {
+      setSelectedMenu("home");
+      window.setTimeout(() => document.getElementById("landing-faq")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+      return;
+    }
+    setSelectedMenu(destination);
+    if (destination === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className={`app-shell ${editMode ? "edit-mode" : ""}`}>
       <header className="site-header">
-        <button className="header-left header-logo-button" type="button" onClick={() => setSelectedMenu(isLoggedIn ? "home" : "account")} aria-label="返回首页">
+        <button className="header-left header-logo-button" type="button" onClick={() => isLoggedIn ? setSelectedMenu("home") : handlePublicNavigation("home")} aria-label="返回首页">
           <span className="logo-mark" aria-hidden="true">S</span>
           <span className="brand-name">
             <EditableText active={editMode} value={content.logoText} onChange={(value) => updateContent("logoText", value)} />
@@ -852,7 +866,7 @@ export default function Home() {
         </button>
         <nav className="business-nav" aria-label="业务导航">
           <div className="business-menu">
-            {menuItems.map((item) => (
+            {isLoggedIn ? loggedInMenuItems.map((item) => (
               <button
                 className="business-nav-item"
                 data-active={selectedMenu === item.id}
@@ -866,6 +880,17 @@ export default function Home() {
                   value={content[item.key]}
                   onChange={(value) => updateContent(item.key, value)}
                 />
+              </button>
+            )) : publicMenuItems.map((item) => (
+              <button
+                className="business-nav-item"
+                data-active={item.id === "faq" ? false : selectedMenu === item.id}
+                type="button"
+                onClick={() => handlePublicNavigation(item.id)}
+                key={item.id}
+              >
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
+                <span>{item.label}</span>
               </button>
             ))}
           </div>
