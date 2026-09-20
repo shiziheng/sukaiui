@@ -45,3 +45,7 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+# Local handoff archives, build caches and agent workspace state; never commit.
+*.zip
+tsconfig.tsbuildinfo
+.workbuddy/

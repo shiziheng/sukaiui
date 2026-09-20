@@ -122,6 +122,8 @@ export function getOrderActions(order: ManagedOrder): OrderActionDescriptor[] {
       return [{ id: "credentials", placement: "primary" }, { id: "download", placement: "overflow" }, { id: "details", placement: "overflow" }];
     case "account_cancelled":
       return [{ id: "details", placement: "primary" }];
+    default:
+      return [{ id: "details", placement: "primary" }];
   }
 }
 

@@ -1,23 +1,30 @@
 "use client";
 
-import { ArrowRight, Bot, Clock3, Gift, Headphones, ReceiptText, Sparkles, WalletCards } from "lucide-react";
+import { ArrowRight, Bot, Check, ClipboardCheck, Clock3, Gift, Headphones, LifeBuoy, MapPinned, ReceiptText, Sparkles, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
 import { OrderTable, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
+import { getHomePopularProducts, homeDashboardCopy } from "@/data/home-dashboard";
+import type { Product } from "@/data/products";
 
-export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, content, editMode, updateContent }: {
+export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, products, content, editMode, updateContent }: {
   onNavigate: (destination: DashboardDestination) => void;
   onOpenRecharge: () => void;
   availableBalance: number;
+  products: Product[];
   content: DemoContent;
   editMode: boolean;
   updateContent: CopyUpdater;
 }) {
   const data = accountDashboardMock;
   const pending = data.orders.filter((order) => order.status === "pending" || order.status === "processing").length;
+  const popularProducts = getHomePopularProducts(products);
+  const activeOrder = data.orders.find((order) => order.status === "processing" || order.status === "pending");
+  const progressIndex = activeOrder?.status === "processing" ? 1 : 0;
+  const trustIcons = { region: MapPinned, order: ClipboardCheck, payment: WalletCards, support: LifeBuoy };
 
   return (
     <section className="user-center-page business-dashboard">
@@ -30,23 +37,46 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
       <section className="business-entry-grid" aria-label="业务办理">
         <button className="business-entry-card is-account" type="button" onClick={() => onNavigate("account")}>
           <span className="business-entry-icon"><Bot /></span><span className="business-card-art" aria-hidden="true"><i /><i /><i /></span>
-          <span className="business-entry-copy"><strong><EditableText active={editMode} value={content.accountServiceTitle} onChange={(value) => updateContent("accountServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.accountServiceDescription} onChange={(value) => updateContent("accountServiceDescription", value)} /></small></span>
+          <span className="business-entry-copy"><em>{homeDashboardCopy.accountScenario}</em><strong><EditableText active={editMode} value={content.accountServiceTitle} onChange={(value) => updateContent("accountServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.accountServiceDescription} onChange={(value) => updateContent("accountServiceDescription", value)} /></small><span className="business-entry-tags">{homeDashboardCopy.accountTags.map((tag) => <i key={tag}>{tag}</i>)}</span></span>
+          <span className="business-entry-category">{homeDashboardCopy.accountCategory}</span>
           <span className="business-entry-action"><EditableText active={editMode} value={content.selectAccountService} onChange={(value) => updateContent("selectAccountService", value)} /><ArrowRight /></span>
         </button>
         <button className="business-entry-card is-recharge" type="button" onClick={() => onNavigate("recharge")}>
           <span className="business-entry-icon"><Sparkles /></span><span className="business-card-art" aria-hidden="true"><i /><i /><i /></span>
-          <span className="business-entry-copy"><strong><EditableText active={editMode} value={content.rechargeServiceTitle} onChange={(value) => updateContent("rechargeServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.rechargeServiceDescription} onChange={(value) => updateContent("rechargeServiceDescription", value)} /></small></span>
+          <span className="business-entry-copy"><em>{homeDashboardCopy.rechargeScenario}</em><strong><EditableText active={editMode} value={content.rechargeServiceTitle} onChange={(value) => updateContent("rechargeServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.rechargeServiceDescription} onChange={(value) => updateContent("rechargeServiceDescription", value)} /></small><span className="business-entry-tags">{homeDashboardCopy.rechargeTags.map((tag) => <i key={tag}>{tag}</i>)}</span></span>
+          <span className="business-entry-category">{homeDashboardCopy.rechargeCategory}</span>
           <span className="business-entry-action"><EditableText active={editMode} value={content.startRechargeService} onChange={(value) => updateContent("startRechargeService", value)} /><ArrowRight /></span>
         </button>
       </section>
 
-      <section className="home-quick-section uc-card">
-        <div className="uc-section-heading home-quick-heading"><div><span className="quick-heading-icon"><WalletCards /></span><div><h2><EditableText active={editMode} value={content.accountQuickInfo} onChange={(value) => updateContent("accountQuickInfo", value)} /></h2><p>账户状态与常用入口</p></div></div><span className="quick-heading-badge">ACCOUNT OVERVIEW</span></div>
-        <div className="home-quick-layout"><div className="home-quick-grid">
-          <button type="button" onClick={onOpenRecharge}><WalletCards /><span><EditableText active={editMode} value={content.availableBalance} onChange={(value) => updateContent("availableBalance", value)} /></span><strong>{formatMoney(availableBalance)}</strong><small><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /><ArrowRight /></small></button>
-          <button type="button" onClick={() => onNavigate("orders")}><Clock3 /><span><EditableText active={editMode} value={content.pendingOrders} onChange={(value) => updateContent("pendingOrders", value)} /></span><strong>{pending}</strong><small>查看处理进度<ArrowRight /></small></button>
-          <button type="button" onClick={() => onNavigate("orders")}><ReceiptText /><span><EditableText active={editMode} value={content.recentOrderCount} onChange={(value) => updateContent("recentOrderCount", value)} /></span><strong>{data.orders.length}</strong><small><EditableText active={editMode} value={content.viewAllOrders} onChange={(value) => updateContent("viewAllOrders", value)} /><ArrowRight /></small></button>
-        </div><div className="home-quick-actions"><button className="is-primary" type="button" onClick={onOpenRecharge}><WalletCards /><EditableText active={editMode} value={content.rechargeAction} onChange={(value) => updateContent("rechargeAction", value)} /></button><button type="button" onClick={() => onNavigate("wallet")}>查看钱包<ArrowRight /></button></div></div>
+      <section className="home-popular-section" aria-labelledby="home-popular-title">
+        <header className="home-section-heading"><div><span>{homeDashboardCopy.popularEyebrow}</span><h2 id="home-popular-title">{homeDashboardCopy.popularTitle}</h2><p>{homeDashboardCopy.popularDescription}</p></div><button type="button" onClick={() => onNavigate("account")}>{homeDashboardCopy.popularAction}<ArrowRight /></button></header>
+        <div className="home-popular-grid">
+          {popularProducts.map((product) => <button className={`home-popular-card is-${product.businessType}`} type="button" onClick={() => onNavigate(product.businessType)} key={product.id}>
+            <span className="home-popular-meta"><i>{product.brand === "chatgpt" ? "ChatGPT" : "Claude"}</i><em>{product.businessType === "account" ? "购买账号" : "套餐升级"}</em></span>
+            <strong>{product.name}</strong><small>{product.subtitle}</small>
+            <span className="home-popular-tags">{product.tags.slice(0, 2).map((tag) => <i key={tag}>{tag}</i>)}</span>
+            <span className="home-popular-footer"><b>{formatMoney(product.price)}<small>{product.priceSuffix}</small></b><em>{product.stockText}</em></span>
+            <span className="home-popular-action">{product.businessType === "account" ? "查看商品" : "立即办理"}<ArrowRight /></span>
+          </button>)}
+        </div>
+      </section>
+
+      <section className="home-trust-strip" aria-label="服务保障">
+        {homeDashboardCopy.trustItems.map((item) => { const Icon = trustIcons[item.icon]; return <article key={item.id}><span><Icon /></span><div><strong>{item.title}</strong><p>{item.description}</p></div></article>; })}
+      </section>
+
+      <section className="home-state-grid">
+        {activeOrder ? <article className="home-active-order uc-card">
+          <header className="home-section-heading"><div><span>{homeDashboardCopy.activeEyebrow}</span><h2>{homeDashboardCopy.activeTitle}</h2><p>{homeDashboardCopy.activeDescription}</p></div><button type="button" onClick={() => onNavigate("orders")}>查看进度<ArrowRight /></button></header>
+          <div className="home-active-order-summary"><div><span className={`uc-kind-tag is-${activeOrder.kind}`}>{activeOrder.kind === "account" ? "成品号" : "代充"}</span><strong>{activeOrder.product}</strong><small>{activeOrder.snapshot} · {activeOrder.id}</small></div><div><em>{activeOrder.statusLabel}</em><b>{formatMoney(activeOrder.amount)}</b></div></div>
+          <ol className="home-order-progress">{homeDashboardCopy.progressSteps.map((step, index) => <li className={index < progressIndex ? "is-done" : index === progressIndex ? "is-current" : ""} key={step}><span>{index < progressIndex ? <Check /> : index + 1}</span><strong>{step}</strong></li>)}</ol>
+        </article> : null}
+        <article className="home-account-overview uc-card">
+          <header><span>{homeDashboardCopy.overviewEyebrow}</span><h2>{homeDashboardCopy.overviewTitle}</h2><p>{homeDashboardCopy.overviewDescription}</p></header>
+          <dl><button type="button" onClick={onOpenRecharge}><dt><WalletCards />{content.availableBalance}</dt><dd>{formatMoney(availableBalance)}</dd></button><button type="button" onClick={() => onNavigate("orders")}><dt><Clock3 />{content.pendingOrders}</dt><dd>{pending}</dd></button><button type="button" onClick={() => onNavigate("orders")}><dt><ReceiptText />{content.recentOrderCount}</dt><dd>{data.orders.length}</dd></button></dl>
+          <footer><button className="is-primary" type="button" onClick={onOpenRecharge}>{content.rechargeAction}</button><button type="button" onClick={() => onNavigate("wallet")}>查看钱包<ArrowRight /></button></footer>
+        </article>
       </section>
 
       <section className="home-lower-grid">

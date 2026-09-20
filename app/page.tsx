@@ -27,6 +27,7 @@ import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
 import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
+import { WalletRechargePage } from "@/components/wallet-recharge-page";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -540,6 +541,14 @@ export default function Home() {
         if (config.content.storeAction === "商城") config.content.storeAction = "购买成品号";
         if (config.content.logoText === "SUKAI") config.content.logoText = "Sukai 速开";
         if (config.content.homeActionSubtitle === "选择服务，快速开始办理。") config.content.homeActionSubtitle = "一站式获取和升级 AI 账号，简单 · 快速 · 安全";
+        if (config.content.homeActionTitle === "需要办理什么？") config.content.homeActionTitle = "今天需要办理什么？";
+        if (config.content.homeActionSubtitle === "一站式获取和升级 AI 账号，简单 · 快速 · 安全") config.content.homeActionSubtitle = "根据是否已有账号，快速选择购买账号或升级套餐。";
+        if (config.content.accountServiceTitle === "成品号") config.content.accountServiceTitle = "购买 ChatGPT / Claude 账号";
+        if (config.content.accountServiceDescription === "购买已经配置完成的 AI 账号") config.content.accountServiceDescription = "还没有账号？选择套餐与区域，购买后在订单中查看交付信息。";
+        if (config.content.selectAccountService === "选择成品号") config.content.selectAccountService = "查看账号商品";
+        if (config.content.rechargeServiceTitle === "AI 代充") config.content.rechargeServiceTitle = "为已有账号升级套餐";
+        if (config.content.rechargeServiceDescription === "为已有账号升级或续费套餐") config.content.rechargeServiceDescription = "已有账号？选择 Plus、Pro、Max 等当前在售套餐。";
+        if (config.content.startRechargeService === "开始代充") config.content.startRechargeService = "选择升级套餐";
         if (config.content.ordersPageSubtitle === "查看你的成品号和代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充服务订单。";
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
@@ -550,6 +559,10 @@ export default function Home() {
         if (config.content.purchaseSuccess === "Demo：商品购买成功") config.content.purchaseSuccess = "购买信息已确认";
         if (config.content.purchaseSuccessDescription === "这是交互演示，不会创建订单或发起支付。") config.content.purchaseSuccessDescription = "交互演示已完成，不会发起真实支付。";
         if (config.content.rechargeNow === "选择方案") config.content.rechargeNow = "立即办理";
+        // 充值页 v1.2: 清理旧的手续费评价与到账时间口径，统一为「5 分钟以内」
+        if (config.content.topupNetworkTrc20Hint.includes("手续费低")) config.content.topupNetworkTrc20Hint = defaults.content.topupNetworkTrc20Hint;
+        if (config.content.topupNetworkErc20Hint.includes("手续费较高") || config.content.topupNetworkErc20Hint.includes("到账时间略长")) config.content.topupNetworkErc20Hint = defaults.content.topupNetworkErc20Hint;
+        if (/1～3 分钟|1~3 分钟|5～15 分钟|5~15 分钟/.test(config.content.topupWaitingHint)) config.content.topupWaitingHint = defaults.content.topupWaitingHint;
         config.products = config.products.map((product) => product.id === "gpt-plus-recharge" && product.price === 135
           ? { ...product, price: 18, priceSuffix: "/账号" }
           : product);
@@ -682,9 +695,14 @@ export default function Home() {
       }, ...current]);
     }
   };
+  const navigateTo = (destination: DashboardDestination) => {
+    setWizardProduct(null);
+    setWizardInitialMode(null);
+    setPaymentRequest(null);
+    setSelectedMenu(destination);
+  };
   const openWalletRecharge = () => {
-    setSelectedMenu("wallet");
-    setPaymentRequest({ mode: "wallet_recharge", amount: 100 });
+    navigateTo("topup");
   };
   const handleDemoLogin = () => {
     setIsLoggedIn(true);
@@ -850,6 +868,7 @@ export default function Home() {
     { id: "home", key: "navHome" },
     { id: "account", key: "navAccount" },
     { id: "recharge", key: "navRecharge" },
+    { id: "topup", key: "navTopup" },
     { id: "orders", key: "navOrders" },
   ];
   const publicMenuItems: Array<{ id: "home" | "account" | "recharge" | "help" | "faq"; label: string }> = [
@@ -875,7 +894,7 @@ export default function Home() {
   return (
     <div className={`app-shell ${editMode ? "edit-mode" : ""}`}>
       <header className="site-header">
-        <button className="header-left header-logo-button" type="button" onClick={() => isLoggedIn ? setSelectedMenu("home") : handlePublicNavigation("home")} aria-label="返回首页">
+        <button className="header-left header-logo-button" type="button" onClick={() => isLoggedIn ? navigateTo("home") : handlePublicNavigation("home")} aria-label="返回首页">
           <span className="logo-mark" aria-hidden="true">S</span>
           <span className="brand-name">
             <EditableText active={editMode} value={content.logoText} onChange={(value) => updateContent("logoText", value)} />
@@ -888,10 +907,10 @@ export default function Home() {
                 className="business-nav-item"
                 data-active={selectedMenu === item.id}
                 type="button"
-                onClick={() => setSelectedMenu(item.id)}
+                onClick={() => navigateTo(item.id)}
                 key={item.id}
               >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "topup" ? <WalletCards aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
                 <EditableText
                   active={editMode}
                   value={content[item.key]}
@@ -927,7 +946,7 @@ export default function Home() {
               <Pencil aria-hidden="true" />{content.editCopy}
             </button>
           ) : null}
-          {isLoggedIn ? <button className="header-balance" type="button" onClick={() => setSelectedMenu("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-balance" type="button" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
           <div
             className="top-support"
             onMouseEnter={() => setSupportSurface("top")}
@@ -963,10 +982,10 @@ export default function Home() {
                 <strong>{accountDashboardMock.user.name}</strong><span>{accountDashboardMock.user.email}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem data-active={selectedMenu === "profile"} onSelect={() => setSelectedMenu("profile")}><UserRound />{content.personalCenter}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "wallet"} onSelect={() => setSelectedMenu("wallet")}><WalletCards />{content.walletMenu}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "invite"} onSelect={() => setSelectedMenu("invite")}><Gift />{content.navInvite}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "security"} onSelect={() => setSelectedMenu("security")}><ShieldCheck />{content.securityMenu}</DropdownMenuItem>
+              <DropdownMenuItem data-active={selectedMenu === "profile"} onSelect={() => navigateTo("profile")}><UserRound />{content.personalCenter}</DropdownMenuItem>
+              <DropdownMenuItem data-active={selectedMenu === "wallet"} onSelect={() => navigateTo("wallet")}><WalletCards />{content.walletMenu}</DropdownMenuItem>
+              <DropdownMenuItem data-active={selectedMenu === "invite"} onSelect={() => navigateTo("invite")}><Gift />{content.navInvite}</DropdownMenuItem>
+              <DropdownMenuItem data-active={selectedMenu === "security"} onSelect={() => navigateTo("security")}><ShieldCheck />{content.securityMenu}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={() => setLogoutOpen(true)}><LogOut />{content.logout}</DropdownMenuItem>
             </DropdownMenuContent>
@@ -974,9 +993,20 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
-            {wizardProduct && wizardFlow ? (
+            {selectedMenu === "topup" ? (
+              <WalletRechargePage
+                content={content}
+                editMode={editMode}
+                updateContent={updateContent}
+                availableBalance={walletBalance}
+                topUpRecords={topUpRecords}
+                onBack={() => navigateTo("wallet")}
+                onComplete={applyPaymentCompletion}
+                onSupport={() => setSupportSurface("floating")}
+              />
+            ) : wizardProduct && wizardFlow ? (
               <RechargeWizard
                 product={wizardProduct}
                 flow={wizardFlow}
@@ -991,7 +1021,7 @@ export default function Home() {
                 onExit={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={setSelectedMenu} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { setSelectedMenu(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} products={products} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { setSelectedMenu(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
@@ -1001,18 +1031,18 @@ export default function Home() {
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
-                onNavigate={setSelectedMenu}
+                onNavigate={navigateTo}
+                onOpenRecharge={openWalletRecharge}
                 availableBalance={walletBalance}
                 walletRecords={walletRecords}
                 topUpRecords={topUpRecords}
-                onPaymentComplete={applyPaymentCompletion}
               />
             ) : selectedMenu === "profile" ? (
               <ProfilePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "security" ? (
               <SecurityPage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "help" ? (
-              <HelpCenter onNavigate={(destination) => { setSelectedMenu(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
+              <HelpCenter onNavigate={(destination) => { navigateTo(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
             ) : isProductsPage ? (
               <section className="commerce-panel">
                 <header className="commerce-page-heading">
@@ -1213,8 +1243,8 @@ export default function Home() {
       </Dialog>
 
       <PaymentFlowSheet
-        open={Boolean(paymentRequest)}
-        request={paymentRequest}
+        open={paymentRequest?.mode === "order_payment"}
+        request={paymentRequest?.mode === "order_payment" ? paymentRequest : null}
         availableBalance={walletBalance}
         onOpenChange={(open) => !open && setPaymentRequest(null)}
         onComplete={(completion) => {

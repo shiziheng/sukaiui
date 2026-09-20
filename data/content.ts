@@ -10,6 +10,7 @@ export type DemoContent = {
   navHome: string;
   navAccount: string;
   navRecharge: string;
+  navTopup: string;
   navOrders: string;
   navInvite: string;
   personalCenter: string;
@@ -217,6 +218,44 @@ export type DemoContent = {
   logoutConfirmTitle: string;
   logoutConfirmDescription: string;
   logoutConfirmAction: string;
+  topupTitle: string;
+  topupSubtitle: string;
+  topupBackWallet: string;
+  topupStepAmount: string;
+  topupStepNetwork: string;
+  topupStepPay: string;
+  topupStepAmountHint: string;
+  topupStepNetworkHint: string;
+  topupStepPayHint: string;
+  topupNetworkTrc20Hint: string;
+  topupNetworkErc20Hint: string;
+  topupWaitingHint: string;
+  topupMinAmount: string;
+  topupNetworkWarning: string;
+  topupSummaryTitle: string;
+  topupNoticeTitle: string;
+  topupSupportTitle: string;
+  topupSupportHint: string;
+  topupSupportAction: string;
+  topupProcessTitle: string;
+  topupRecentTitle: string;
+  topupFaqTitle: string;
+  topupContinuePay: string;
+  topupViewRecords: string;
+  topupContinueRecharge: string;
+  topupSuccessEyebrow: string;
+  topupSuccessHint: string;
+  topupDemoToggle: string;
+  topupArrivalEta: string;
+  topupNetworkFeeNote: string;
+  topupNetworkAdviceTitle: string;
+  topupNetworkAdvice1: string;
+  topupNetworkAdvice2: string;
+  topupNetworkAdvice3: string;
+  topupCountdownLabel: string;
+  topupCountdownHint: string;
+  topupSupportStripTitle: string;
+  topupSupportStripHint: string;
 };
 
 export const defaultContent: DemoContent = {
@@ -231,6 +270,7 @@ export const defaultContent: DemoContent = {
   navHome: "首页",
   navAccount: "成品号",
   navRecharge: "代充",
+  navTopup: "充值",
   navOrders: "我的订单",
   navInvite: "我的邀请",
   personalCenter: "个人中心",
@@ -403,14 +443,14 @@ export const defaultContent: DemoContent = {
   exchangeToBalance: "兑换到余额",
   walletMenu: "我的钱包",
   securityMenu: "账户与安全",
-  homeActionTitle: "需要办理什么？",
-  homeActionSubtitle: "一站式获取和升级 AI 账号，简单 · 快速 · 安全",
-  accountServiceTitle: "成品号",
-  accountServiceDescription: "购买已经配置完成的 AI 账号",
-  selectAccountService: "选择成品号",
-  rechargeServiceTitle: "AI 代充",
-  rechargeServiceDescription: "为已有账号升级或续费套餐",
-  startRechargeService: "开始代充",
+  homeActionTitle: "今天需要办理什么？",
+  homeActionSubtitle: "根据是否已有账号，快速选择购买账号或升级套餐。",
+  accountServiceTitle: "购买 ChatGPT / Claude 账号",
+  accountServiceDescription: "还没有账号？选择套餐与区域，购买后在订单中查看交付信息。",
+  selectAccountService: "查看账号商品",
+  rechargeServiceTitle: "为已有账号升级套餐",
+  rechargeServiceDescription: "已有账号？选择 Plus、Pro、Max 等当前在售套餐。",
+  startRechargeService: "选择升级套餐",
   accountQuickInfo: "账户快捷信息",
   pendingOrders: "待处理订单",
   recentOrderCount: "最近订单",
@@ -438,4 +478,42 @@ export const defaultContent: DemoContent = {
   logoutConfirmTitle: "退出登录？",
   logoutConfirmDescription: "退出后需要重新登录才能访问账户信息。",
   logoutConfirmAction: "退出登录",
+  topupTitle: "充值",
+  topupSubtitle: "充值到 SUKAI 钱包，用于支付站内成品号与代充订单。目前仅支持 USDT 链上充值。",
+  topupBackWallet: "返回钱包",
+  topupStepAmount: "充值金额",
+  topupStepNetwork: "支付网络",
+  topupStepPay: "扫码支付",
+  topupStepAmountHint: "选择充值金额。充值金额将 1:1 计入钱包可用余额，仅用于支付平台订单。",
+  topupStepNetworkHint: "选择支付网络。请确认你的付款钱包支持所选网络，充值后无法跨网络找回。",
+  topupStepPayHint: "请向下方地址转入精确金额。金额用于自动匹配订单，多转或少转都会影响自动到账。",
+  topupNetworkTrc20Hint: "TRON 网络 USDT 通道：多数钱包与交易平台都支持，充值流程成熟。",
+  topupNetworkErc20Hint: "Ethereum 网络 USDT 通道：适合从以太坊生态钱包或交易平台直接转入。",
+  topupWaitingHint: "链上确认后自动到账，通常 5 分钟以内。请勿重复支付或关闭页面。",
+  topupMinAmount: "最小充值金额 $1.00，充值金额按实际到账 1:1 计入钱包余额。",
+  topupNetworkWarning: "仅支持所选网络，使用其他网络转账可能导致资金无法找回。",
+  topupSummaryTitle: "充值摘要",
+  topupNoticeTitle: "链上支付须知",
+  topupSupportTitle: "需要帮助？",
+  topupSupportHint: "充值未到账或金额有疑问，可联系客服核对支付单。",
+  topupSupportAction: "联系在线客服",
+  topupProcessTitle: "充值流程说明",
+  topupRecentTitle: "最近充值记录",
+  topupFaqTitle: "常见问题",
+  topupContinuePay: "继续支付",
+  topupViewRecords: "查看充值记录",
+  topupContinueRecharge: "继续充值",
+  topupSuccessEyebrow: "充值成功",
+  topupSuccessHint: "已到账金额已计入钱包余额，可直接用于支付站内订单。",
+  topupDemoToggle: "演示模式",
+  topupArrivalEta: "5 分钟以内",
+  topupNetworkFeeNote: "链上转账手续费由对应网络收取，平台不额外收取充值手续费；具体金额以你的钱包或交易所显示为准。",
+  topupNetworkAdviceTitle: "怎么选网络",
+  topupNetworkAdvice1: "与付款钱包保持一致：从钱包或交易所提现时选择的网络，必须和本页所选网络相同。",
+  topupNetworkAdvice2: "两种网络都可用：到账时间均为预计 5 分钟以内，请按你手上资金所在的网络选择。",
+  topupNetworkAdvice3: "选错网络无法找回：不同网络之间不能互转，转错网络需要联系客服人工核对。",
+  topupCountdownLabel: "支付单有效期",
+  topupCountdownHint: "请在有效期内完成转账，过期可以重新生成支付信息。",
+  topupSupportStripTitle: "充值未到账或金额有疑问？",
+  topupSupportStripHint: "提供充值单号，客服可帮你核对链上记录。",
 };

@@ -80,10 +80,20 @@ export function CryptoPaymentPanel({
   intent,
   onIntentChange,
   onComplete,
+  demoCollapsible = false,
+  demoTitle = "Demo 状态演示",
+  demoHint = "仅改变前端 Mock 状态，不会发起真实付款。",
+  countdownLabel,
+  countdownHint,
 }: {
   intent: PaymentIntent;
   onIntentChange: (intent: PaymentIntent) => void;
   onComplete: (receivedAmount: number) => void;
+  demoCollapsible?: boolean;
+  demoTitle?: string;
+  demoHint?: string;
+  countdownLabel?: string;
+  countdownHint?: string;
 }) {
   const network = paymentNetworks[intent.network];
   const remaining = Math.max(0, intent.uniquePayableAmount - intent.receivedAmount);
@@ -108,12 +118,25 @@ export function CryptoPaymentPanel({
     onIntentChange({ ...intent, status: "expired", receivedAmount: 0 });
   };
 
+  const demoButtons = <div className="payment-demo-actions">
+    <button type="button" onClick={() => setReceived(Math.max(0, intent.uniquePayableAmount - 9))}>模拟少付</button>
+    <button type="button" onClick={() => setReceived(intent.uniquePayableAmount + 1)}>模拟多付</button>
+    <button type="button" onClick={() => onIntentChange({ ...intent, status: "detected", receivedAmount: intent.uniquePayableAmount })}>检测到交易</button>
+    <button type="button" onClick={simulateTimeout}>模拟超时</button>
+    <button type="button" onClick={() => onIntentChange({ ...intent, status: "failed", receivedAmount: 0 })}>模拟失败</button>
+    {intent.status === "underpaid" ? <button className="is-primary" type="button" onClick={() => setReceived(intent.uniquePayableAmount)}>补足金额</button>
+      : intent.status === "confirming" || intent.status === "detected" ? <button className="is-primary" type="button" onClick={() => onComplete(intent.receivedAmount || intent.uniquePayableAmount)}>完成链上确认</button>
+        : <button className="is-primary" type="button" onClick={() => setReceived(intent.uniquePayableAmount)}>模拟足额付款</button>}
+  </div>;
+
   return <div className="crypto-payment-panel">
     <section className="payment-detail-card">
       <div className="payment-detail-heading">
         <div><span>支付状态</span><strong className={`payment-state is-${intent.status}`}><i />{statusLabel}</strong></div>
-        <span className="payment-countdown"><Clock3 />29:42</span>
+        <span className="payment-countdown">{countdownLabel ? <em>{countdownLabel}</em> : null}<Clock3 />29:42</span>
       </div>
+
+      {countdownHint ? <p className="payment-countdown-hint">{countdownHint}</p> : null}
 
       <div className="payment-amount-focus">
         <span>{intent.mode === "wallet_recharge" ? "应付金额" : "链上应付"}</span>
@@ -146,19 +169,16 @@ export function CryptoPaymentPanel({
       <div className="payment-warning"><ShieldCheck /><p>仅支持 {network.name}，使用其他网络可能导致资金无法识别。</p></div>
     </aside>
 
-    <section className="payment-demo-controls">
-      <div><strong>Demo 状态演示</strong><span>仅改变前端 Mock 状态，不会发起真实付款。</span></div>
-      <div>
-        <button type="button" onClick={() => setReceived(Math.max(0, intent.uniquePayableAmount - 9))}>模拟少付</button>
-        <button type="button" onClick={() => setReceived(intent.uniquePayableAmount + 1)}>模拟多付</button>
-        <button type="button" onClick={() => onIntentChange({ ...intent, status: "detected", receivedAmount: intent.uniquePayableAmount })}>检测到交易</button>
-        <button type="button" onClick={simulateTimeout}>模拟超时</button>
-        <button type="button" onClick={() => onIntentChange({ ...intent, status: "failed", receivedAmount: 0 })}>模拟失败</button>
-        {intent.status === "underpaid" ? <button className="is-primary" type="button" onClick={() => setReceived(intent.uniquePayableAmount)}>补足金额</button>
-          : intent.status === "confirming" || intent.status === "detected" ? <button className="is-primary" type="button" onClick={() => onComplete(intent.receivedAmount || intent.uniquePayableAmount)}>完成链上确认</button>
-            : <button className="is-primary" type="button" onClick={() => setReceived(intent.uniquePayableAmount)}>模拟足额付款</button>}
-      </div>
-    </section>
+    {demoCollapsible ? <details className="payment-demo-panel">
+      <summary><span><strong>{demoTitle}</strong><small>{demoHint}</small></span><em><span className="is-closed">展开</span><span className="is-open">收起</span></em></summary>
+      <section className="payment-demo-controls">
+        <div><strong>{demoTitle}</strong><span>{demoHint}</span></div>
+        {demoButtons}
+      </section>
+    </details> : <section className="payment-demo-controls">
+      <div><strong>{demoTitle}</strong><span>{demoHint}</span></div>
+      {demoButtons}
+    </section>}
   </div>;
 }
 
