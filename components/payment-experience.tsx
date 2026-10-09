@@ -81,19 +81,34 @@ export function CryptoPaymentPanel({
   onIntentChange,
   onComplete,
   demoCollapsible = false,
+  showDemoControls = true,
   demoTitle = "Demo 状态演示",
   demoHint = "仅改变前端 Mock 状态，不会发起真实付款。",
   countdownLabel,
   countdownHint,
+  showTimeline = true,
+  orderNo,
+  amountNotice,
+  queryArrival,
 }: {
   intent: PaymentIntent;
   onIntentChange: (intent: PaymentIntent) => void;
   onComplete: (receivedAmount: number) => void;
   demoCollapsible?: boolean;
+  /** 隐藏整块演示按钮区（充值页定制：由「查询到账状态」按钮代替）。 */
+  showDemoControls?: boolean;
   demoTitle?: string;
   demoHint?: string;
   countdownLabel?: string;
   countdownHint?: string;
+  /** 隐藏「等待付款/链上确认/充值到账」时间线。 */
+  showTimeline?: boolean;
+  /** 支付单号（如充值单号），显示在金额区上方。 */
+  orderNo?: string;
+  /** 金额下方的高亮提示文案（如小数点尾数提醒）。 */
+  amountNotice?: string;
+  /** 右下角「查询到账状态」按钮。 */
+  queryArrival?: { label: string; onClick: () => void };
 }) {
   const network = paymentNetworks[intent.network];
   const remaining = Math.max(0, intent.uniquePayableAmount - intent.receivedAmount);
@@ -138,11 +153,15 @@ export function CryptoPaymentPanel({
 
       {countdownHint ? <p className="payment-countdown-hint">{countdownHint}</p> : null}
 
+      {orderNo ? <div className="payment-order-no"><span>充值单号</span><code>{orderNo}</code></div> : null}
+
       <div className="payment-amount-focus">
         <span>{intent.mode === "wallet_recharge" ? "应付金额" : "链上应付"}</span>
         <strong>{usdt(intent.uniquePayableAmount)}</strong>
         <p>此金额用于自动匹配当前支付，请按页面金额准确转账。</p>
       </div>
+
+      {amountNotice ? <div className="payment-tail-notice"><TriangleAlert /><p>{amountNotice}</p></div> : null}
 
       {intent.mode === "order_payment" ? <dl className="payment-breakdown compact">
         <div><dt>商品金额</dt><dd>{money(intent.totalAmount)}</dd></div>
@@ -158,7 +177,7 @@ export function CryptoPaymentPanel({
 
       {intent.status === "expired" ? <div className="payment-expired-card"><TriangleAlert /><div><strong>支付已过期</strong><p>尚未检测到付款，可以重新生成支付信息。</p></div><Button variant="outline" onClick={() => onIntentChange({ ...intent, status: "pending", receivedAmount: 0 })}><RefreshCcw />重新生成支付</Button></div> : null}
 
-      <PaymentTimeline intent={intent} />
+      {showTimeline ? <PaymentTimeline intent={intent} /> : null}
     </section>
 
     <aside className="payment-qr-card">
@@ -169,7 +188,7 @@ export function CryptoPaymentPanel({
       <div className="payment-warning"><ShieldCheck /><p>仅支持 {network.name}，使用其他网络可能导致资金无法识别。</p></div>
     </aside>
 
-    {demoCollapsible ? <details className="payment-demo-panel">
+    {showDemoControls ? (demoCollapsible ? <details className="payment-demo-panel">
       <summary><span><strong>{demoTitle}</strong><small>{demoHint}</small></span><em><span className="is-closed">展开</span><span className="is-open">收起</span></em></summary>
       <section className="payment-demo-controls">
         <div><strong>{demoTitle}</strong><span>{demoHint}</span></div>
@@ -178,7 +197,9 @@ export function CryptoPaymentPanel({
     </details> : <section className="payment-demo-controls">
       <div><strong>{demoTitle}</strong><span>{demoHint}</span></div>
       {demoButtons}
-    </section>}
+    </section>) : null}
+
+    {queryArrival ? <div className="payment-query-row"><Button className="payment-query-button" onClick={queryArrival.onClick}>{queryArrival.label}</Button></div> : null}
   </div>;
 }
 

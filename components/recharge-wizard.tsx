@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, Check, Clipboard, ExternalLink, Inbox,
-  LoaderCircle, LockKeyhole, Play, Sparkles,
+  ArrowLeft, Check, Clipboard, ExternalLink, Headphones, Inbox,
+  LoaderCircle, LockKeyhole, Play, Sparkles, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
 import { PaymentExperience } from "@/components/payment-experience";
 import { RechargeBatchFlow } from "@/components/recharge-batch-flow";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -350,6 +351,19 @@ function SingleRechargeFlow({
   );
 }
 
+const rechargeCompareRows = [
+  { label: "适合情况", single: "只给自己或 1–2 个账号升级", batch: "手上有一批账号要统一升级" },
+  { label: "需要准备", single: "一个能正常登录的账号", batch: "Session 列表（粘贴或 TXT / CSV / JSON）" },
+  { label: "单次上限", single: "1 个账号", batch: "100 个账号" },
+  { label: "处理方式", single: "全程引导，逐步确认", batch: "统一解析筛选后一次性结算" },
+];
+
+const rechargeFaqItems = [
+  { id: "session", question: "Session 会被留存吗？", answer: "不会。本页只用于前端交互演示，不接入真实 Session 接口，也不上传或存储你粘贴的凭据；刷新页面后内容即清空。" },
+  { id: "limit", question: "批量最多能办多少个账号？", answer: "单次最多 100 个账号。超出部分请分批办理，批量工作台会在解析阶段把超出上限的条目单独列出。" },
+  { id: "failure", question: "办理失败怎么处理？", answer: "批量任务会把失败项单独列出，核对后可以重新提交；单账号流程会在对应步骤给出重试入口。当前为 Demo，不产生真实扣费。" },
+];
+
 export type RechargeMode = "single" | "batch";
 
 export function RechargeWizard({
@@ -364,6 +378,7 @@ export function RechargeWizard({
   initialMode = null,
   onTaskCreated,
   onNavigateOrders,
+  onSupport,
 }: {
   product: Product;
   flow: RechargeFlow;
@@ -376,6 +391,7 @@ export function RechargeWizard({
   initialMode?: RechargeMode | null;
   onTaskCreated: (task: BatchTask) => void;
   onNavigateOrders: () => void;
+  onSupport: () => void;
 }) {
   const [mode, setMode] = useState<RechargeMode | null>(initialMode);
   const [modeKey, setModeKey] = useState(0);
@@ -395,11 +411,56 @@ export function RechargeWizard({
 
   return <section className="recharge-workspace">
     <header className="recharge-workspace-header">
-      <button type="button" onClick={requestLeave}><ArrowLeft />返回代充页面</button>
-      <div><span>当前办理商品</span><h1>{product.name}</h1><p>目标套餐：<strong>{targetPlan}</strong> · 单价 ${product.price}{product.priceSuffix}</p></div>
+      <button className="page-back-button" type="button" onClick={requestLeave}><ArrowLeft aria-hidden="true" />返回代充页面</button>
+      <div className="recharge-workspace-heading">
+        <span className="recharge-workspace-icon" aria-hidden="true"><Zap /></span>
+        <div className="recharge-workspace-info"><span>当前办理商品</span><h1>{product.name}</h1><p>目标套餐：<strong>{targetPlan}</strong> · 单价 ${product.price}{product.priceSuffix}</p></div>
+      </div>
       <div className="recharge-mode-context"><span>{mode === "single" ? "单账号办理" : mode === "batch" ? "批量办理" : "请选择办理方式"}</span>{mode ? <button type="button" onClick={() => switchMode(mode === "single" ? "batch" : "single")}>切换到{mode === "single" ? "批量" : "单账号"}</button> : null}</div>
     </header>
-    {!mode ? <section className="recharge-mode-select"><div className="recharge-mode-intro"><span>RECHARGE WORKSPACE</span><h2>选择办理方式</h2><p>商品与目标套餐已经锁定。根据账号数量选择单账号或批量流程。</p></div><div className="recharge-mode-grid"><button type="button" onClick={() => switchMode("single")}><span>01</span><div><h3>单账号办理</h3><p>适合 1 个账号，沿用登录、获取 Session、提交、支付和完成流程。</p></div><strong>进入单账号流程 →</strong></button><button type="button" onClick={() => switchMode("batch")}><span>02</span><div><h3>批量办理</h3><p>支持粘贴 Session 或导入 TXT / CSV / JSON，统一解析、筛选和结算。</p></div><strong>进入批量工作台 →</strong></button></div><div className="batch-local-notice"><LockKeyhole /><span><strong>仅用于前端交互演示</strong>不接入真实 Session 接口、后台或支付系统。</span></div></section> : mode === "single" ? <SingleRechargeFlow key={`single-${modeKey}`} product={product} flow={flow} content={content} editMode={editMode} onFlowChange={onFlowChange} onExit={onExit} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} /> : <RechargeBatchFlow key={`batch-${modeKey}`} product={product} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} onTaskCreated={onTaskCreated} onNavigateOrders={onNavigateOrders} onExit={requestLeave} />}
+    {!mode ? <section className="recharge-mode-select">
+      <div className="recharge-mode-intro"><span>RECHARGE WORKSPACE</span><h2>选择办理方式</h2><p>商品与目标套餐已经锁定。根据账号数量选择单账号或批量流程。</p></div>
+      <div className="recharge-mode-grid">
+        <button type="button" onClick={() => switchMode("single")}><span>01</span><div><h3>单账号办理</h3><p>适合 1 个账号，沿用登录、获取 Session、提交、支付和完成流程。</p><em className="recharge-mode-meta">1 个账号 · 约 3 分钟 · 全程引导</em></div><strong>进入单账号流程 →</strong></button>
+        <button type="button" onClick={() => switchMode("batch")}><span>02</span><div><h3>批量办理</h3><p>支持粘贴 Session 或导入 TXT / CSV / JSON，统一解析、筛选和结算。</p><em className="recharge-mode-meta">最多 100 个账号 · 支持 TXT / CSV / JSON</em></div><strong>进入批量工作台 →</strong></button>
+      </div>
+      <div className="batch-local-notice"><LockKeyhole /><span><strong>仅用于前端交互演示</strong>不接入真实 Session 接口、后台或支付系统。</span></div>
+    </section> : mode === "single" ? <SingleRechargeFlow key={`single-${modeKey}`} product={product} flow={flow} content={content} editMode={editMode} onFlowChange={onFlowChange} onExit={onExit} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} /> : <RechargeBatchFlow key={`batch-${modeKey}`} product={product} availableBalance={availableBalance} onPaymentComplete={onPaymentComplete} onTaskCreated={onTaskCreated} onNavigateOrders={onNavigateOrders} onExit={requestLeave} />}
+    {!mode ? <>
+      <section className="recharge-supplement-card recharge-compare">
+        <header className="recharge-supplement-heading"><div><h2>两种方式怎么选</h2><p>按手上的账号数量选，两条路径的准备工作和结算方式不一样。</p></div></header>
+        <div className="recharge-compare-scroll">
+          <table className="recharge-compare-table">
+            <thead><tr><th scope="col">对比项</th><th scope="col">单账号办理</th><th scope="col">批量办理</th></tr></thead>
+            <tbody>
+              {rechargeCompareRows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th><td data-label="单账号办理">{row.single}</td><td data-label="批量办理">{row.batch}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section className="recharge-supplement-card recharge-prepare">
+        <header className="recharge-supplement-heading"><div><h2>办理前要准备什么</h2><p>这三件事先确认好，流程基本不会卡住。</p></div></header>
+        <ol>
+          <li><span>1</span><strong>确认目标套餐</strong><p>页面已经锁定 {product.name} 对应的套餐「{targetPlan}」，办理过程中不能更改。</p></li>
+          <li><span>2</span><strong>准备好账号凭据</strong><p>单账号需要能正常登录的账号；批量需要可用的 Session，可以粘贴或导入 TXT / CSV / JSON。</p></li>
+          <li><span>3</span><strong>确认余额够用</strong><p>单价 ${product.price}{product.priceSuffix} × 账号数即为总额，当前可用余额 ${availableBalance.toFixed(2)}，不足会在支付步骤被拦下。</p></li>
+        </ol>
+      </section>
+      <section className="recharge-supplement-card recharge-faq">
+        <header className="recharge-supplement-heading"><div><h2>常见问题</h2><p>关于 Session、批量上限和办理失败的说明。</p></div></header>
+        <Accordion type="single" collapsible className="recharge-faq-list">
+          {rechargeFaqItems.map((item) => <AccordionItem value={item.id} key={item.id}>
+            <AccordionTrigger>{item.question}</AccordionTrigger>
+            <AccordionContent>{item.answer}</AccordionContent>
+          </AccordionItem>)}
+        </Accordion>
+      </section>
+      <section className="recharge-support-strip">
+        <span className="recharge-support-icon" aria-hidden="true"><Headphones /></span>
+        <div className="recharge-support-copy"><strong>办理过程中遇到问题？</strong><p>可以先看帮助中心，也可以直接找在线客服确认账号与套餐信息。</p></div>
+        <Button variant="outline" className="topup-secondary-button" onClick={onSupport}>联系在线客服</Button>
+      </section>
+    </> : null}
     <Dialog open={exitOpen} onOpenChange={setExitOpen}><DialogContent><DialogHeader><DialogTitle>离开当前流程？</DialogTitle><DialogDescription>切换办理方式会清空当前页面中的未提交内容。</DialogDescription></DialogHeader><DialogFooter><Button variant="secondary" onClick={() => setExitOpen(false)}>继续当前流程</Button><Button className="exit-flow-button" variant="ghost" onClick={confirmSwitch}>离开并切换</Button></DialogFooter></DialogContent></Dialog>
     <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}><DialogContent><DialogHeader><DialogTitle>离开当前流程？</DialogTitle><DialogDescription>当前未提交的 Session 和办理进度会被清空。</DialogDescription></DialogHeader><DialogFooter><Button variant="secondary" onClick={() => setLeaveOpen(false)}>继续当前流程</Button><Button className="exit-flow-button" variant="ghost" onClick={onExit}>确认离开</Button></DialogFooter></DialogContent></Dialog>
   </section>;

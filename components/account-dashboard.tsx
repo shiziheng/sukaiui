@@ -28,12 +28,6 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
 
   return (
     <section className="user-center-page business-dashboard">
-      <header className="home-hero-heading">
-        <span>欢迎回来，{data.user.name}</span>
-        <h1><EditableText active={editMode} value={content.homeActionTitle} onChange={(value) => updateContent("homeActionTitle", value)} /></h1>
-        <p><EditableText active={editMode} value={content.homeActionSubtitle} onChange={(value) => updateContent("homeActionSubtitle", value)} /></p>
-      </header>
-
       <section className="business-entry-grid" aria-label="业务办理">
         <button className="business-entry-card is-account" type="button" onClick={() => onNavigate("account")}>
           <span className="business-entry-icon"><Bot /></span><span className="business-card-art" aria-hidden="true"><i /><i /><i /></span>

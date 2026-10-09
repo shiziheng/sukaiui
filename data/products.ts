@@ -88,12 +88,12 @@ export const defaultProducts: Product[] = [
     id: "claude-pro-recharge", businessType: "recharge", brand: "claude",
     name: "Claude Pro 代充", subtitle: "Claude Pro套餐充值", tags: ["Claude Pro", "代充"],
     price: 209, priceSuffix: "/月", features: ["官方Claude Pro套餐", "支持长文本处理", "支持网页端使用", "充值完成即可使用"],
-    stockText: "库存充足", status: "available", highlight: false, highlightLabel: "",
+    stockText: "库存充足", status: "available", maxQuantity: 9, highlight: false, highlightLabel: "",
   },
   {
     id: "claude-max-recharge", businessType: "recharge", brand: "claude",
     name: "Claude Max 代充", subtitle: "Claude Max套餐充值", tags: ["Max", "代充"],
     price: 629, priceSuffix: "/月", discountLabel: "高额度方案", features: ["官方Claude Max套餐", "更高模型使用额度", "适合高频使用", "充值完成即可使用"],
-    stockText: "库存充足", status: "available", highlight: true, highlightLabel: "推荐",
+    stockText: "库存充足", status: "available", maxQuantity: 9, highlight: true, highlightLabel: "推荐",
   },
 ];

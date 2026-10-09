@@ -83,6 +83,9 @@ export function WalletRechargePage({
   onBack,
   onComplete,
   onSupport,
+  initialAmount,
+  onResumeOrder,
+  pendingOrderHint,
 }: {
   content: DemoContent;
   editMode: boolean;
@@ -92,9 +95,16 @@ export function WalletRechargePage({
   onBack: () => void;
   onComplete: (completion: PaymentCompletion) => void;
   onSupport: () => void;
+  /** 从购买弹窗跳来时预填的充值金额（订单缺口额）；不传时沿用默认 100。 */
+  initialAmount?: number;
+  /** 传入时，成功态额外渲染 primary 的「返回订单继续支付」按钮。 */
+  onResumeOrder?: () => void;
+  /** 传入时，页头下方渲染一条「正在为订单补足余额」提示条。 */
+  pendingOrderHint?: string;
 }) {
   const [step, setStep] = useState<TopUpStep>(1);
-  const [amount, setAmount] = useState(100);
+  // 初值只在挂载时取一次：从商品页跳来是新挂载，不要用 effect 同步，否则会冲掉用户手动改过的金额。
+  const [amount, setAmount] = useState(initialAmount ?? 100);
   const [network, setNetwork] = useState<PaymentNetwork>("trc20");
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [completion, setCompletion] = useState<PaymentCompletion | null>(null);
@@ -119,6 +129,17 @@ export function WalletRechargePage({
     setCompletion(result);
     onComplete(result);
     toast.success(`充值成功，已到账 ${money(result.paymentIntent.receivedAmount)}`);
+  };
+
+  // 「查询到账状态」：第一次点击模拟检测到转账（进入链上确认中），再次点击完成到账。
+  const queryArrivalStatus = () => {
+    if (!intent) return;
+    if (intent.status === "confirming" || intent.status === "detected") {
+      finishPayment(intent.receivedAmount || intent.uniquePayableAmount);
+      return;
+    }
+    setIntent({ ...intent, receivedAmount: intent.uniquePayableAmount, status: "confirming" });
+    toast.info("已检测到您的链上转账，正在确认，请稍后再查询");
   };
 
   const resumePayment = (record: { amount: number; method: string }) => {
@@ -181,6 +202,8 @@ export function WalletRechargePage({
       </button>
     </header>
 
+    {pendingOrderHint ? <p className="payment-auto-deduction"><Clock3 aria-hidden="true" />{pendingOrderHint}</p> : null}
+
     {completion ? <section className="topup-card is-primary topup-success">
       <span className="topup-success-icon"><CheckCircle2 /></span>
       <span className="topup-success-eyebrow">{editable("topupSuccessEyebrow")}</span>
@@ -194,9 +217,12 @@ export function WalletRechargePage({
         <div><dt>到账时间</dt><dd>{new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-")}</dd></div>
       </dl>
       <div className="topup-success-actions">
+        {onResumeOrder ? <Button className="topup-primary-button" onClick={onResumeOrder}>{editable("purchaseResumeOrder")}</Button> : null}
         <Button variant="outline" className="topup-secondary-button" onClick={scrollToRecords}>{editable("topupViewRecords")}</Button>
         <Button variant="outline" className="topup-secondary-button" onClick={onBack}>{editable("topupBackWallet")}</Button>
-        <Button className="topup-primary-button" onClick={resetToStart}>{editable("topupContinueRecharge")}</Button>
+        {onResumeOrder
+          ? <Button variant="outline" className="topup-secondary-button" onClick={resetToStart}>{editable("topupContinueRecharge")}</Button>
+          : <Button className="topup-primary-button" onClick={resetToStart}>{editable("topupContinueRecharge")}</Button>}
       </div>
     </section> : <>
       <ol className="topup-steps">
@@ -317,14 +343,17 @@ export function WalletRechargePage({
           intent={intent}
           onIntentChange={setIntent}
           onComplete={finishPayment}
-          demoCollapsible
-          demoTitle={content.topupDemoToggle}
+          showDemoControls={false}
+          showTimeline={false}
+          orderNo={intent.id}
+          amountNotice="请注意小数点后尾数：如不按显示金额转账会导致不能正常到账（有些交易所会扣除手续费 请确保到账金额为显示金额）"
           countdownLabel={content.topupCountdownLabel}
           countdownHint={content.topupCountdownHint}
         />
         <p className="topup-note">{editable("topupWaitingHint")}</p>
-        <p className="topup-note">建议保存收款地址或截图二维码；关闭页面后可在下方充值记录中继续支付。</p>
+        <p className="topup-note">关闭页面后可在下方充值记录中继续支付。</p>
         <div className="topup-step-actions">
+          <Button className="topup-primary-button" onClick={queryArrivalStatus}>查询到账状态</Button>
           <Button variant="outline" className="topup-secondary-button" onClick={() => { setIntent(null); setStep(2); }}><ArrowLeft />返回修改支付方式</Button>
         </div>
       </section> : null}

@@ -35,20 +35,13 @@ export type DemoContent = {
   walletEmptyTitle: string;
   placeholderDescription: string;
   placeholderHint: string;
-  modalKicker: string;
-  modalTitle: string;
-  modalDescription: string;
-  reservationModalDescription: string;
   quantityLabel: string;
-  quantityHint: string;
   currentStockLabel: string;
   maxQuantityLabel: string;
   maxReservationLabel: string;
   accountUnit: string;
   totalLabel: string;
   cancel: string;
-  confirmPurchase: string;
-  confirmReservation: string;
   purchaseNotesTitle: string;
   purchaseNoteOfficial: string;
   purchaseNoteOrder: string;
@@ -59,6 +52,17 @@ export type DemoContent = {
   purchaseSuccessDescription: string;
   reservationSuccess: string;
   reservationSuccessDescription: string;
+  purchaseSheetTitle: string;
+  purchaseSheetDescConfirm: string;
+  purchaseSheetDescSuccess: string;
+  purchasePayAction: string;
+  purchasePaidToast: string;
+  purchaseGoTopup: string;
+  purchaseTopUpTotal: string;
+  purchaseInsufficientHint: string;
+  purchaseResumeOrder: string;
+  purchasePendingHint: string;
+  purchaseBalancePaidLabel: string;
   editingNow: string;
   editProduct: string;
   editorTitle: string;
@@ -295,30 +299,34 @@ export const defaultContent: DemoContent = {
   walletEmptyTitle: "钱包 / 充值",
   placeholderDescription: "该功能将在下一版本设计",
   placeholderHint: "当前页面仅用于确认 Demo 导航与布局效果",
-  modalKicker: "购买信息",
-  modalTitle: "确认购买",
-  modalDescription: "请确认商品信息和购买数量。",
-  reservationModalDescription: "当前商品需备货，确认后将提交预定申请。",
   quantityLabel: "购买数量",
-  quantityHint: "数量上限以商品库存为准",
   currentStockLabel: "当前库存",
   maxQuantityLabel: "每次最多购买",
   maxReservationLabel: "每次最多预定",
   accountUnit: "个账号",
   totalLabel: "应付金额",
   cancel: "取消",
-  confirmPurchase: "确认购买",
-  confirmReservation: "确认预定",
   purchaseNotesTitle: "购买说明",
   purchaseNoteOfficial: "官方成品号，支持购买后交付",
   purchaseNoteOrder: "订单交付后可在「我的订单」查看凭据",
   purchaseNoteBatch: "单笔订单按当前购买数量创建并统一交付",
   preorderNote: "当前商品需预定，运营确认库存后安排交付",
   afterSalesTitle: "售后说明",
-  purchaseSuccess: "购买信息已确认",
-  purchaseSuccessDescription: "交互演示已完成，不会发起真实支付。",
+  purchaseSuccess: "支付成功",
+  purchaseSuccessDescription: "交互结果只写入前端 Mock，不会发起真实支付。",
   reservationSuccess: "预定已提交",
   reservationSuccessDescription: "交互演示已完成，不会创建真实预定或扣款。",
+  purchaseSheetTitle: "购买账号",
+  purchaseSheetDescConfirm: "确认商品与数量，下一步完成支付。",
+  purchaseSheetDescSuccess: "订单已提交，正在进入后续处理流程。",
+  purchasePayAction: "支付",
+  purchasePaidToast: "订单支付成功",
+  purchaseGoTopup: "去充值",
+  purchaseTopUpTotal: "还需充值",
+  purchaseInsufficientHint: "当前余额不足，充值到账后即可完成支付。",
+  purchaseResumeOrder: "返回订单继续支付",
+  purchasePendingHint: "正在为订单补足余额，充值到账后返回订单即可完成支付。",
+  purchaseBalancePaidLabel: "余额支付",
   editingNow: "文案编辑中",
   editProduct: "编辑",
   editorTitle: "编辑商品",

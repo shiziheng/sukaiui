@@ -17,11 +17,13 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { AccountDashboard } from "@/components/account-dashboard";
+import { AccountPurchaseDialog, type PurchaseStage } from "@/components/account-purchase-dialog";
+import { SiteMessages } from "@/components/site-messages";
 import { EditableText } from "@/components/editable-text";
 import { InvitePage } from "@/components/invite-page";
 import { HelpCenter } from "@/components/help-center";
 import { OrdersPage } from "@/components/orders-page";
-import { PaymentFlowSheet, type PaymentRequest } from "@/components/payment-experience";
+import { type PaymentRequest } from "@/components/payment-experience";
 import { ProfilePage } from "@/components/profile-page";
 import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
@@ -35,10 +37,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog, DialogClose, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -56,7 +54,7 @@ import { defaultFaqs, type FAQGroup, type FAQItem } from "@/data/faqs";
 import { defaultRechargeFlows, type RechargeFlow } from "@/data/recharge-flows";
 import type { ManagedOrder } from "@/data/order-management";
 import type { BatchTask } from "@/data/recharge-batch";
-import type { PaymentCompletion, ProductOrder } from "@/data/payment-mocks";
+import type { PaymentCompletion, PaymentIntent } from "@/data/payment-mocks";
 import {
   defaultProducts, type BusinessType, type Product, type ProductStatus,
 } from "@/data/products";
@@ -506,7 +504,11 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [purchaseProduct, setPurchaseProduct] = useState<Product | null>(null);
+  const [purchaseStage, setPurchaseStage] = useState<PurchaseStage>("confirm");
+  const [purchaseIntent, setPurchaseIntent] = useState<PaymentIntent | null>(null);
+  // 余额不足跳去充值页时挂起的订单意图；充值完成后可据此回到订单继续支付。
+  const [pendingOrder, setPendingOrder] = useState<{ productId: string; quantity: number } | null>(null);
   const [wizardProduct, setWizardProduct] = useState<Product | null>(null);
   const [wizardInitialMode, setWizardInitialMode] = useState<RechargeMode | null>(null);
   const [generatedOrders, setGeneratedOrders] = useState<ManagedOrder[]>([]);
@@ -554,10 +556,8 @@ export default function Home() {
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
         if (config.content.invitePageSubtitle === "邀请好友注册并消费，可获得返佣奖励。") config.content.invitePageSubtitle = "邀请好友使用 SUKAI，查看你的邀请奖励与记录。";
         if (config.content.buyNow === "选择方案" || config.content.buyNow === "立即预定") config.content.buyNow = "立即购买";
-        if (config.content.modalKicker === "PURCHASE DEMO") config.content.modalKicker = "购买信息";
-        if (config.content.modalDescription === "请确认商品与数量，本操作不会发起真实支付。") config.content.modalDescription = "请确认商品信息和购买数量。";
-        if (config.content.purchaseSuccess === "Demo：商品购买成功") config.content.purchaseSuccess = "购买信息已确认";
-        if (config.content.purchaseSuccessDescription === "这是交互演示，不会创建订单或发起支付。") config.content.purchaseSuccessDescription = "交互演示已完成，不会发起真实支付。";
+        if (["Demo：商品购买成功", "购买信息已确认"].includes(config.content.purchaseSuccess)) config.content.purchaseSuccess = "支付成功";
+        if (["这是交互演示，不会创建订单或发起支付。", "交互演示已完成，不会发起真实支付。"].includes(config.content.purchaseSuccessDescription)) config.content.purchaseSuccessDescription = "交互结果只写入前端 Mock，不会发起真实支付。";
         if (config.content.rechargeNow === "选择方案") config.content.rechargeNow = "立即办理";
         // 充值页 v1.2: 清理旧的手续费评价与到账时间口径，统一为「5 分钟以内」
         if (config.content.topupNetworkTrc20Hint.includes("手续费低")) config.content.topupNetworkTrc20Hint = defaults.content.topupNetworkTrc20Hint;
@@ -595,14 +595,14 @@ export default function Home() {
     return products.filter((product) => product.businessType === selectedMenu && product.brand === selectedBrand);
   }, [isProductsPage, products, selectedBrand, selectedMenu]);
   const currentBrand = brands.find((brand) => brand.id === selectedBrand) ?? brands[0];
-  const selectedProductBrand = selectedProduct
-    ? brands.find((brand) => brand.id === selectedProduct.brand) ?? defaultBrands[0]
-    : null;
-  const selectedPurchaseMode = selectedProduct ? getPurchaseMode(selectedProduct) : null;
-  const selectedPurchaseLimit = selectedProduct && selectedPurchaseMode
-    ? getPurchaseLimit(selectedProduct, selectedPurchaseMode)
-    : 1;
-  const selectedPurchaseTotal = selectedProduct ? selectedProduct.price * quantity : 0;
+  const effectiveBalance = isLoggedIn ? walletBalance : 0;
+  // 挂起订单对应的余额缺口（向上取整、最小 1），用于预填充值页金额。
+  const pendingOrderGapAmount = (() => {
+    if (!pendingOrder) return undefined;
+    const target = products.find((product) => product.id === pendingOrder.productId);
+    if (!target) return undefined;
+    return Math.max(1, Math.ceil(target.price * pendingOrder.quantity - effectiveBalance));
+  })();
   const editorProduct = products.find((product) => product.id === editorProductId) ?? null;
   const wizardFlow = wizardProduct ? rechargeFlows.find((flow) => flow.brand === wizardProduct.brand) : undefined;
   const currentFaqGroup = faqs.find((group) => group.businessType === selectedMenu && group.brand === selectedBrand);
@@ -632,37 +632,26 @@ export default function Home() {
     setProducts((current) => current.map((product) => product.id === id
       ? { ...product, ...patch, id: product.id, brand: product.brand, businessType: product.businessType }
       : product));
-    setSelectedProduct((current) => current?.id === id
+    setPurchaseProduct((current) => current?.id === id
       ? { ...current, ...patch, id: current.id, brand: current.brand, businessType: current.businessType }
       : current);
   };
   const openPurchase = (product: Product) => {
+    // 「下单即登录」：未登录先沿用系统既有的一键 mock 登录，再继续原有分支，不弹任何新浮层。
+    if (!isLoggedIn) signInDemo();
     if (product.businessType === "recharge" && product.brand === "chatgpt") {
       setWizardInitialMode(null);
       setWizardProduct(product);
       return;
     }
-    setQuantity(1);
-    setSelectedProduct(product);
-  };
-  const confirmPurchase = () => {
-    if (!selectedProduct) return;
-    const mode = getPurchaseMode(selectedProduct);
-    const purchasedProduct = selectedProduct;
-    const purchasedTotal = selectedProduct.price * quantity;
-    setSelectedProduct(null);
-    if (mode === "preorder") {
+    if (getPurchaseMode(product) === "preorder") {
       toast.success(content.reservationSuccess, { description: content.reservationSuccessDescription });
       return;
     }
-    const order: ProductOrder = {
-      id: `${purchasedProduct.businessType === "account" ? "MO" : "DO"}${Date.now().toString().slice(-11)}`,
-      amount: purchasedTotal,
-      type: purchasedProduct.businessType,
-      productName: purchasedProduct.name,
-      paymentStatus: "pending",
-    };
-    setPaymentRequest({ mode: "order_payment", order });
+    setQuantity(1);
+    setPurchaseIntent(null);
+    setPurchaseStage("confirm");
+    setPurchaseProduct(product);
   };
   const applyPaymentCompletion = (completion: PaymentCompletion) => {
     const time = new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-");
@@ -695,22 +684,50 @@ export default function Home() {
       }, ...current]);
     }
   };
-  const navigateTo = (destination: DashboardDestination) => {
+  const navigateTo = (destination: DashboardDestination, options?: { keepPendingOrder?: boolean }) => {
     setWizardProduct(null);
     setWizardInitialMode(null);
     setPaymentRequest(null);
+    setPurchaseProduct(null);
+    setPurchaseStage("confirm");
+    setPurchaseIntent(null);
+    // 默认切页签即作废挂起订单；只有「去充值」这一条路需要把它带到充值页。
+    if (!options?.keepPendingOrder) setPendingOrder(null);
     setSelectedMenu(destination);
   };
   const openWalletRecharge = () => {
     navigateTo("topup");
   };
-  const handleDemoLogin = () => {
+  // 余额不足：挂起本单并跳转充值页，充值完成后可由「返回订单继续支付」接回。
+  const goTopupForOrder = (productId: string, nextQuantity: number) => {
+    setPendingOrder({ productId, quantity: nextQuantity });
+    navigateTo("topup", { keepPendingOrder: true });
+  };
+  // 充值完成后回到挂起的订单：先导航（会清购买态），再设弹窗状态。
+  const resumePendingOrder = () => {
+    const pending = pendingOrder;
+    if (!pending) return;
+    setPendingOrder(null);
+    const product = products.find((item) => item.id === pending.productId);
+    if (!product) return;
+    navigateTo(product.businessType === "recharge" ? "recharge" : "account");
+    setQuantity(pending.quantity);
+    setPurchaseStage("confirm");
+    setPurchaseIntent(null);
+    setPurchaseProduct(product);
+  };
+  const signInDemo = () => {
     setIsLoggedIn(true);
-    setSelectedMenu("home");
     toast.success("登录成功（Demo）");
+  };
+  const handleDemoLogin = () => {
+    signInDemo();
+    setSelectedMenu("home");
   };
   const handleDemoRegister = () => toast.info("注册为 Demo 交互");
   const openBatchRecharge = () => {
+    // 批量代充同样「下单即登录」，入口先过纯登录动作，不动向导内部的 5 步结构。
+    if (!isLoggedIn) signInDemo();
     const product = visibleProducts.find((item) => item.businessType === "recharge" && item.status === "available");
     if (!product || product.brand !== "chatgpt") {
       toast.info("请先选择一个支持批量办理的 ChatGPT 代充商品");
@@ -871,23 +888,14 @@ export default function Home() {
     { id: "topup", key: "navTopup" },
     { id: "orders", key: "navOrders" },
   ];
-  const publicMenuItems: Array<{ id: "home" | "account" | "recharge" | "help" | "faq"; label: string }> = [
+  const publicMenuItems: Array<{ id: "home" | "account" | "recharge"; label: string }> = [
     { id: "home", label: "首页" },
-    { id: "account", label: "购买账号" },
-    { id: "recharge", label: "套餐升级" },
-    { id: "help", label: "帮助中心" },
-    { id: "faq", label: "常见问题" },
+    { id: "account", label: "成品号" },
+    { id: "recharge", label: "代充" },
   ];
-  const handlePublicNavigation = (destination: "home" | "account" | "recharge" | "help" | "faq") => {
-    if (destination === "faq") {
-      setSelectedMenu("home");
-      window.history.replaceState(null, "", "#landing-faq");
-      window.setTimeout(() => document.getElementById("landing-faq")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
-      return;
-    }
-    setSelectedMenu(destination);
-    if (destination === "help") window.history.replaceState(null, "", "#help");
-    else window.history.replaceState(null, "", window.location.pathname);
+  const handlePublicNavigation = (destination: "home" | "account" | "recharge") => {
+    navigateTo(destination);
+    window.history.replaceState(null, "", window.location.pathname);
     if (destination === "home") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -920,12 +928,12 @@ export default function Home() {
             )) : publicMenuItems.map((item) => (
               <button
                 className="business-nav-item"
-                data-active={item.id === "faq" ? false : selectedMenu === item.id}
+                data-active={selectedMenu === item.id}
                 type="button"
                 onClick={() => handlePublicNavigation(item.id)}
                 key={item.id}
               >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
                 <span>{item.label}</span>
               </button>
             ))}
@@ -947,6 +955,7 @@ export default function Home() {
             </button>
           ) : null}
           {isLoggedIn ? <button className="header-balance" type="button" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <SiteMessages /> : null}
           <div
             className="top-support"
             onMouseEnter={() => setSupportSurface("top")}
@@ -993,20 +1002,23 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <WalletRechargePage
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
-                availableBalance={walletBalance}
+                availableBalance={effectiveBalance}
                 topUpRecords={topUpRecords}
                 onBack={() => navigateTo("wallet")}
                 onComplete={applyPaymentCompletion}
                 onSupport={() => setSupportSurface("floating")}
+                initialAmount={pendingOrderGapAmount}
+                onResumeOrder={pendingOrder ? resumePendingOrder : undefined}
+                pendingOrderHint={pendingOrder ? content.purchasePendingHint : undefined}
               />
-            ) : wizardProduct && wizardFlow ? (
+            ) : selectedMenu === "recharge" && wizardProduct && wizardFlow ? (
               <RechargeWizard
                 product={wizardProduct}
                 flow={wizardFlow}
@@ -1014,14 +1026,15 @@ export default function Home() {
                 editMode={editMode}
                 initialMode={wizardInitialMode}
                 onFlowChange={(nextFlow) => setRechargeFlows((current) => current.map((flow) => flow.id === nextFlow.id ? { ...nextFlow, id: flow.id, brand: flow.brand } : flow))}
-                availableBalance={walletBalance}
+                availableBalance={effectiveBalance}
                 onPaymentComplete={applyPaymentCompletion}
                 onTaskCreated={addBatchOrder}
-                onNavigateOrders={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("orders"); }}
-                onExit={() => { setWizardProduct(null); setWizardInitialMode(null); setSelectedMenu("recharge"); setSelectedBrand("chatgpt"); }}
+                onNavigateOrders={() => navigateTo("orders")}
+                onSupport={() => setSupportSurface("floating")}
+                onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={walletBalance} products={products} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { setSelectedMenu(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} products={products} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
@@ -1137,120 +1150,37 @@ export default function Home() {
         </button>
       </div>
 
-      <Dialog open={Boolean(selectedProduct)} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        <DialogContent className={`purchase-dialog ${selectedProduct?.businessType === "account" ? "purchase-dialog-account" : ""}`}>
-          {selectedProduct && selectedProductBrand && selectedPurchaseMode ? selectedProduct.businessType === "account" ? (
-            <>
-              <DialogHeader>
-                {editMode ? <div className="dialog-kicker"><EditableText active value={content.modalKicker} onChange={(value) => updateContent("modalKicker", value)} /></div> : null}
-                <DialogTitle>
-                  <EditableText
-                    active={editMode}
-                    value={selectedPurchaseMode === "preorder" ? content.confirmReservation : content.modalTitle}
-                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "confirmReservation" : "modalTitle", value)}
-                  />
-                </DialogTitle>
-                <DialogDescription>
-                  <EditableText
-                    active={editMode}
-                    value={selectedPurchaseMode === "preorder" ? content.reservationModalDescription : content.modalDescription}
-                    multiline
-                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "reservationModalDescription" : "modalDescription", value)}
-                  />
-                </DialogDescription>
-              </DialogHeader>
-              <div className="dialog-product">
-                <BrandMark brand={selectedProductBrand} />
-                <div className="dialog-product-copy">
-                  <strong><EditableText active={editMode} value={selectedProduct.name} onChange={(name) => updateProduct(selectedProduct.id, { name })} /></strong>
-                  <span><EditableText active={editMode} value={selectedProduct.subtitle} multiline onChange={(subtitle) => updateProduct(selectedProduct.id, { subtitle })} /></span>
-                </div>
-                <div className="dialog-unit-price"><strong>${selectedProduct.price}</strong><span>{selectedProduct.priceSuffix}</span></div>
-              </div>
-              <div className="quantity-row">
-                <div>
-                  <strong><EditableText active={editMode} value={content.quantityLabel} onChange={(value) => updateContent("quantityLabel", value)} /></strong>
-                  <span>
-                    {selectedPurchaseMode === "purchase" && selectedProduct.stock !== undefined
-                      ? `${content.currentStockLabel} ${selectedProduct.stock} · ${content.maxQuantityLabel} ${selectedPurchaseLimit} ${content.accountUnit}`
-                      : `${content.maxReservationLabel} ${selectedPurchaseLimit} ${content.accountUnit}`}
-                  </span>
-                </div>
-                <div className="quantity-control">
-                  <button type="button" aria-label="减少数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><Minus /></button>
-                  <span>{quantity}</span>
-                  <button type="button" aria-label="增加数量" disabled={quantity >= selectedPurchaseLimit} onClick={() => setQuantity((value) => Math.min(selectedPurchaseLimit, value + 1))}><Plus /></button>
-                </div>
-              </div>
-              <section className="purchase-notes">
-                <h3><EditableText active={editMode} value={content.purchaseNotesTitle} onChange={(value) => updateContent("purchaseNotesTitle", value)} /></h3>
-                <ul>
-                  <li><EditableText active={editMode} value={content.purchaseNoteOfficial} multiline onChange={(value) => updateContent("purchaseNoteOfficial", value)} /></li>
-                  <li><EditableText active={editMode} value={content.purchaseNoteOrder} multiline onChange={(value) => updateContent("purchaseNoteOrder", value)} /></li>
-                  <li><EditableText active={editMode} value={content.purchaseNoteBatch} multiline onChange={(value) => updateContent("purchaseNoteBatch", value)} /></li>
-                  <li>{selectedProduct.credentialFormatDescription}</li>
-                  {selectedPurchaseMode === "preorder" ? <li><EditableText active={editMode} value={content.preorderNote} multiline onChange={(value) => updateContent("preorderNote", value)} /></li> : null}
-                </ul>
-              </section>
-              {selectedProduct.afterSalesDescription ? (
-                <section className="after-sales-note">
-                  <strong><ShieldCheck aria-hidden="true" /><EditableText active={editMode} value={content.afterSalesTitle} onChange={(value) => updateContent("afterSalesTitle", value)} /></strong>
-                  <p>{selectedProduct.afterSalesDescription}</p>
-                </section>
-              ) : null}
-              <div className="total-row">
-                <div><span><EditableText active={editMode} value={content.totalLabel} onChange={(value) => updateContent("totalLabel", value)} /></span><small>${selectedProduct.price} × {quantity} {content.accountUnit}</small></div>
-                <strong><small>$</small>{selectedPurchaseTotal}</strong>
-              </div>
-              <DialogFooter className="dialog-actions">
-                <DialogClose asChild>
-                  <Button variant="outline" className="dialog-cancel"><EditableText active={editMode} value={content.cancel} onChange={(value) => updateContent("cancel", value)} /></Button>
-                </DialogClose>
-                <Button className="dialog-confirm" onClick={confirmPurchase}>
-                  <EditableText
-                    active={editMode}
-                    value={selectedPurchaseMode === "preorder" ? content.confirmReservation : content.confirmPurchase}
-                    onChange={(value) => updateContent(selectedPurchaseMode === "preorder" ? "confirmReservation" : "confirmPurchase", value)}
-                  />
-                  <span>${selectedPurchaseTotal}</span>
-                </Button>
-              </DialogFooter>
-            </>
-          ) : (
-            <>
-              <DialogHeader>
-                <div className="dialog-kicker"><EditableText active={editMode} value={content.modalKicker} onChange={(value) => updateContent("modalKicker", value)} /></div>
-                <DialogTitle><EditableText active={editMode} value={content.modalTitle} onChange={(value) => updateContent("modalTitle", value)} /></DialogTitle>
-                <DialogDescription><EditableText active={editMode} value={content.modalDescription} multiline onChange={(value) => updateContent("modalDescription", value)} /></DialogDescription>
-              </DialogHeader>
-              <div className="dialog-product">
-                <BrandMark brand={selectedProductBrand} />
-                <div>
-                  <strong><EditableText active={editMode} value={selectedProduct.name} onChange={(name) => updateProduct(selectedProduct.id, { name })} /></strong>
-                  <span><EditableText active={editMode} value={selectedProduct.subtitle} multiline onChange={(subtitle) => updateProduct(selectedProduct.id, { subtitle })} /></span>
-                </div>
-                <div className="dialog-unit-price">${selectedProduct.price}</div>
-              </div>
-              <div className="quantity-row">
-                <div><strong><EditableText active={editMode} value={content.quantityLabel} onChange={(value) => updateContent("quantityLabel", value)} /></strong><span><EditableText active={editMode} value={content.quantityHint} onChange={(value) => updateContent("quantityHint", value)} /></span></div>
-                <div className="quantity-control"><button type="button" aria-label="减少数量" disabled={quantity <= 1} onClick={() => setQuantity((value) => Math.max(1, value - 1))}><Minus /></button><span>{quantity}</span><button type="button" aria-label="增加数量" disabled={quantity >= 9} onClick={() => setQuantity((value) => Math.min(9, value + 1))}><Plus /></button></div>
-              </div>
-              <div className="total-row"><span><EditableText active={editMode} value={content.totalLabel} onChange={(value) => updateContent("totalLabel", value)} /></span><strong><small>$</small>{selectedPurchaseTotal}</strong></div>
-              <DialogFooter className="dialog-actions"><DialogClose asChild><Button variant="outline" className="dialog-cancel"><EditableText active={editMode} value={content.cancel} onChange={(value) => updateContent("cancel", value)} /></Button></DialogClose><Button className="dialog-confirm" onClick={confirmPurchase}><EditableText active={editMode} value={content.confirmPurchase} onChange={(value) => updateContent("confirmPurchase", value)} /></Button></DialogFooter>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
-
-      <PaymentFlowSheet
-        open={paymentRequest?.mode === "order_payment"}
-        request={paymentRequest?.mode === "order_payment" ? paymentRequest : null}
-        availableBalance={walletBalance}
-        onOpenChange={(open) => !open && setPaymentRequest(null)}
+      <AccountPurchaseDialog
+        product={purchaseProduct}
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+        availableBalance={effectiveBalance}
+        stage={purchaseStage}
+        onStageChange={setPurchaseStage}
+        onIntentChange={setPurchaseIntent}
+        onOpenChange={(open) => {
+          if (open) return;
+          setPurchaseProduct(null);
+          setQuantity(1);
+          setPurchaseStage("confirm");
+          setPurchaseIntent(null);
+        }}
         onComplete={(completion) => {
           applyPaymentCompletion(completion);
-          if (completion.order) toast.success("订单支付成功", { description: "订单已提交，正在进入后续处理流程。" });
+          if (completion.order) toast.success(content.purchasePaidToast, { description: content.purchaseSheetDescSuccess });
         }}
+        onGoTopup={goTopupForOrder}
+        onViewOrders={() => navigateTo("orders")}
+        onBackToProducts={() => {
+          if (purchaseProduct) setSelectedBrand(purchaseProduct.brand);
+          setPurchaseProduct(null);
+          setQuantity(1);
+          setPurchaseStage("confirm");
+          setPurchaseIntent(null);
+        }}
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
       />
 
       <Sheet open={Boolean(editorProduct)} onOpenChange={(open) => !open && setEditorProductId(null)}>
@@ -1382,7 +1312,7 @@ export default function Home() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{content.cancel}</AlertDialogCancel>
-            <AlertDialogAction className="logout-confirm-button" onClick={() => { setIsLoggedIn(false); setSelectedMenu("home"); toast.info("已退出登录（Demo）"); }}><EditableText active={editMode} value={content.logoutConfirmAction} onChange={(value) => updateContent("logoutConfirmAction", value)} /></AlertDialogAction>
+            <AlertDialogAction className="logout-confirm-button" onClick={() => { setIsLoggedIn(false); setSelectedMenu("home"); setPurchaseProduct(null); setPurchaseStage("confirm"); setPurchaseIntent(null); setPendingOrder(null); toast.info("已退出登录（Demo）"); }}><EditableText active={editMode} value={content.logoutConfirmAction} onChange={(value) => updateContent("logoutConfirmAction", value)} /></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
