@@ -49,3 +49,9 @@ next-env.d.ts
 *.zip
 tsconfig.tsbuildinfo
 .workbuddy/
+
+# local dev server run state and temp packaging artifacts
+dev-server.log
+dev-server.pid
+_package*
+_package_report.txt
