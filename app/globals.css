@@ -85,15 +85,29 @@ button{font:inherit}
 .site-bell-forced{font-style:normal;font-size:9px;font-weight:800;color:#10170f;background:var(--color-brand);border-radius:4px;padding:1px 4px;letter-spacing:.05em}
 .site-bell-history{width:100%;margin-top:8px;border:1px solid #35383d;border-radius:9px;background:transparent;color:#c9d2cf;font-size:12px;font-weight:600;padding:9px;cursor:pointer;transition:border-color .15s ease,color .15s ease}
 .site-bell-history:hover{border-color:var(--color-brand);color:#fff}
-.site-message-dialog{background:#17191c;color:#fff;border-color:#35383d;width:420px;max-width:calc(100% - 2rem)}
-.site-message-detail-body{font-size:14px;line-height:1.85;color:#cfd6d3;white-space:pre-wrap;max-height:60vh;overflow-y:auto}
+.site-message-dialog{background:#fbfcf9;color:#1c201a;border:1px solid #dedfda;border-radius:16px;width:440px;max-width:calc(100% - 2rem);overflow:hidden;box-shadow:0 24px 64px rgba(28,32,26,.18)}
+.site-message-dialog::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--color-brand)}
+.site-message-dialog [data-slot="dialog-header"]{border-bottom:1px solid #e7e9e2;padding-bottom:14px}
+.site-message-dialog [data-slot="dialog-title"]{font-size:18px;font-weight:740;color:#17191c;letter-spacing:.01em}
+.site-message-dialog [data-slot="dialog-description"]{margin-top:8px;color:#7b817a}
+.site-message-detail-body{font-size:14px;line-height:1.9;color:#3f453e;white-space:pre-wrap;max-height:56vh;overflow-y:auto}
 .site-message-history{display:grid;gap:4px;max-height:56vh;overflow-y:auto;margin:-2px 0}
 .site-message-forced-tag{display:inline-block;margin-right:8px;font-size:11px;font-weight:800;color:#10170f;background:var(--color-brand);border-radius:5px;padding:2px 7px;vertical-align:middle;letter-spacing:.05em}
 .site-message-forced-confirm{background:var(--color-brand);color:#10170f;font-weight:700}
 .site-message-forced-confirm:hover{background:#cdf23a}
-.site-message-dialog [data-slot="dialog-close"]{opacity:1;color:#17191c;background:#fff;border:0;border-radius:9px;width:32px;height:32px;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:background .15s ease}
-.site-message-dialog [data-slot="dialog-close"]:hover{background:#dfe3dc}
+.site-message-chip{display:inline-flex;align-items:center;margin:0 6px 4px 0;padding:3px 9px;border-radius:999px;background:#f1f2ed;border:1px solid #e2e4dd;color:#5f665e;font-size:11.5px;font-weight:640;line-height:1.4}
+.site-message-chip.is-brand{background:#f5f8dd;border-color:#dbe3a2;color:#5c6b1f}
+.site-message-dialog [data-slot="dialog-footer"]{border-top:1px solid #e7e9e2;padding-top:16px}
+.site-message-dialog [data-slot="dialog-footer"] button{height:38px;border-radius:10px}
+.site-message-dialog [data-slot="dialog-close"]{opacity:1;color:#6e746d;background:transparent;border:0;border-radius:9px;width:32px;height:32px;display:grid;place-items:center;transition:background .15s ease,color .15s ease}
+.site-message-dialog [data-slot="dialog-close"]:hover{background:#eef0ea;color:#17191c}
 .site-message-dialog [data-slot="dialog-close"] svg{width:17px;height:17px;stroke-width:2.4}
+/* History dialog is light — bell list items were tuned for the dark dropdown panel, re-tune here */
+.site-message-dialog .site-bell-item{color:#2a2e28}
+.site-message-dialog .site-bell-item:hover{background:#f1f2ed}
+.site-message-dialog .site-bell-item-title{color:#1c201a}
+.site-message-dialog .site-bell-item-scope{color:#8a9097}
+.site-message-dialog .site-bell-item>svg{color:#a2a8a0}
 
 .content-inset{min-height:100svh;padding-top:68px;background:var(--color-bg-page)}.main-content{width:min(1680px,100%);margin:0 auto;padding:40px}
 
@@ -1183,3 +1197,65 @@ button{font:inherit}
 .compact-hero-stats .compact-stats small{color:#75857b}
 .compact-hero-stats .compact-stats strong{color:#e6eee4;font-size:17px}
 @media(max-width:720px){.compact-hero-stats{margin-top:20px;padding-top:15px}}
+/* logged-in home: overview-only state grid (popular & active-order sections removed) */
+.home-state-grid.has-single{grid-template-columns:1fr}
+@media(min-width:1261px){.home-state-grid.has-single .home-account-overview dl{grid-template-columns:repeat(3,1fr);gap:10px}.home-state-grid.has-single .home-account-overview dl>button{grid-template-columns:1fr;border:1px solid #e1e3dd;border-radius:10px;padding:13px}.home-state-grid.has-single .home-account-overview footer{margin-top:16px}}
+/* topup page layout balance: container width aligned with home (1680), body/pay-panel column ratios */
+.topup-inset .main-content{width:min(1680px,100%)}
+@media(min-width:980px){
+.topup-card-body{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+}
+@media(max-width:979px){.crypto-payment-panel.is-split .payment-qr-column{order:2}}
+.crypto-payment-panel.is-split{display:grid;grid-template-columns:1fr;gap:16px}
+.payment-qr-column,.payment-status-column{display:grid;gap:14px;align-content:start}
+.payment-panel-footer{display:grid;gap:8px}
+.topup-card.is-pay .payment-qr-card{gap:12px;padding:18px}
+.topup-card.is-pay .payment-qr-placeholder{width:min(100%,300px);height:auto;aspect-ratio:1}
+.topup-card.is-pay .payment-qr-placeholder svg{width:82%;height:82%}
+.topup-card.is-pay .payment-network-badge{font-size:13px;padding:8px 14px;border:1px solid #dbe3a2}
+.topup-card.is-pay .payment-qr-card>strong{font-size:17px;font-weight:720}
+.topup-card.is-pay .payment-state{font-size:18px;font-weight:740;gap:9px}
+.topup-card.is-pay .payment-state i{width:9px;height:9px}
+.topup-card.is-pay .payment-detail-heading{align-items:center}
+.topup-card.is-pay .payment-countdown{font-size:15px;font-weight:700;color:#3e4500;background:#f5f8dd;border:1px solid #dbe3a2;padding:8px 14px;gap:7px}
+.topup-card.is-pay .payment-countdown svg{width:16px}
+.topup-card.is-pay .payment-countdown{min-width:118px;justify-content:center}
+.topup-card.is-pay .payment-countdown[data-urgent]{background:#fdf1e4;border-color:#eccfa5;color:#8a5423}
+.topup-card.is-pay .payment-address-block.is-featured{border:1px solid #cdd2c4;background:#fff;box-shadow:0 6px 16px rgba(24,27,32,.05);padding:14px;border-radius:12px}
+.topup-card.is-pay .payment-address-block.is-featured>span{font-size:12px;font-weight:650;color:#565c55}
+.topup-card.is-pay .payment-address-block.is-featured code{font-size:15px;font-weight:700;color:#1d211d}
+.topup-card.is-pay .payment-address-block.is-featured button{font-size:12px;height:30px;border:1px solid #d5d8d1;border-radius:8px;padding:0 10px;background:#f7f8f4}
+/* expired order: blur QR & address, offer regenerate entry above the QR */
+.topup-card.is-pay .payment-qr-card.is-expired .payment-qr-placeholder,
+.topup-card.is-pay .payment-qr-card.is-expired .payment-address-block{filter:blur(5px) grayscale(.4);opacity:.55;pointer-events:none;user-select:none}
+.payment-regenerate-button{display:inline-flex;align-items:center;gap:7px;height:38px;border:1px solid #d5d8d1;border-radius:9px;background:#fff;color:#3e4500;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;transition:border-color .15s ease,background-color .15s ease}
+.payment-regenerate-button:hover{border-color:#b8c100;background:#fbfde9}
+.payment-regenerate-button svg{width:15px}
+.topup-card.is-pay .payment-countdown-hint{font-size:14px;color:#3a403a;font-weight:600}
+.topup-card.is-pay .payment-warning{padding:12px 14px}
+.topup-card.is-pay .payment-warning p{font-size:14px;font-weight:600;color:#6b5d2e}
+.topup-card.is-pay .payment-warning svg{width:18px}
+/* step 1/2: actions pinned to the card's bottom-right corner, matching the QR step */
+.topup-card.is-primary>.topup-step-actions{margin-top:20px;padding-top:18px;border-top:1px solid #eceee8}
+/* public landing: container width aligned with other pages (1680); widen copy columns so text stops wrapping */
+@media(min-width:721px){.compact-container{width:min(1680px,calc(100% - 64px))}}
+@media(min-width:1051px){
+.compact-hero-copy{max-width:640px}
+.compact-hero-copy>p{max-width:560px}
+}
+@media(min-width:980px){
+.topup-card.is-pay .crypto-payment-panel.is-split{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.topup-card.is-pay .payment-qr-column,.topup-card.is-pay .payment-status-column{display:flex;flex-direction:column}
+.topup-card.is-pay .payment-qr-card{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+.topup-card.is-pay .payment-qr-card>.payment-network-badge{align-self:flex-start}
+.topup-card.is-pay .payment-qr-placeholder{margin-block:auto;width:min(100%,360px);height:auto;aspect-ratio:1}
+.topup-card.is-pay .payment-detail-card{flex:1}
+}
+/* QR step: card-level footer action bar, identical to steps 1/2 */
+.topup-card.is-pay>.payment-panel-footer{margin-top:20px;padding-top:18px;border-top:1px solid #eceee8}
+.topup-card.is-pay>.payment-panel-footer .topup-step-actions{margin-top:0}
+/* Network step: compact cards stay natural height; right summary card stretches to keep both columns level */
+.topup-card-main.is-network{align-self:stretch;display:flex;flex-direction:column}
+.topup-card-main.is-network .topup-warning{margin-top:20px}
+.topup-card-body:has(.topup-card-main.is-network) .topup-card-info{align-self:stretch}
+.topup-card-body:has(.topup-card-main.is-network) .topup-info-card{align-content:space-between}
