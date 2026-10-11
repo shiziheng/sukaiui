@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowLeft, Check, CheckCircle2, Clock3, Copy,
   QrCode, RefreshCcw, ShieldCheck, TriangleAlert, WalletCards,
@@ -22,6 +22,16 @@ import {
 } from "@/data/payment-mocks";
 
 type PaymentStage = "setup" | "detail" | "success";
+
+// 支付有效期 15 分钟，逐秒递减；归零自动进入过期态（展示虚化 + 重新发起入口）。
+const paymentCountdownSeconds = 15 * 60;
+
+function formatCountdown(totalSeconds: number) {
+  const safe = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safe / 60);
+  const seconds = safe % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
 export type PaymentRequest = {
   mode: PaymentMode;
@@ -90,6 +100,10 @@ export function CryptoPaymentPanel({
   orderNo,
   amountNotice,
   queryArrival,
+  splitLayout = false,
+  panelFooter,
+  qrNote,
+  onRegenerate,
 }: {
   intent: PaymentIntent;
   onIntentChange: (intent: PaymentIntent) => void;
@@ -109,9 +123,36 @@ export function CryptoPaymentPanel({
   amountNotice?: string;
   /** 右下角「查询到账状态」按钮。 */
   queryArrival?: { label: string; onClick: () => void };
+  /** 充值页定制：双列布局——左列二维码框+按钮紧贴，右列状态卡（收款地址/提示/说明并入卡内）。 */
+  splitLayout?: boolean;
+  /** 充值页定制：渲染到面板栅格左栏底部的插槽（操作按钮）。 */
+  panelFooter?: ReactNode;
+  /** 充值页定制：附加到右栏状态卡末尾的说明文字。 */
+  qrNote?: ReactNode;
+  /** 充值页定制：支付单过期后「重新发起充值」的回调（跳回充值开始页）。 */
+  onRegenerate?: () => void;
 }) {
   const network = paymentNetworks[intent.network];
   const remaining = Math.max(0, intent.uniquePayableAmount - intent.receivedAmount);
+
+  // 支付有效期倒计时：新支付单重置为 15 分钟，逐秒递减，归零将未完成支付的订单置为过期。
+  const [secondsLeft, setSecondsLeft] = useState(paymentCountdownSeconds);
+  useEffect(() => {
+    setSecondsLeft(paymentCountdownSeconds);
+  }, [intent.id]);
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    if (intent.status === "completed" || intent.status === "expired" || intent.status === "failed") return;
+    const timer = setInterval(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [intent.id, intent.status, secondsLeft]);
+  useEffect(() => {
+    if (secondsLeft > 0) return;
+    if (intent.status === "pending" || intent.status === "underpaid") {
+      onIntentChange({ ...intent, status: "expired", receivedAmount: 0 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [secondsLeft]);
   const statusLabel = intent.status === "underpaid" ? "等待补足金额"
     : intent.status === "detected" ? "已检测到链上交易"
       : intent.status === "confirming" ? "链上确认中"
@@ -144,11 +185,17 @@ export function CryptoPaymentPanel({
         : <button className="is-primary" type="button" onClick={() => setReceived(intent.uniquePayableAmount)}>模拟足额付款</button>}
   </div>;
 
-  return <div className="crypto-payment-panel">
-    <section className="payment-detail-card">
+  const addressInner = <>
+    <span>收款地址</span><code>{network.address}</code><button type="button" onClick={() => { navigator.clipboard?.writeText(network.address); toast.success("收款地址已复制"); }}><Copy />复制</button>
+  </>;
+  const addressBlock = <div className="payment-address-block is-featured">{addressInner}</div>;
+  const warningBlock = <div className="payment-warning"><ShieldCheck /><p>仅支持 {network.name}，使用其他网络可能导致资金无法识别。</p></div>;
+  const qrExtras = <><div className="payment-address-block">{addressInner}</div>{warningBlock}</>;
+
+  const detailCard = <section className="payment-detail-card">
       <div className="payment-detail-heading">
         <div><span>支付状态</span><strong className={`payment-state is-${intent.status}`}><i />{statusLabel}</strong></div>
-        <span className="payment-countdown">{countdownLabel ? <em>{countdownLabel}</em> : null}<Clock3 />29:42</span>
+        <span className="payment-countdown" data-urgent={secondsLeft <= 300 || undefined}>{countdownLabel ? <em>{countdownLabel}</em> : null}<Clock3 />{formatCountdown(secondsLeft)}</span>
       </div>
 
       {countdownHint ? <p className="payment-countdown-hint">{countdownHint}</p> : null}
@@ -175,18 +222,34 @@ export function CryptoPaymentPanel({
         <p>请继续向同一收款地址补足金额，支付单仍然有效。</p>
       </div> : null}
 
-      {intent.status === "expired" ? <div className="payment-expired-card"><TriangleAlert /><div><strong>支付已过期</strong><p>尚未检测到付款，可以重新生成支付信息。</p></div><Button variant="outline" onClick={() => onIntentChange({ ...intent, status: "pending", receivedAmount: 0 })}><RefreshCcw />重新生成支付</Button></div> : null}
+      {intent.status === "expired" ? <div className="payment-expired-card"><TriangleAlert /><div><strong>支付已过期</strong><p>尚未检测到付款，可以重新生成支付信息。</p></div><Button variant="outline" onClick={onRegenerate ?? (() => onIntentChange({ ...intent, status: "pending", receivedAmount: 0 }))}><RefreshCcw />{onRegenerate ? "重新发起充值" : "重新生成支付"}</Button></div> : null}
 
       {showTimeline ? <PaymentTimeline intent={intent} /> : null}
-    </section>
+      {splitLayout ? <>{warningBlock}{qrNote}</> : null}
+    </section>;
 
-    <aside className="payment-qr-card">
-      <span className="payment-network-badge">{network.name}</span>
-      <div className="payment-qr-placeholder" aria-label="Demo 支付二维码"><QrCode /></div>
-      <strong>请使用 {network.name} 支付</strong>
-      <div className="payment-address-block"><span>收款地址</span><code>{network.address}</code><button type="button" onClick={() => { navigator.clipboard?.writeText(network.address); toast.success("收款地址已复制"); }}><Copy />复制</button></div>
-      <div className="payment-warning"><ShieldCheck /><p>仅支持 {network.name}，使用其他网络可能导致资金无法识别。</p></div>
-    </aside>
+  const expired = intent.status === "expired";
+  const qrCard = <aside className={"payment-qr-card" + (splitLayout && expired ? " is-expired" : "")}>
+    {splitLayout && expired && onRegenerate ? <button type="button" className="payment-regenerate-button" onClick={onRegenerate}><RefreshCcw />重新发起充值</button> : null}
+    <span className="payment-network-badge">{network.name}</span>
+    <div className="payment-qr-placeholder" aria-label="Demo 支付二维码"><QrCode /></div>
+    <strong>请使用 {network.name} 支付</strong>
+    {splitLayout ? addressBlock : qrExtras}
+  </aside>;
+
+  if (splitLayout) {
+    return <>
+      <div className="crypto-payment-panel is-split">
+        <div className="payment-qr-column">{qrCard}</div>
+        <div className="payment-status-column">{detailCard}</div>
+      </div>
+      {panelFooter ? <div className="payment-panel-footer">{panelFooter}</div> : null}
+    </>;
+  }
+
+  return <div className="crypto-payment-panel">
+    {detailCard}
+    {qrCard}
 
     {showDemoControls ? (demoCollapsible ? <details className="payment-demo-panel">
       <summary><span><strong>{demoTitle}</strong><small>{demoHint}</small></span><em><span className="is-closed">展开</span><span className="is-open">收起</span></em></summary>

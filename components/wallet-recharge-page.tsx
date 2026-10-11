@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Clock3,
   Headphones,
-  ShieldCheck,
   TriangleAlert,
   WalletCards,
 } from "lucide-react";
@@ -32,8 +31,6 @@ import {
 
 type TopUpStep = 1 | 2 | 3;
 
-type AdviceKey = "topupNetworkAdvice1" | "topupNetworkAdvice2" | "topupNetworkAdvice3";
-
 const quickAmounts = [10, 50, 100, 300, 500, 1000];
 
 const networkOptions: Array<{
@@ -42,12 +39,6 @@ const networkOptions: Array<{
 }> = [
   { id: "trc20", hintKey: "topupNetworkTrc20Hint" },
   { id: "erc20", hintKey: "topupNetworkErc20Hint" },
-];
-
-const networkAdvice: Array<{ key: AdviceKey; icon: typeof WalletCards }> = [
-  { key: "topupNetworkAdvice1", icon: WalletCards },
-  { key: "topupNetworkAdvice2", icon: Clock3 },
-  { key: "topupNetworkAdvice3", icon: TriangleAlert },
 ];
 
 const processSteps = [
@@ -67,11 +58,6 @@ const faqItems = [
 
 function money(value: number) {
   return `$${value.toFixed(2)}`;
-}
-
-function splitAdvice(text: string) {
-  const match = text.match(/^([^：:]{2,16})[：:]\s*(.+)$/);
-  return match ? { title: match[1], detail: match[2] } : { title: "", detail: text };
 }
 
 export function WalletRechargePage({
@@ -114,6 +100,7 @@ export function WalletRechargePage({
     setIntent(null);
     setCompletion(null);
     setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const beginPayment = () => {
@@ -170,19 +157,6 @@ export function WalletRechargePage({
         <div><dt>预计到账金额</dt><dd>{money(amount)}</dd></div>
       </dl>
       <p className="topup-note">充值金额 1:1 计入钱包可用余额，通常 {content.topupArrivalEta}到账。</p>
-    </div>
-  );
-
-  const noticeCard = (
-    <div className="topup-info-card">
-      <h3>{editable("topupNoticeTitle")}</h3>
-      <ul className="topup-notice-list">
-        <li><ShieldCheck aria-hidden="true" /><span>仅支持 TRC20 / ERC20 两种网络</span></li>
-        <li><Clock3 aria-hidden="true" /><span>链上确认后到账，通常 {content.topupArrivalEta}</span></li>
-        <li><TriangleAlert aria-hidden="true" /><span>请转入精确金额，系统按金额自动匹配</span></li>
-        <li><WalletCards aria-hidden="true" /><span>请勿使用其他网络或交易所提现通道</span></li>
-      </ul>
-      <p className="topup-note topup-fee-note">{editable("topupNetworkFeeNote")}</p>
     </div>
   );
 
@@ -263,11 +237,11 @@ export function WalletRechargePage({
               {quickAmounts.map((value) => <button data-selected={amount === value} type="button" onClick={() => setAmount(value)} key={value}>${value}</button>)}
             </div>
             <p className="topup-note">{editable("topupMinAmount")}</p>
-            <div className="topup-step-actions">
-              <Button className="topup-primary-button" disabled={amount <= 0} onClick={() => setStep(2)}>下一步：选择支付网络</Button>
-            </div>
           </div>
           <aside className="topup-card-info">{summaryCard}</aside>
+        </div>
+        <div className="topup-step-actions">
+          <Button className="topup-primary-button" disabled={amount <= 0} onClick={() => setStep(2)}>下一步：选择支付网络</Button>
         </div>
       </section> : null}
 
@@ -280,8 +254,8 @@ export function WalletRechargePage({
           </div>
         </header>
         <div className="topup-card-body">
-          <div className="topup-card-main">
-            <div className="topup-network-grid" role="radiogroup" aria-label="选择支付网络">
+        <div className="topup-card-main is-network">
+          <div className="topup-network-grid" role="radiogroup" aria-label="选择支付网络">
               {networkOptions.map((option) => {
                 const info = paymentNetworks[option.id];
                 return <button
@@ -298,36 +272,19 @@ export function WalletRechargePage({
                     <strong>{info.name}</strong>
                     <small>{info.networkName}</small>
                     <em>{editable(option.hintKey)}</em>
-                    <ul>
-                      <li>预计到账：{content.topupArrivalEta}</li>
-                    </ul>
                   </div>
                 </button>;
               })}
             </div>
-            <div className="topup-advice">
-              <h3>{editable("topupNetworkAdviceTitle")}</h3>
-              <div className="topup-advice-grid">
-                {networkAdvice.map((item) => {
-                  const Icon = item.icon;
-                  const advice = splitAdvice(String(content[item.key]));
-                  return <article key={item.key}>
-                    <span className="topup-advice-icon" aria-hidden="true"><Icon /></span>
-                    {editMode ? editable(item.key) : <div><strong>{advice.title}</strong><p>{advice.detail}</p></div>}
-                  </article>;
-                })}
-              </div>
-            </div>
             <div className="topup-warning"><TriangleAlert aria-hidden="true" /><p>{editable("topupNetworkWarning")}</p></div>
-            <div className="topup-step-actions">
-              <Button variant="outline" className="topup-secondary-button" onClick={() => setStep(1)}>上一步</Button>
-              <Button className="topup-primary-button" onClick={beginPayment}>生成收款信息</Button>
-            </div>
           </div>
           <aside className="topup-card-info">
             {summaryCard}
-            {noticeCard}
           </aside>
+        </div>
+        <div className="topup-step-actions">
+          <Button variant="outline" className="topup-secondary-button" onClick={() => setStep(1)}>上一步</Button>
+          <Button className="topup-primary-button" onClick={beginPayment}>生成收款信息</Button>
         </div>
       </section> : null}
 
@@ -345,17 +302,20 @@ export function WalletRechargePage({
           onComplete={finishPayment}
           showDemoControls={false}
           showTimeline={false}
+          splitLayout
+          onRegenerate={resetToStart}
+          qrNote={<p className="topup-note">{editable("topupWaitingHint")}</p>}
+          panelFooter={<>
+            <div className="topup-step-actions">
+              <Button className="topup-primary-button" onClick={queryArrivalStatus}>查询到账状态</Button>
+              <Button variant="outline" className="topup-secondary-button" onClick={() => { setIntent(null); setStep(2); }}><ArrowLeft />返回修改支付方式</Button>
+            </div>
+          </>}
           orderNo={intent.id}
           amountNotice="请注意小数点后尾数：如不按显示金额转账会导致不能正常到账（有些交易所会扣除手续费 请确保到账金额为显示金额）"
           countdownLabel={content.topupCountdownLabel}
           countdownHint={content.topupCountdownHint}
         />
-        <p className="topup-note">{editable("topupWaitingHint")}</p>
-        <p className="topup-note">关闭页面后可在下方充值记录中继续支付。</p>
-        <div className="topup-step-actions">
-          <Button className="topup-primary-button" onClick={queryArrivalStatus}>查询到账状态</Button>
-          <Button variant="outline" className="topup-secondary-button" onClick={() => { setIntent(null); setStep(2); }}><ArrowLeft />返回修改支付方式</Button>
-        </div>
       </section> : null}
     </>}
 
