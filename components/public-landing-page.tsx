@@ -106,7 +106,7 @@ export function PublicLandingPage({ onNavigate, onLogin, onRegister, onSupport }
         <div className="compact-hero-copy compact-reveal is-visible">
           <span className="compact-eyebrow"><Sparkles />AI ACCOUNT SERVICE · SOURCE-POWERED</span>
           <h1>ChatGPT / Claude<br /><strong>账号代充</strong><br /><em>成品号服务</em></h1>
-          <p>源头卡头资源接入，代充与成品号一站办理。无需绑卡，按地区与套餐快速开通。</p>
+          <p>源头卡头资源接入，代充与成品号一站办理。<br />无需绑卡，按地区与套餐快速开通。</p>
           <div className="compact-actions">
             <div className="compact-action-stack"><button type="button" className="compact-button compact-button-primary" onClick={() => onNavigate("recharge")}>开始代充<ArrowRight /></button><small>已有 ChatGPT / Claude 账号</small></div>
             <div className="compact-action-stack"><button type="button" className="compact-button compact-button-secondary" onClick={() => onNavigate("account")}>购买成品号</button><small>需要即用的 AI 账号</small></div>
