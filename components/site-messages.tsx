@@ -197,8 +197,12 @@ export function SiteMessages() {
               <DialogHeader>
                 <DialogTitle>{detail.title}</DialogTitle>
                 <DialogDescription>
-                  {detail.scope === "personal" ? "专属消息" : "全局消息"} ·{" "}
-                  {detail.forced ? "强制弹窗" : "普通消息"}
+                  <span className="site-message-chip">
+                    {detail.scope === "personal" ? "专属消息" : "全局消息"}
+                  </span>
+                  <span className={detail.forced ? "site-message-chip is-brand" : "site-message-chip"}>
+                    {detail.forced ? "强制弹窗" : "普通消息"}
+                  </span>
                 </DialogDescription>
               </DialogHeader>
               <div className="site-message-detail-body">{detail.content}</div>
@@ -269,7 +273,9 @@ export function SiteMessages() {
                   {currentForced.title}
                 </DialogTitle>
                 <DialogDescription>
-                  {currentForced.scope === "personal" ? "专属消息" : "全局消息"}
+                  <span className="site-message-chip">
+                    {currentForced.scope === "personal" ? "专属消息" : "全局消息"}
+                  </span>
                 </DialogDescription>
               </DialogHeader>
               <div className="site-message-detail-body">{currentForced.content}</div>
