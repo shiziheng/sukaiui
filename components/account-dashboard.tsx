@@ -1,29 +1,24 @@
 "use client";
 
-import { ArrowRight, Bot, Check, ClipboardCheck, Clock3, Gift, Headphones, LifeBuoy, MapPinned, ReceiptText, Sparkles, WalletCards } from "lucide-react";
+import { ArrowRight, Bot, ClipboardCheck, Clock3, Gift, Headphones, LifeBuoy, MapPinned, ReceiptText, Sparkles, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
 import { OrderTable, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
-import { getHomePopularProducts, homeDashboardCopy } from "@/data/home-dashboard";
-import type { Product } from "@/data/products";
+import { homeDashboardCopy } from "@/data/home-dashboard";
 
-export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, products, content, editMode, updateContent }: {
+export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, content, editMode, updateContent }: {
   onNavigate: (destination: DashboardDestination) => void;
   onOpenRecharge: () => void;
   availableBalance: number;
-  products: Product[];
   content: DemoContent;
   editMode: boolean;
   updateContent: CopyUpdater;
 }) {
   const data = accountDashboardMock;
   const pending = data.orders.filter((order) => order.status === "pending" || order.status === "processing").length;
-  const popularProducts = getHomePopularProducts(products);
-  const activeOrder = data.orders.find((order) => order.status === "processing" || order.status === "pending");
-  const progressIndex = activeOrder?.status === "processing" ? 1 : 0;
   const trustIcons = { region: MapPinned, order: ClipboardCheck, payment: WalletCards, support: LifeBuoy };
 
   return (
@@ -43,29 +38,11 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
         </button>
       </section>
 
-      <section className="home-popular-section" aria-labelledby="home-popular-title">
-        <header className="home-section-heading"><div><span>{homeDashboardCopy.popularEyebrow}</span><h2 id="home-popular-title">{homeDashboardCopy.popularTitle}</h2><p>{homeDashboardCopy.popularDescription}</p></div><button type="button" onClick={() => onNavigate("account")}>{homeDashboardCopy.popularAction}<ArrowRight /></button></header>
-        <div className="home-popular-grid">
-          {popularProducts.map((product) => <button className={`home-popular-card is-${product.businessType}`} type="button" onClick={() => onNavigate(product.businessType)} key={product.id}>
-            <span className="home-popular-meta"><i>{product.brand === "chatgpt" ? "ChatGPT" : "Claude"}</i><em>{product.businessType === "account" ? "购买账号" : "套餐升级"}</em></span>
-            <strong>{product.name}</strong><small>{product.subtitle}</small>
-            <span className="home-popular-tags">{product.tags.slice(0, 2).map((tag) => <i key={tag}>{tag}</i>)}</span>
-            <span className="home-popular-footer"><b>{formatMoney(product.price)}<small>{product.priceSuffix}</small></b><em>{product.stockText}</em></span>
-            <span className="home-popular-action">{product.businessType === "account" ? "查看商品" : "立即办理"}<ArrowRight /></span>
-          </button>)}
-        </div>
-      </section>
-
       <section className="home-trust-strip" aria-label="服务保障">
         {homeDashboardCopy.trustItems.map((item) => { const Icon = trustIcons[item.icon]; return <article key={item.id}><span><Icon /></span><div><strong>{item.title}</strong><p>{item.description}</p></div></article>; })}
       </section>
 
-      <section className="home-state-grid">
-        {activeOrder ? <article className="home-active-order uc-card">
-          <header className="home-section-heading"><div><span>{homeDashboardCopy.activeEyebrow}</span><h2>{homeDashboardCopy.activeTitle}</h2><p>{homeDashboardCopy.activeDescription}</p></div><button type="button" onClick={() => onNavigate("orders")}>查看进度<ArrowRight /></button></header>
-          <div className="home-active-order-summary"><div><span className={`uc-kind-tag is-${activeOrder.kind}`}>{activeOrder.kind === "account" ? "成品号" : "代充"}</span><strong>{activeOrder.product}</strong><small>{activeOrder.snapshot} · {activeOrder.id}</small></div><div><em>{activeOrder.statusLabel}</em><b>{formatMoney(activeOrder.amount)}</b></div></div>
-          <ol className="home-order-progress">{homeDashboardCopy.progressSteps.map((step, index) => <li className={index < progressIndex ? "is-done" : index === progressIndex ? "is-current" : ""} key={step}><span>{index < progressIndex ? <Check /> : index + 1}</span><strong>{step}</strong></li>)}</ol>
-        </article> : null}
+      <section className="home-state-grid has-single">
         <article className="home-account-overview uc-card">
           <header><span>{homeDashboardCopy.overviewEyebrow}</span><h2>{homeDashboardCopy.overviewTitle}</h2><p>{homeDashboardCopy.overviewDescription}</p></header>
           <dl><button type="button" onClick={onOpenRecharge}><dt><WalletCards />{content.availableBalance}</dt><dd>{formatMoney(availableBalance)}</dd></button><button type="button" onClick={() => onNavigate("orders")}><dt><Clock3 />{content.pendingOrders}</dt><dd>{pending}</dd></button><button type="button" onClick={() => onNavigate("orders")}><dt><ReceiptText />{content.recentOrderCount}</dt><dd>{data.orders.length}</dd></button></dl>

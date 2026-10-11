@@ -509,6 +509,8 @@ export default function Home() {
   const [purchaseIntent, setPurchaseIntent] = useState<PaymentIntent | null>(null);
   // 余额不足跳去充值页时挂起的订单意图；充值完成后可据此回到订单继续支付。
   const [pendingOrder, setPendingOrder] = useState<{ productId: string; quantity: number } | null>(null);
+  // 在充值页内再次点击「充值」页签时自增，作为 key 强制充值页重挂载回到开始页重新发起订单。
+  const [topupResetCount, setTopupResetCount] = useState(0);
   const [wizardProduct, setWizardProduct] = useState<Product | null>(null);
   const [wizardInitialMode, setWizardInitialMode] = useState<RechargeMode | null>(null);
   const [generatedOrders, setGeneratedOrders] = useState<ManagedOrder[]>([]);
@@ -915,7 +917,7 @@ export default function Home() {
                 className="business-nav-item"
                 data-active={selectedMenu === item.id}
                 type="button"
-                onClick={() => navigateTo(item.id)}
+                onClick={() => { if (item.id === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1); navigateTo(item.id); }}
                 key={item.id}
               >
                 {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "topup" ? <WalletCards aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
@@ -1006,6 +1008,7 @@ export default function Home() {
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <WalletRechargePage
+                key={`topup-${topupResetCount}`}
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
@@ -1034,7 +1037,7 @@ export default function Home() {
                 onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} products={products} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
             ) : selectedMenu === "invite" ? (
