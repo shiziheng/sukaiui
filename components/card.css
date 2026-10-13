@@ -1,0 +1,218 @@
+/* 虚拟卡业务模块样式 —— 独立文件，由 components/card-module.tsx 引入 */
+/* 虚拟卡业务模块：开卡中心 / 我的卡片 / 卡详情 / 消费记录 / 开卡·充值弹窗 */
+/* ================================================================== */
+
+/* 模块外壳与面板通用头部 */
+.card-module{display:block}
+.card-module-head{margin-bottom:18px}
+.card-tabs{margin-bottom:22px}
+.vcard-panel,.vbin-panel,.vtxn-panel{display:block}
+.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.vcard-panel-copy,.vbin-panel-copy,.vtxn-panel-copy{display:flex;align-items:flex-start;gap:14px}
+.vcard-panel-copy h2,.vbin-panel-copy h2,.vtxn-panel-copy h2{margin:0;font-size:21px;line-height:1.3;font-weight:650;letter-spacing:-.02em;color:var(--color-text-primary)}
+.vcard-panel-copy p,.vbin-panel-copy p,.vtxn-panel-copy p{margin:3px 0 0;font-size:13px;color:var(--color-text-secondary)}
+.vbin-count,.vtxn-count{font-size:13px;color:var(--color-text-secondary);white-space:nowrap}
+
+/* ---------- 虚拟卡视觉（列表 / 详情大卡） ---------- */
+.vcard{position:relative;display:flex;flex-direction:column;gap:14px;aspect-ratio:1.586/1;min-height:172px;padding:18px 20px;border-radius:15px;color:#fff;background:linear-gradient(135deg,#23262b 0%,#34383f 100%);box-shadow:var(--ds-shadow-card);overflow:hidden}
+.vcard.is-detail{max-width:460px;font-size:16px}
+.vcard.is-dimmed{filter:grayscale(.45);opacity:.78}
+.vcard-accent{position:absolute;inset:0 0 auto 0;height:3px;background:var(--color-brand);z-index:2}
+.vcard:before{content:"";position:absolute;right:-40px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(223,255,0,.16),transparent 70%);z-index:0}
+.vcard>*,.vcard-head,.vcard-foot,.vcard-status{position:relative;z-index:1}
+.vcard-head{display:flex;align-items:center;justify-content:flex-start;gap:9px}
+.vcard-bin{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.vcard-scheme{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.03em;background:rgba(255,255,255,.16);color:#fff}
+.vcard-scheme.is-visa{background:rgba(25,31,113,.55)}
+.vcard-scheme.is-mastercard{background:rgba(200,30,40,.5)}
+.vcard-scheme.is-discover{background:rgba(0,0,0,.42)}
+.vcard-chip{width:38px;height:28px;border-radius:6px;background:linear-gradient(135deg,#e9cf8d,#b9913f);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);position:relative}
+.vcard-chip i{position:absolute;left:6px;right:6px;height:2px;background:rgba(0,0,0,.28)}
+.vcard-chip i:nth-child(1){top:8px}
+.vcard-chip i:nth-child(2){top:13px}
+.vcard-chip i:nth-child(3){top:18px}
+.vcard-number-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px}
+.vcard-number{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:19px;letter-spacing:.08em;color:#fff}
+.vcard-number-tools{display:inline-flex;gap:6px;flex:none}
+.vcard-number-tools button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;transition:background .15s ease}
+.vcard-number-tools button:hover{background:rgba(255,255,255,.24)}
+.vcard-number-tools svg{width:16px;height:16px}
+.vcard-balance{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto}
+.vcard-balance span{font-size:12px;color:rgba(255,255,255,.7)}
+.vcard-balance strong{font-size:22px;font-weight:650;color:#fff;letter-spacing:.01em}
+.vcard-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:12px;color:rgba(255,255,255,.72)}
+.vcard-foot b{font-weight:600;color:rgba(255,255,255,.55);margin-right:5px}
+.vcard-region{padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:11px}
+.vcard-status{position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(4px);z-index:3}
+.vcard-status.is-completed{background:rgba(93,128,107,.34);color:#cdeed6}
+.vcard-status.is-processing{background:rgba(214,170,60,.32);color:#f0d28a}
+.vcard-status.is-pending{background:rgba(255,255,255,.2);color:#ecece6}
+.vcard-status.is-failed{background:rgba(169,99,91,.4);color:#f1c5bf}
+.vcard-status svg{width:13px;height:13px}
+.vcard-status i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+
+/* ---------- 我的卡片（列表） ---------- */
+.vcard-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.vcard-stat{display:flex;align-items:center;gap:13px;padding:16px 18px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
+.vcard-stat.is-primary{background:linear-gradient(135deg,#fbffd6,#f4f7da);border-color:var(--ds-border-selected)}
+.vcard-stat-icon{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:11px;background:var(--color-surface-soft);color:var(--color-text-secondary)}
+.vcard-stat.is-primary .vcard-stat-icon{background:#eef3c8;color:#5b6b1f}
+.vcard-stat div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.vcard-stat span{font-size:12px;color:var(--color-text-secondary)}
+.vcard-stat strong{font-size:19px;font-weight:650;color:var(--color-text-primary);line-height:1.2}
+.vcard-stat small{font-size:11px;color:var(--color-text-tertiary)}
+.vcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.vcard-item{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);transition:box-shadow .18s ease,border-color .18s ease}
+.vcard-item:hover{box-shadow:var(--ds-shadow-card);border-color:var(--ds-border-strong)}
+.vcard-item-face{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;border-radius:15px;overflow:hidden}
+.vcard-item-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.vcard-item-action{flex:1;min-width:84px}
+.vcard-item-danger{width:38px;height:38px;flex:none;display:grid;place-items:center;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);color:var(--color-danger);cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.vcard-item-danger:hover{background:#fbeeed;border-color:var(--color-danger)}
+.vcard-item-danger svg{width:16px;height:16px}
+.vcard-open-entry{background:var(--color-brand)!important;color:#111214!important;border:0!important}
+
+/* ---------- 卡详情 ---------- */
+.vcard-detail{display:block}
+.vcard-detail-head{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.vcard-detail-title{display:flex;align-items:center;gap:12px}
+.vcard-detail-title h2{margin:0;font-size:22px;font-weight:650;color:var(--color-text-primary);letter-spacing:-.02em}
+.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.vcard-detail-main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.vcard-info-panel,.vcard-side-panel,.vcard-finance-panel,.vcard-flow-panel{padding:18px 20px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
+.vcard-info-panel h3,.vcard-side-panel h3,.vcard-finance-panel h3,.vcard-flow-panel h3{margin:0 0 14px;font-size:15px;font-weight:650;color:var(--color-text-primary)}
+.vcard-finance-panel,.vcard-flow-panel{margin-top:18px}
+.vcard-info-list{margin:0;display:flex;flex-direction:column}
+.vcard-info-row{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--color-border)}
+.vcard-info-row:first-child{border-top:0}
+.vcard-info-row dt{margin:0;font-size:13px;color:var(--color-text-secondary)}
+.vcard-info-row dd{margin:0;font-size:13px;color:var(--color-text-primary);display:flex;flex-direction:column;gap:2px;word-break:break-word}
+.vcard-info-row.is-address dd{gap:1px}
+.vcard-info-tools{display:inline-flex;gap:4px;margin-top:4px}
+.vcard-info-tools button{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--ds-border-default);border-radius:8px;background:var(--color-surface);color:var(--color-text-secondary);cursor:pointer}
+.vcard-info-tools button:hover{background:var(--color-surface-soft);color:var(--color-text-primary)}
+.vcard-info-tools svg{width:14px;height:14px}
+.vcard-detail-side{display:flex;flex-direction:column;gap:18px}
+.vcard-side-balance{display:flex;flex-direction:column;gap:3px;padding:14px 16px;border-radius:12px;background:var(--color-surface-soft)}
+.vcard-side-balance span{font-size:12px;color:var(--color-text-secondary)}
+.vcard-side-balance strong{font-size:26px;font-weight:650;color:var(--color-text-primary);line-height:1.1}
+.vcard-side-balance small{font-size:11px;color:var(--color-text-tertiary)}
+.vcard-side-meta{margin:14px 0 0;display:flex;flex-direction:column;gap:0}
+.vcard-side-meta div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--color-border)}
+.vcard-side-meta dt{font-size:13px;color:var(--color-text-secondary)}
+.vcard-side-meta dd{margin:0;font-size:13px;color:var(--color-text-primary);display:inline-flex;align-items:center;gap:7px}
+.vcard-action-list{display:flex;flex-direction:column;gap:9px}
+.vcard-action-primary{background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vcard-action-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
+.vcard-action-note{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--color-text-tertiary)}
+.vcard-action-note svg{width:14px;height:14px;flex:none;margin-top:1px}
+.vcard-finance{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px 18px}
+.vcard-finance div{display:flex;flex-direction:column;gap:3px}
+.vcard-finance dt{font-size:12px;color:var(--color-text-secondary)}
+.vcard-finance dd{margin:0;font-size:17px;font-weight:650;color:var(--color-text-primary)}
+.vcard-flow-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.vcard-flow-head h3{margin:0!important}
+.vcard-flow-table .vcard-flow-amount,.vtxn-table .vcard-flow-amount{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vcard-flow-amount.is-income{color:var(--color-success)}
+.vcard-flow-amount.is-expense{color:var(--color-text-primary)}
+.vcard-flow-type{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-flow-type.is-recharge{background:#edf5ef;color:#4e745d}
+.vcard-flow-type.is-consume{background:#eef0ea;color:#4a4d44}
+.vcard-flow-type.is-refund{background:#e7eefb;color:#3f5fa6}
+.vcard-flow-type.is-fee{background:#f1f1ec;color:#7a7c72}
+.vcard-flow-status{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-flow-status.is-success{background:#edf5ef;color:#4e745d}
+.vcard-flow-status.is-processing{background:#fbf2da;color:#9a7320}
+.vcard-flow-status.is-failed{background:#fbeeed;color:#a9635b}
+.vcard-flow-balance{color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vcard-flow-table code,.vtxn-table code{font-size:12px;color:var(--color-text-tertiary)}
+
+/* ---------- 开卡中心（卡段市场） ---------- */
+.vbin-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.vbin-search,.vtxn-search{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;height:40px;padding:0 13px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);color:var(--color-text-tertiary)}
+.vbin-search svg,.vtxn-search svg{width:16px;height:16px;flex:none}
+.vbin-search input,.vtxn-search input{flex:1;border:0;outline:0;background:transparent;font-size:14px;color:var(--color-text-primary)}
+.vbin-select{height:40px;padding:0 34px 0 13px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6f6b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--color-text-primary);font-size:14px;cursor:pointer;appearance:none;-webkit-appearance:none}
+.vbin-select-wrap{display:inline-flex;flex-direction:column;gap:5px}
+.vbin-select-wrap>span{font-size:12px;color:var(--color-text-secondary)}
+.vbin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.vbin-card{position:relative;display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden;transition:box-shadow .18s ease,border-color .18s ease}
+.vbin-card:hover{box-shadow:var(--ds-shadow-card);border-color:var(--ds-border-strong)}
+.vbin-card.is-recommended{border-color:var(--ds-border-selected)}
+.vbin-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.vbin-card-head h3{margin:0;font-size:16px;font-weight:650;color:var(--color-text-primary)}
+.vbin-card-badges{display:inline-flex;align-items:center;gap:7px;flex:none}
+.vbin-recommend{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--color-brand);color:#111214}
+.vbin-recommend svg{width:12px;height:12px}
+.vbin-tags{display:flex;flex-wrap:wrap;gap:7px}
+.vbin-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;background:var(--color-surface-soft);color:var(--color-text-secondary)}
+.vbin-tag.is-type{background:var(--color-dark);color:#fff}
+.vbin-tag.is-support{background:#edf5ef;color:#4e745d}
+.vbin-notices{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.vbin-notices li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.45;color:var(--color-text-secondary)}
+.vbin-notices svg{width:13px;height:13px;flex:none;margin-top:2px;color:#9a7320}
+.vbin-fees{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)}
+.vbin-fees div{display:flex;flex-direction:column;gap:2px}
+.vbin-fees dt{font-size:12px;color:var(--color-text-secondary)}
+.vbin-fees dd{margin:0;font-size:16px;font-weight:650;color:var(--color-text-primary)}
+.vbin-fees small{font-size:11px;font-weight:400;color:var(--color-text-tertiary)}
+.vbin-meta{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.vbin-meta div{display:flex;flex-direction:column;gap:2px}
+.vbin-meta dt{font-size:12px;color:var(--color-text-secondary)}
+.vbin-meta dd{margin:0;font-size:13px;color:var(--color-text-primary)}
+.vbin-meta dd.is-low{color:var(--color-danger);font-weight:600}
+.vbin-meta code{font-size:12px;color:var(--color-text-tertiary)}
+.vbin-card-foot{margin-top:auto}
+.vbin-open-button{width:100%;background:var(--color-brand)!important;color:#111214!important;border:0!important}
+
+/* ---------- 消费记录（全局流水） ---------- */
+.vtxn-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
+.vtxn-filters .vbin-select-wrap{min-width:150px}
+.vtxn-filters .vtxn-search{flex:1;min-width:220px}
+.vtxn-summary{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:14px;font-size:13px;color:var(--color-text-secondary)}
+.vtxn-summary strong{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
+.vtxn-summary strong.is-income{color:var(--color-success)}
+.vtxn-summary strong.is-expense{color:var(--color-danger)}
+
+/* 空状态间距微调 */
+.uc-empty.vcard-empty,.uc-empty.vbin-empty,.uc-empty.vtxn-empty{margin-top:8px}
+
+/* ---------- 开卡 / 充值弹窗 ---------- */
+.card-open-dialog .purchase-dialog-body,.card-recharge-dialog .purchase-dialog-body{padding-top:20px}
+.card-open-bin{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--ds-border-default);border-radius:12px;background:var(--color-surface-soft)}
+.card-open-bin .vcard-bin{font-size:13px;font-weight:600;color:var(--color-text-primary);text-transform:none;letter-spacing:0}
+.card-open-region{font-size:12px;color:var(--color-text-secondary)}
+.card-open-meta{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card-open-meta div{display:flex;flex-direction:column;gap:2px}
+.card-open-meta dt{font-size:12px;color:var(--color-text-secondary)}
+.card-open-meta dd{margin:0;font-size:15px;font-weight:650;color:var(--color-text-primary)}
+.card-recharge-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--ds-border-default);border-radius:12px;background:var(--color-surface-soft)}
+.card-recharge-card .vcard-bin{font-size:13px;font-weight:600;color:var(--color-text-primary);text-transform:none;letter-spacing:0}
+.card-recharge-tail{font-size:12px;color:var(--color-text-secondary)}
+.card-recharge-balance{margin-left:auto;font-size:12px;font-weight:600;color:var(--color-text-primary)}
+.card-recharge-balance:before{content:"当前余额 "}
+.card-recharge-amount{display:flex;flex-direction:column;gap:10px}
+.card-recharge-amount input{height:46px;padding:0 14px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);font-size:18px;font-weight:600;color:var(--color-text-primary);outline:0}
+.card-recharge-amount input:focus{border-color:var(--ds-border-selected)}
+.card-recharge-quick{display:flex;flex-wrap:wrap;gap:8px}
+.card-recharge-quick button{height:34px;padding:0 14px;border:1px solid var(--ds-border-default);border-radius:999px;background:var(--color-surface);color:var(--color-text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+.card-recharge-quick button:hover:not(:disabled){border-color:var(--ds-border-selected);color:var(--color-text-primary)}
+.card-recharge-quick button:disabled{opacity:.4;cursor:not-allowed}
+
+/* 冻结 / 注销确认按钮 */
+.card-freeze-confirm{background:var(--color-brand)!important;color:#111214!important}
+.card-delete-confirm{background:var(--color-danger)!important;color:#fff!important}
+
+/* ---------- 虚拟卡模块响应式（新增独立媒体块，不改动既有窄屏共享块） ---------- */
+@media(max-width:1200px){.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:980px){
+  .vcard-detail-top{grid-template-columns:1fr}
+  .vcard-overview{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){.business-entry-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .vcard-overview{grid-template-columns:1fr}
+  .vcard-number{font-size:17px}
+  .vbin-fees,.vbin-meta{grid-template-columns:1fr}
+  .vcard-info-row{grid-template-columns:88px 1fr}
+}

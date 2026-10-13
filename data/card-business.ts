@@ -1,0 +1,302 @@
+/**
+ * 虚拟卡业务 · Mock 数据与类型
+ *
+ * 业务链路：平台余额 → 开卡（按卡段收费）→ 卡内余额（从平台余额划转）→ 消费。
+ * 全部为前端演示数据，无真实上游发卡、无真实扣款。
+ *
+ * 与知识库对应：卡段 CardBin / 卡片 Card / 流水 Bill / 费率 FeePackage。
+ */
+
+export type CardScheme = "visa" | "mastercard" | "discover";
+export type CardRegion = "us" | "hk";
+/** 与知识库 04 一致：处理中 / 正常 / 冻结（人工）/ 系统冻结（上游或风控）。 */
+export type CardStatus = "processing" | "active" | "frozen" | "system_frozen";
+export type CardFlowType = "recharge" | "consume" | "refund" | "fee";
+export type CardFlowStatus = "success" | "processing" | "failed";
+
+/** 卡段（卡 BIN）：开卡的库存与费率来源。 */
+export type CardBin = {
+  id: string;
+  bin: string;
+  scheme: CardScheme;
+  region: CardRegion;
+  cardType: string;
+  scenes: string[];
+  restrictions: string[];
+  /** 开卡费（$/张），从平台余额扣除。 */
+  openFee: number;
+  /** 充值手续费（%），卡片充值按比例收取。 */
+  rechargeFeePercent: number;
+  /** 消费费率（固定 + 百分比），用于消费结算。 */
+  consumeFee: { fixed: number; percent: number };
+  /** 可开张数上限；剩余可开 = 上限 − 已持有张数。 */
+  stock: number;
+  recommended?: boolean;
+};
+
+export type BillingAddress = {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+};
+
+export type VirtualCard = {
+  id: string;
+  cardNo: string;
+  binId: string;
+  bin: string;
+  scheme: CardScheme;
+  region: CardRegion;
+  holder: string;
+  expMonth: number;
+  expYear: number;
+  cvv: string;
+  balance: number;
+  currency: "USD";
+  status: CardStatus;
+  createdAt: string;
+  remark: string;
+  billingAddress: BillingAddress;
+};
+
+/** 卡流水：一张卡上的余额变动（充值 / 消费 / 退款 / 手续费）。 */
+export type CardFlowItem = {
+  id: string;
+  cardId: string;
+  time: string;
+  type: CardFlowType;
+  /** 正数入账、负数出账。 */
+  amount: number;
+  balanceAfter: number;
+  merchant: string;
+  /** 消费类流水才有：交易金额 / 结算金额（含手续费）。 */
+  tradeAmount?: number;
+  settleAmount?: number;
+  status: CardFlowStatus;
+  txNo: string;
+};
+
+/* ------------------------------------------------------------------ */
+/* 文案与格式化                                                        */
+/* ------------------------------------------------------------------ */
+
+const schemeNames: Record<CardScheme, string> = {
+  visa: "Visa",
+  mastercard: "MasterCard",
+  discover: "Discover",
+};
+
+const regionNames: Record<CardRegion, string> = {
+  us: "美国",
+  hk: "中国香港",
+};
+
+export function schemeLabel(scheme: CardScheme) {
+  return schemeNames[scheme];
+}
+
+export function regionLabel(region: CardRegion) {
+  return regionNames[region];
+}
+
+export function binTitle(bin: { bin: string }) {
+  return `卡BIN-${bin.bin}`;
+}
+
+export function money(value: number, digits = 2) {
+  return `$${value.toFixed(digits)}`;
+}
+
+export function formatCardNumber(cardNo: string) {
+  return cardNo.replace(/(.{4})/g, "$1 ").trim();
+}
+
+/** 列表场景默认脱敏：只保留前 4 位与后 4 位。 */
+export function maskCardNumber(cardNo: string) {
+  const grouped = formatCardNumber(cardNo).split(" ");
+  if (grouped.length < 4) return formatCardNumber(cardNo);
+  return `${grouped[0]} •••• •••• ${grouped[grouped.length - 1]}`;
+}
+
+export function cardTail(cardNo: string) {
+  return cardNo.slice(-4);
+}
+
+export const cardStatusMeta: Record<CardStatus, { label: string; tone: "completed" | "processing" | "pending" | "failed" }> = {
+  processing: { label: "处理中", tone: "processing" },
+  active: { label: "正常", tone: "completed" },
+  frozen: { label: "已冻结", tone: "pending" },
+  system_frozen: { label: "系统冻结", tone: "failed" },
+};
+
+export const cardFlowTypeLabel: Record<CardFlowType, string> = {
+  recharge: "卡充值",
+  consume: "消费",
+  refund: "退款",
+  fee: "手续费",
+};
+
+export const cardFlowStatusLabel: Record<CardFlowStatus, string> = {
+  success: "消费完成",
+  processing: "处理中",
+  failed: "失败",
+};
+
+/** 卡段剩余的评估口径：可开上限 − 已持有张数。 */
+export function remainingStock(bin: CardBin, owned: number) {
+  return Math.max(0, bin.stock - owned);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mock：卡段                                                            */
+/* ------------------------------------------------------------------ */
+
+export const defaultCardBins: CardBin[] = [
+  {
+    id: "bin-537872", bin: "537872", scheme: "mastercard", region: "us", cardType: "通用卡",
+    scenes: ["OpenAI · ChatGPT 订阅", "常规线上消费"], restrictions: [],
+    openFee: 0.1, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 500, recommended: true,
+  },
+  {
+    id: "bin-486555", bin: "486555", scheme: "visa", region: "us", cardType: "常规卡",
+    scenes: ["OpenAI · ChatGPT 订阅"], restrictions: ["禁止 Claude 相关消费"],
+    openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 300,
+  },
+  {
+    id: "bin-446602", bin: "446602", scheme: "visa", region: "us", cardType: "常规卡",
+    scenes: ["OpenAI · ChatGPT 订阅"], restrictions: ["禁止 Claude 相关消费"],
+    openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 260,
+  },
+  {
+    id: "bin-428852", bin: "428852", scheme: "visa", region: "us", cardType: "常规卡",
+    scenes: ["AI 订阅", "广告投放", "通用消费"], restrictions: [],
+    openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 120,
+  },
+  {
+    id: "bin-474613", bin: "474613", scheme: "visa", region: "us", cardType: "申请制专用卡",
+    scenes: ["通用消费"], restrictions: ["可充 Claude，但不建议开通 GPT Pro", "退款将封卡，请谨慎操作"],
+    openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0.4, percent: 0 }, stock: 80,
+  },
+  {
+    id: "bin-4416405", bin: "4416405", scheme: "visa", region: "us", cardType: "申请制专用卡",
+    scenes: ["AI 订阅", "广告投放", "通用消费"], restrictions: ["禁止 Claude 相关消费"],
+    openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 60,
+  },
+  {
+    id: "bin-545020", bin: "545020", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
+    scenes: ["谷歌等线上消费", "广告投放"], restrictions: ["取消订阅可能触发冻结，请按需充值"],
+    openFee: 0.2, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 400,
+  },
+  {
+    id: "bin-558325", bin: "558325", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
+    scenes: ["谷歌等线上消费", "广告投放"], restrictions: ["取消订阅可能触发冻结，请按需充值"],
+    openFee: 0.2, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 350,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Mock：卡片                                                            */
+/* ------------------------------------------------------------------ */
+
+const defaultBilling: BillingAddress = {
+  line1: "Street -",
+  city: "City -",
+  state: "State -",
+  zip: "Zip Code -",
+  country: "United States",
+};
+
+export const defaultVirtualCards: VirtualCard[] = [
+  {
+    id: "VC-20261012001", cardNo: "5556597907237632", binId: "bin-537872", bin: "537872",
+    scheme: "mastercard", region: "us", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "431",
+    balance: 150, currency: "USD", status: "active", createdAt: "2026-10-12 09:53:13",
+    remark: "OpenAI 订阅专用", billingAddress: defaultBilling,
+  },
+  {
+    id: "VC-20261012007", cardNo: "5556597907160727", binId: "bin-537872", bin: "537872",
+    scheme: "mastercard", region: "us", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "512",
+    balance: 56.11, currency: "USD", status: "active", createdAt: "2026-10-12 10:02:20",
+    remark: "", billingAddress: defaultBilling,
+  },
+  {
+    id: "VC-20261011012", cardNo: "5450201099209206", binId: "bin-545020", bin: "545020",
+    scheme: "mastercard", region: "hk", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "733",
+    balance: 36.18, currency: "USD", status: "active", createdAt: "2026-10-11 20:14:02",
+    remark: "谷歌广告投放", billingAddress: { ...defaultBilling, country: "Hong Kong, China" },
+  },
+  {
+    id: "VC-20261010009", cardNo: "4865557007891693", binId: "bin-486555", bin: "486555",
+    scheme: "visa", region: "us", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "219",
+    balance: 128.62, currency: "USD", status: "frozen", createdAt: "2026-10-10 12:30:44",
+    remark: "手动冻结，待排查异常消费", billingAddress: defaultBilling,
+  },
+  {
+    id: "VC-20261009004", cardNo: "4466027004132943", binId: "bin-446602", bin: "446602",
+    scheme: "visa", region: "us", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "884",
+    balance: 44.07, currency: "USD", status: "system_frozen", createdAt: "2026-10-09 15:22:10",
+    remark: "上游风控触发，请联系客服", billingAddress: defaultBilling,
+  },
+  {
+    id: "VC-20261013002", cardNo: "4416405011228890", binId: "bin-4416405", bin: "4416405",
+    scheme: "visa", region: "us", holder: "Ava Johnson", expMonth: 10, expYear: 28, cvv: "601",
+    balance: 0, currency: "USD", status: "processing", createdAt: "2026-10-13 09:12:33",
+    remark: "上游发卡处理中", billingAddress: defaultBilling,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Mock：卡流水                                                          */
+/* ------------------------------------------------------------------ */
+
+export const defaultCardFlows: CardFlowItem[] = [
+  // VC-…001
+  { id: "CF-1069447121", cardId: "VC-20261012001", time: "2026-10-13 09:31:10", type: "consume", amount: -12.53, balanceAfter: 150, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 12.53, settleAmount: 12.53, status: "success", txNo: "1069447121" },
+  { id: "CF-1069447106", cardId: "VC-20261012001", time: "2026-10-13 09:12:43", type: "consume", amount: -6, balanceAfter: 162.53, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 6, settleAmount: 6, status: "success", txNo: "1069447106" },
+  { id: "CF-KC-000018", cardId: "VC-20261012001", time: "2026-10-12 10:19:21", type: "recharge", amount: 50, balanceAfter: 168.53, merchant: "平台余额划转", status: "success", txNo: "—" },
+  { id: "CF-1069441487", cardId: "VC-20261012001", time: "2026-10-12 09:55:41", type: "consume", amount: -1.47, balanceAfter: 118.53, merchant: "OpenAI", tradeAmount: 1.47, settleAmount: 1.47, status: "success", txNo: "1069441487" },
+  { id: "CF-KC-000001", cardId: "VC-20261012001", time: "2026-10-12 09:53:13", type: "recharge", amount: 120, balanceAfter: 120, merchant: "开卡初始充值", status: "success", txNo: "—" },
+
+  // VC-…007
+  { id: "CF-1069435482", cardId: "VC-20261012007", time: "2026-10-13 08:04:12", type: "consume", amount: -3.9, balanceAfter: 56.11, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 3.9, settleAmount: 3.9, status: "success", txNo: "1069435482" },
+  { id: "CF-1069433476", cardId: "VC-20261012007", time: "2026-10-12 22:36:55", type: "consume", amount: -9.99, balanceAfter: 60.01, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 9.99, settleAmount: 9.99, status: "success", txNo: "1069433476" },
+  { id: "CF-KC-000009", cardId: "VC-20261012007", time: "2026-10-12 10:02:20", type: "recharge", amount: 70, balanceAfter: 70, merchant: "开卡初始充值", status: "success", txNo: "—" },
+
+  // VC-…012（中国香港卡）
+  { id: "CF-1069421980", cardId: "VC-20261011012", time: "2026-10-13 07:22:31", type: "consume", amount: -8.42, balanceAfter: 36.18, merchant: "Google Ads", tradeAmount: 8.42, settleAmount: 8.42, status: "success", txNo: "1069421980" },
+  { id: "CF-1069411764", cardId: "VC-20261011012", time: "2026-10-12 21:10:02", type: "consume", amount: -5.4, balanceAfter: 44.6, merchant: "Google Ads", tradeAmount: 5.4, settleAmount: 5.4, status: "processing", txNo: "1069411764" },
+  { id: "CF-KC-000031", cardId: "VC-20261011012", time: "2026-10-11 20:14:02", type: "recharge", amount: 50, balanceAfter: 50, merchant: "开卡初始充值", status: "success", txNo: "—" },
+
+  // VC-…009（已冻结）
+  { id: "CF-1069409871", cardId: "VC-20261010009", time: "2026-10-13 03:00:44", type: "consume", amount: -3.69, balanceAfter: 128.62, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 3.69, settleAmount: 3.69, status: "success", txNo: "1069409871" },
+  { id: "CF-1069403210", cardId: "VC-20261010009", time: "2026-10-12 23:45:37", type: "consume", amount: -12, balanceAfter: 132.31, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 12, settleAmount: 12, status: "success", txNo: "1069403210" },
+  { id: "CF-1069398746", cardId: "VC-20261010009", time: "2026-10-12 09:33:33", type: "consume", amount: -15.69, balanceAfter: 144.31, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 15.69, settleAmount: 15.69, status: "success", txNo: "1069398746" },
+  { id: "CF-KC-000044", cardId: "VC-20261010009", time: "2026-10-10 12:30:44", type: "recharge", amount: 160, balanceAfter: 160, merchant: "开卡初始充值", status: "success", txNo: "—" },
+
+  // VC-…004（系统冻结）
+  { id: "CF-1069392430", cardId: "VC-20261009004", time: "2026-10-12 09:44:39", type: "consume", amount: -14.44, balanceAfter: 44.07, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 14.44, settleAmount: 14.44, status: "success", txNo: "1069392430" },
+  { id: "CF-1069387762", cardId: "VC-20261009004", time: "2026-10-12 00:29:20", type: "consume", amount: -19, balanceAfter: 58.51, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 19, settleAmount: 19, status: "failed", txNo: "1069387762" },
+  { id: "CF-KC-000058", cardId: "VC-20261009004", time: "2026-10-09 15:22:10", type: "recharge", amount: 77.51, balanceAfter: 77.51, merchant: "开卡初始充值", status: "success", txNo: "—" },
+];
+
+/** 卡片财务口径：从流水聚合，避免展示值与流水对不上。 */
+export function buildCardFinance(card: VirtualCard, flows: CardFlowItem[]) {
+  const own = flows.filter((flow) => flow.cardId === card.id);
+  const consumed = own.filter((flow) => flow.type === "consume");
+  const rechargeTotal = own.filter((flow) => flow.type === "recharge").reduce((sum, flow) => sum + flow.amount, 0);
+  const consumeTotal = consumed.reduce((sum, flow) => sum + Math.abs(flow.amount), 0);
+  const refundTotal = own.filter((flow) => flow.type === "refund").reduce((sum, flow) => sum + flow.amount, 0);
+  const done = consumed.filter((flow) => flow.status === "success").length;
+  return {
+    balance: card.balance,
+    rechargeTotal,
+    consumeTotal,
+    refundTotal,
+    consumeCount: consumed.length,
+    doneCount: done,
+    successRate: consumed.length ? Math.round((done / consumed.length) * 100) : 100,
+  };
+}

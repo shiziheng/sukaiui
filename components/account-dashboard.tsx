@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Bot, ClipboardCheck, Clock3, Gift, Headphones, LifeBuoy, MapPinned, ReceiptText, Sparkles, WalletCards } from "lucide-react";
+import { ArrowRight, Bot, ClipboardCheck, Clock3, CreditCard, Gift, Headphones, LifeBuoy, MapPinned, ReceiptText, Sparkles, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
@@ -35,6 +35,12 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
           <span className="business-entry-copy"><em>{homeDashboardCopy.rechargeScenario}</em><strong><EditableText active={editMode} value={content.rechargeServiceTitle} onChange={(value) => updateContent("rechargeServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.rechargeServiceDescription} onChange={(value) => updateContent("rechargeServiceDescription", value)} /></small><span className="business-entry-tags">{homeDashboardCopy.rechargeTags.map((tag) => <i key={tag}>{tag}</i>)}</span></span>
           <span className="business-entry-category">{homeDashboardCopy.rechargeCategory}</span>
           <span className="business-entry-action"><EditableText active={editMode} value={content.startRechargeService} onChange={(value) => updateContent("startRechargeService", value)} /><ArrowRight /></span>
+        </button>
+        <button className="business-entry-card is-card" type="button" onClick={() => onNavigate("card")}>
+          <span className="business-entry-icon"><CreditCard /></span><span className="business-card-art" aria-hidden="true"><i /><i /><i /></span>
+          <span className="business-entry-copy"><em>虚拟信用卡</em><strong><EditableText active={editMode} value={content.cardServiceTitle} onChange={(value) => updateContent("cardServiceTitle", value)} /></strong><small><EditableText active={editMode} value={content.cardServiceDescription} onChange={(value) => updateContent("cardServiceDescription", value)} /></small><span className="business-entry-tags">{["Visa", "MasterCard", "香港卡"].map((tag) => <i key={tag}>{tag}</i>)}</span></span>
+          <span className="business-entry-category">虚拟卡</span>
+          <span className="business-entry-action"><EditableText active={editMode} value={content.cardGoOpen} onChange={(value) => updateContent("cardGoOpen", value)} /><ArrowRight /></span>
         </button>
       </section>
 

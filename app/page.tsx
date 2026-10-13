@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import {
-  ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, Download, ExternalLink, Gift,
+  ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, CreditCard, Download, ExternalLink, Gift,
   Headphones, House, LogOut, Minus, PackageOpen, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard"
 import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
+import { CardModule } from "@/components/card-module";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -52,6 +53,7 @@ import { defaultBrands, type Brand, type BrandId } from "@/data/brands";
 import { defaultContent, type DemoContent } from "@/data/content";
 import { defaultFaqs, type FAQGroup, type FAQItem } from "@/data/faqs";
 import { defaultRechargeFlows, type RechargeFlow } from "@/data/recharge-flows";
+import { defaultCardBins, defaultCardFlows, defaultVirtualCards, type CardBin, type CardFlowItem, type VirtualCard } from "@/data/card-business";
 import type { ManagedOrder } from "@/data/order-management";
 import type { BatchTask } from "@/data/recharge-batch";
 import type { PaymentCompletion, PaymentIntent } from "@/data/payment-mocks";
@@ -521,6 +523,8 @@ export default function Home() {
   const [supportSurface, setSupportSurface] = useState<"top" | "floating" | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [walletBalance, setWalletBalance] = useState(accountDashboardMock.summary.availableBalance);
+  const [virtualCards, setVirtualCards] = useState<VirtualCard[]>(() => defaultVirtualCards.map((card) => ({ ...card })));
+  const [cardFlows, setCardFlows] = useState<CardFlowItem[]>(() => defaultCardFlows.map((flow) => ({ ...flow })));
   const [walletRecords, setWalletRecords] = useState(() => accountDashboardMock.walletRecords.map((item) => ({ ...item })));
   const [topUpRecords, setTopUpRecords] = useState(() => accountDashboardMock.topUpRecords.map((item) => ({ ...item })));
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
@@ -889,6 +893,7 @@ export default function Home() {
     { id: "recharge", key: "navRecharge" },
     { id: "topup", key: "navTopup" },
     { id: "orders", key: "navOrders" },
+    { id: "card", key: "navCard" },
   ];
   const publicMenuItems: Array<{ id: "home" | "account" | "recharge"; label: string }> = [
     { id: "home", label: "首页" },
@@ -920,7 +925,7 @@ export default function Home() {
                 onClick={() => { if (item.id === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1); navigateTo(item.id); }}
                 key={item.id}
               >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "topup" ? <WalletCards aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "topup" ? <WalletCards aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : item.id === "card" ? <CreditCard aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
                 <EditableText
                   active={editMode}
                   value={content[item.key]}
@@ -1004,7 +1009,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <WalletRechargePage
@@ -1059,6 +1064,20 @@ export default function Home() {
               <SecurityPage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "help" ? (
               <HelpCenter onNavigate={(destination) => { navigateTo(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
+            ) : selectedMenu === "card" ? (
+              <CardModule
+                cards={virtualCards}
+                setCards={setVirtualCards}
+                flows={cardFlows}
+                setFlows={setCardFlows}
+                bins={defaultCardBins}
+                platformBalance={effectiveBalance}
+                setPlatformBalance={setWalletBalance}
+                content={content}
+                editMode={editMode}
+                updateContent={updateContent}
+                onGoTopup={() => navigateTo("topup")}
+              />
             ) : isProductsPage ? (
               <section className="commerce-panel">
                 <header className="commerce-page-heading">
