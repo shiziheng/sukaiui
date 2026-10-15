@@ -307,6 +307,18 @@ export type DemoContent = {
   cardEmptyCards: string;
   cardEmptyCardsHint: string;
   cardGoOpen: string;
+  cardFilterSearch: string;
+  cardAllStatus: string;
+  cardClosedStatus: string;
+  cardSortDefault: string;
+  cardSortBalanceDesc: string;
+  cardSortBalanceAsc: string;
+  cardViewCard: string;
+  cardViewTable: string;
+  cardClosedTitle: string;
+  cardClosedAt: string;
+  cardClosedEmpty: string;
+  cardClosedEmptyHint: string;
   cardDetailLabel: string;
   cardReveal: string;
   cardHide: string;
@@ -669,6 +681,18 @@ export const defaultContent: DemoContent = {
   cardEmptyCards: "还没有卡片",
   cardEmptyCardsHint: "去开卡中心挑一个卡段，开通你的第一张虚拟卡。",
   cardGoOpen: "去开卡",
+  cardFilterSearch: "搜索卡号 / 备注",
+  cardAllStatus: "全部状态",
+  cardClosedStatus: "已注销",
+  cardSortDefault: "最近开卡",
+  cardSortBalanceDesc: "余额从高到低",
+  cardSortBalanceAsc: "余额从低到高",
+  cardViewCard: "卡片视图",
+  cardViewTable: "表格视图",
+  cardClosedTitle: "删卡记录",
+  cardClosedAt: "注销时间",
+  cardClosedEmpty: "暂无删卡记录",
+  cardClosedEmptyHint: "注销卡片后会在这里保留记录，卡内余额自动退回平台余额。",
   cardDetailLabel: "卡详情",
   cardReveal: "显示",
   cardHide: "隐藏",

@@ -22,6 +22,7 @@ import { type DemoContent } from "@/data/content";
 
 type Editable = (key: keyof DemoContent, value: string) => void;
 type CardTab = "cards" | "market" | "transactions";
+export type ClosedCardRecord = { card: VirtualCard; closedAt: string };
 
 export function CardModule({
   cards, setCards, flows, setFlows, bins, platformBalance, setPlatformBalance,
@@ -45,6 +46,7 @@ export function CardModule({
   const [fundCard, setFundCard] = useState<VirtualCard | null>(null);
   const [freezeTarget, setFreezeTarget] = useState<VirtualCard | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<VirtualCard | null>(null);
+  const [closedRecords, setClosedRecords] = useState<ClosedCardRecord[]>([]);
 
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
@@ -133,6 +135,7 @@ export function CardModule({
     const card = deleteTarget;
     if (!card) return;
     setPlatformBalance((wb) => Number((wb + card.balance).toFixed(2)));
+    setClosedRecords((records) => [{ card, closedAt: now() }, ...records]);
     setCards((cs) => cs.filter((c) => c.id !== card.id));
     setFlows((fs) => fs.filter((f) => f.cardId !== card.id));
     if (detailCard?.id === card.id) setDetailCard(null);
@@ -144,13 +147,6 @@ export function CardModule({
 
   return (
     <section className="card-module">
-      <header className="uc-page-heading card-module-head">
-        <div>
-          <h1>{editable("navCard")}</h1>
-          <p>{editable("cardModuleSubtitle")}</p>
-        </div>
-      </header>
-
       <Tabs value={tab} onValueChange={(value) => setTab(value as CardTab)} className="uc-tabs-list card-tabs">
         <TabsList>
           <TabsTrigger value="cards"><Layers aria-hidden="true" />{editable("cardTabCards")}</TabsTrigger>
@@ -175,6 +171,7 @@ export function CardModule({
       ) : tab === "cards" ? (
         <CardList
           cards={cards}
+          closedRecords={closedRecords}
           platformBalance={platformBalance}
           onOpenMarket={() => setTab("market")}
           onDetail={setDetailCard}

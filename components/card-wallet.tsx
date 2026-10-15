@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, CreditCard, Layers, LockKeyhole, PlusCircle, ReceiptText,
-  Snowflake, Trash2, WalletCards,
+  ArrowLeft, ArrowRight, CreditCard, Layers, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
+  Search, Snowflake, Table, Trash2, WalletCards,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { ClosedCardRecord } from "@/components/card-module";
 import {
   CardVisual, SchemeBadge, SensitiveRow, copyText, type RevealMap,
 } from "@/components/card-visual";
@@ -14,11 +15,17 @@ import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import {
   binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, money,
-  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type VirtualCard,
+  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardRegion, type CardScheme,
+  type CardStatus, type VirtualCard,
 } from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
 
 type Editable = (key: keyof DemoContent, value: string) => void;
+type StatusFilter = "all" | CardStatus | "closed";
+type SchemeFilter = "all" | CardScheme;
+type RegionFilter = "all" | CardRegion;
+type SortMode = "default" | "balance_desc" | "balance_asc";
+type ViewMode = "cards" | "table";
 
 /* ------------------------------------------------------------------ */
 /* 我的卡片（列表）                                                     */
@@ -26,6 +33,7 @@ type Editable = (key: keyof DemoContent, value: string) => void;
 
 export function CardList({
   cards,
+  closedRecords,
   platformBalance,
   onOpenMarket,
   onDetail,
@@ -37,6 +45,7 @@ export function CardList({
   updateContent,
 }: {
   cards: VirtualCard[];
+  closedRecords: ClosedCardRecord[];
   platformBalance: number;
   onOpenMarket: () => void;
   onDetail: (card: VirtualCard) => void;
@@ -48,6 +57,12 @@ export function CardList({
   updateContent: Editable;
 }) {
   const [revealed, setRevealed] = useState<RevealMap>({});
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [schemeFilter, setSchemeFilter] = useState<SchemeFilter>("all");
+  const [regionFilter, setRegionFilter] = useState<RegionFilter>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("default");
+  const [view, setView] = useState<ViewMode>("cards");
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
@@ -59,20 +74,79 @@ export function CardList({
     return { total: cards.length, active, frozen, balance };
   }, [cards]);
 
+  const showClosed = statusFilter === "closed";
+
+  const filtered = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    const kwDigits = kw.replace(/\D/g, "");
+    const matchKw = (card: VirtualCard) => {
+      if (!kw) return true;
+      return (
+        card.cardNo.toLowerCase().includes(kw) ||
+        (kwDigits.length > 0 && card.cardNo.includes(kwDigits)) ||
+        (card.remark ?? "").toLowerCase().includes(kw)
+      );
+    };
+    if (showClosed) {
+      return closedRecords
+        .map((record) => record.card)
+        .filter(matchKw)
+        .filter((card) => schemeFilter === "all" || card.scheme === schemeFilter)
+        .filter((card) => regionFilter === "all" || card.region === regionFilter);
+    }
+    let list = cards.filter((card) => {
+      if (statusFilter !== "all" && card.status !== statusFilter) return false;
+      if (schemeFilter === "all" ? false : card.scheme !== schemeFilter) return false;
+      if (regionFilter === "all" ? false : card.region !== regionFilter) return false;
+      return matchKw(card);
+    });
+    if (sortMode === "balance_desc") list = [...list].sort((a, b) => b.balance - a.balance);
+    if (sortMode === "balance_asc") list = [...list].sort((a, b) => a.balance - b.balance);
+    return list;
+  }, [cards, closedRecords, keyword, statusFilter, schemeFilter, regionFilter, sortMode, showClosed]);
+
+  const closedAtOf = (card: VirtualCard) =>
+    closedRecords.find((record) => record.card.id === card.id)?.closedAt ?? "—";
+
+  const noFilterApplied =
+    !keyword.trim() && statusFilter === "all" && schemeFilter === "all" && regionFilter === "all";
+
   return (
     <section className="vcard-panel">
       <header className="vcard-panel-head">
         <div className="vcard-panel-copy">
           <span className="section-title-icon"><CreditCard aria-hidden="true" /></span>
           <div>
-            <h2>{editable("cardCardsTitle")}</h2>
-            <p>{editable("cardCardsSubtitle")}</p>
+            <h2>{showClosed ? editable("cardClosedTitle") : editable("cardCardsTitle")}</h2>
+            <p>{showClosed ? content.cardClosedEmptyHint : editable("cardCardsSubtitle")}</p>
           </div>
         </div>
-        <Button className="vcard-open-entry" onClick={onOpenMarket}>
-          <PlusCircle aria-hidden="true" />
-          {editable("cardOpenAction")}
-        </Button>
+        <div className="vcard-head-tools">
+          <div className="vcard-view-toggle" role="group" aria-label="展示方式">
+            <button
+              type="button"
+              className={view === "cards" ? "is-active" : ""}
+              onClick={() => setView("cards")}
+              aria-pressed={view === "cards"}
+            >
+              <LayoutGrid aria-hidden="true" />{editable("cardViewCard")}
+            </button>
+            <button
+              type="button"
+              className={view === "table" ? "is-active" : ""}
+              onClick={() => setView("table")}
+              aria-pressed={view === "table"}
+            >
+              <Table aria-hidden="true" />{editable("cardViewTable")}
+            </button>
+          </div>
+          {!showClosed ? (
+            <Button className="vcard-open-entry" onClick={onOpenMarket}>
+              <PlusCircle aria-hidden="true" />
+              {editable("cardOpenAction")}
+            </Button>
+          ) : null}
+        </div>
       </header>
 
       <section className="vcard-overview" aria-label="卡片概览">
@@ -94,22 +168,172 @@ export function CardList({
         </article>
       </section>
 
-      {cards.length ? (
+      <div className="vcard-filters">
+        <div className="vbin-search vcard-search">
+          <Search aria-hidden="true" />
+          <input
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder={content.cardFilterSearch}
+            aria-label="搜索卡号或备注"
+          />
+        </div>
+        <select
+          className="vbin-select"
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+          aria-label="卡片状态"
+        >
+          <option value="all">{content.cardAllStatus}</option>
+          <option value="active">{cardStatusMeta.active.label}</option>
+          <option value="frozen">{cardStatusMeta.frozen.label}</option>
+          <option value="system_frozen">{cardStatusMeta.system_frozen.label}</option>
+          <option value="processing">{cardStatusMeta.processing.label}</option>
+          <option value="closed">{content.cardClosedStatus}</option>
+        </select>
+        <select
+          className="vbin-select"
+          value={schemeFilter}
+          onChange={(event) => setSchemeFilter(event.target.value as SchemeFilter)}
+          aria-label="卡组织"
+        >
+          <option value="all">{content.cardAllScheme}</option>
+          <option value="visa">{schemeLabel("visa")}</option>
+          <option value="mastercard">{schemeLabel("mastercard")}</option>
+          <option value="discover">{schemeLabel("discover")}</option>
+        </select>
+        <select
+          className="vbin-select"
+          value={regionFilter}
+          onChange={(event) => setRegionFilter(event.target.value as RegionFilter)}
+          aria-label="发行地"
+        >
+          <option value="all">{content.cardAllRegion}</option>
+          <option value="us">{regionLabel("us")}</option>
+          <option value="hk">{regionLabel("hk")}</option>
+        </select>
+        <select
+          className="vbin-select"
+          value={sortMode}
+          onChange={(event) => setSortMode(event.target.value as SortMode)}
+          aria-label="排序方式"
+          disabled={showClosed}
+        >
+          <option value="default">{content.cardSortDefault}</option>
+          <option value="balance_desc">{content.cardSortBalanceDesc}</option>
+          <option value="balance_asc">{content.cardSortBalanceAsc}</option>
+        </select>
+      </div>
+
+      {filtered.length === 0 ? (
+        noFilterApplied && !showClosed ? (
+          <div className="uc-empty vcard-empty">
+            <CreditCard aria-hidden="true" />
+            <strong>{editable("cardEmptyCards")}</strong>
+            <p>{editable("cardEmptyCardsHint")}</p>
+            <Button className="vcard-open-entry" onClick={onOpenMarket}><PlusCircle aria-hidden="true" />{editable("cardGoOpen")}</Button>
+          </div>
+        ) : (
+          <div className="uc-empty vcard-empty">
+            <Search aria-hidden="true" />
+            <strong>{showClosed ? content.cardClosedEmpty : "没有符合条件的卡片"}</strong>
+            <p>{showClosed ? content.cardClosedEmptyHint : "试试调整筛选条件或清空关键词。"}</p>
+          </div>
+        )
+      ) : view === "table" ? (
+        <div className="uc-table-wrap vcard-table-wrap">
+          <table className="uc-table vcard-table-view">
+            <thead>
+              {showClosed ? (
+                <tr>
+                  <th>卡号</th><th>卡组织</th><th>发行地</th><th>余额</th><th>开卡时间</th><th>{content.cardClosedAt}</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th>卡号</th><th>卡组织</th><th>发行地</th><th>状态</th><th>余额</th><th>开卡时间</th><th>操作</th>
+                </tr>
+              )}
+            </thead>
+            <tbody>
+              {filtered.map((card) => {
+                const frozen = card.status === "frozen" || card.status === "system_frozen";
+                return showClosed ? (
+                  <tr key={card.id}>
+                    <td><code className="vcard-table-no">{maskNo(card.cardNo)}</code></td>
+                    <td>{schemeLabel(card.scheme)}</td>
+                    <td>{regionLabel(card.region)}</td>
+                    <td className="vcard-flow-balance">{money(card.balance)}</td>
+                    <td><time>{card.createdAt}</time></td>
+                    <td><time>{closedAtOf(card)}</time></td>
+                  </tr>
+                ) : (
+                  <tr key={card.id}>
+                    <td><code className="vcard-table-no">{maskNo(card.cardNo)}</code></td>
+                    <td>{schemeLabel(card.scheme)}</td>
+                    <td>{regionLabel(card.region)}</td>
+                    <td><span className={`vcard-status is-${cardStatusMeta[card.status].tone}`}>{cardStatusMeta[card.status].label}</span></td>
+                    <td className="vcard-flow-balance">{money(card.balance)}</td>
+                    <td><time>{card.createdAt}</time></td>
+                    <td>
+                      <span className="vcard-table-actions">
+                        <button type="button" className="uc-secondary-action" onClick={() => onDetail(card)}>
+                          {content.cardDetailLabel}<ArrowRight aria-hidden="true" />
+                        </button>
+                        <button type="button" className="uc-secondary-action" onClick={() => onFund(card)} disabled={frozen}>
+                          <PlusCircle aria-hidden="true" />充值
+                        </button>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : showClosed ? (
         <div className="vcard-grid">
-          {cards.map((card) => {
+          {filtered.map((card) => (
+            <article className="vcard-item is-closed" key={card.id}>
+              <div className="vcard-item-face">
+                <CardVisual
+                  card={card}
+                  revealed={Boolean(revealed[card.id])}
+                  onToggleReveal={() => setRevealed((current) => ({ ...current, [card.id]: !current[card.id] }))}
+                  content={content}
+                  editMode={editMode}
+                  updateContent={updateContent}
+                />
+              </div>
+              <div className="vcard-closed-meta">
+                <span>{content.cardClosedAt}</span>
+                <strong>{closedAtOf(card)}</strong>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="vcard-grid">
+          {filtered.map((card) => {
             const frozen = card.status === "frozen" || card.status === "system_frozen";
             return (
               <article className="vcard-item" key={card.id}>
-                <button className="vcard-item-face" type="button" onClick={() => onDetail(card)} aria-label={`查看 ${binTitle(card)} 卡详情`}>
+                <div
+                  className="vcard-item-face"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onDetail(card)}
+                  onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onDetail(card); } }}
+                  aria-label={`查看 ${binTitle(card)} 卡详情`}
+                >
                   <CardVisual
                     card={card}
                     revealed={Boolean(revealed[card.id])}
                     onToggleReveal={() => setRevealed((current) => ({ ...current, [card.id]: !current[card.id] }))}
                     content={content}
                     editMode={editMode}
-                    updateContent={updateContent}
-                  />
-                </button>
+                  updateContent={updateContent}
+                />
+                </div>
                 <div className="vcard-item-actions">
                   <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
@@ -128,16 +352,14 @@ export function CardList({
             );
           })}
         </div>
-      ) : (
-        <div className="uc-empty vcard-empty">
-          <CreditCard aria-hidden="true" />
-          <strong>{editable("cardEmptyCards")}</strong>
-          <p>{editable("cardEmptyCardsHint")}</p>
-          <Button className="vcard-open-entry" onClick={onOpenMarket}><PlusCircle aria-hidden="true" />{editable("cardGoOpen")}</Button>
-        </div>
       )}
     </section>
   );
+}
+
+/** 表格里的卡号统一脱敏：前 6 后 4。 */
+function maskNo(cardNo: string) {
+  return cardNo.replace(/^(.{6})[\d]+(.{4})$/, "$1******$2");
 }
 
 /* ------------------------------------------------------------------ */

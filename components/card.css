@@ -4,7 +4,6 @@
 
 /* 模块外壳与面板通用头部 */
 .card-module{display:block}
-.card-module-head{margin-bottom:18px}
 .card-tabs{margin-bottom:22px}
 .vcard-panel,.vbin-panel,.vtxn-panel{display:block}
 .vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px;flex-wrap:wrap}
@@ -31,12 +30,12 @@
 .vcard-chip i:nth-child(1){top:8px}
 .vcard-chip i:nth-child(2){top:13px}
 .vcard-chip i:nth-child(3){top:18px}
-.vcard-number-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px}
-.vcard-number{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:19px;letter-spacing:.08em;color:#fff}
+.vcard-number-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.vcard-number{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.05em;color:#fff;white-space:nowrap;overflow:hidden}
 .vcard-number-tools{display:inline-flex;gap:6px;flex:none}
-.vcard-number-tools button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;transition:background .15s ease}
+.vcard-number-tools button{display:grid;place-items:center;width:26px;height:26px;border:0;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;transition:background .15s ease}
 .vcard-number-tools button:hover{background:rgba(255,255,255,.24)}
-.vcard-number-tools svg{width:16px;height:16px}
+.vcard-number-tools svg{width:14px;height:14px}
 .vcard-balance{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto}
 .vcard-balance span{font-size:12px;color:rgba(255,255,255,.7)}
 .vcard-balance strong{font-size:22px;font-weight:650;color:#fff;letter-spacing:.01em}
@@ -71,6 +70,24 @@
 .vcard-item-danger:hover{background:#fbeeed;border-color:var(--color-danger)}
 .vcard-item-danger svg{width:16px;height:16px}
 .vcard-open-entry{background:var(--color-brand)!important;color:#111214!important;border:0!important}
+
+/* 我的卡片：筛选栏 / 视图切换 / 表格视图 / 删卡记录 */
+.vcard-head-tools{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
+.vcard-view-toggle{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface)}
+.vcard-view-toggle button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--color-text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.vcard-view-toggle button:hover{color:var(--color-text-primary)}
+.vcard-view-toggle button.is-active{background:var(--color-brand);color:#111214}
+.vcard-view-toggle svg{width:14px;height:14px}
+.vcard-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.vcard-filters .vcard-search{flex:1;min-width:200px}
+.vcard-filters .vbin-select{min-width:132px}
+.vcard-table-wrap{border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden}
+.vcard-table-view th,.vcard-table-view td{padding:12px 14px;text-align:left;white-space:nowrap}
+.vcard-table-no{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--color-text-primary)}
+.vcard-table-actions{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vcard-item.is-closed .vcard{filter:grayscale(.7);opacity:.82}
+.vcard-closed-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px dashed var(--ds-border-default);border-radius:10px;font-size:12px;color:var(--color-text-secondary)}
+.vcard-closed-meta strong{font-weight:600;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
 
 /* ---------- 卡详情 ---------- */
 .vcard-detail{display:block}
@@ -212,7 +229,10 @@
 @media(max-width:900px){.business-entry-grid{grid-template-columns:1fr}}
 @media(max-width:640px){
   .vcard-overview{grid-template-columns:1fr}
-  .vcard-number{font-size:17px}
+  .vcard-number{font-size:14px}
   .vbin-fees,.vbin-meta{grid-template-columns:1fr}
   .vcard-info-row{grid-template-columns:88px 1fr}
+  .vcard-filters{flex-direction:column;align-items:stretch}
+  .vcard-filters .vbin-select{min-width:0;width:100%}
+  .vcard-head-tools{width:100%;justify-content:space-between}
 }
