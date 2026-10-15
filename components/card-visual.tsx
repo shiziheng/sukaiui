@@ -105,7 +105,6 @@ export function CardVisual({
         <span className="vcard-number-tools">
           <button type="button" onClick={onToggleReveal} aria-label={revealed ? content.cardHide : content.cardReveal}>
             {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-            <EditableText active={editMode} value={revealed ? content.cardHide : content.cardReveal} onChange={(value) => updateContent(revealed ? "cardHide" : "cardReveal", value)} />
           </button>
           <button type="button" onClick={handleCopy} aria-label={content.cardCopy}>
             {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}

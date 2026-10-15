@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, CreditCard, Layers, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
-  Search, Snowflake, Table, Trash2, WalletCards,
+  ArrowLeft, ArrowRight, CreditCard, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
+  Search, Snowflake, Table, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -149,23 +149,32 @@ export function CardList({
         </div>
       </header>
 
-      <section className="vcard-overview" aria-label="卡片概览">
-        <article className="vcard-stat is-primary">
-          <span className="vcard-stat-icon"><WalletCards aria-hidden="true" /></span>
-          <div><span>平台余额</span><strong>{money(platformBalance)}</strong><small>用于开卡与卡片充值</small></div>
-        </article>
-        <article className="vcard-stat">
-          <span className="vcard-stat-icon"><Layers aria-hidden="true" /></span>
-          <div><span>卡片总数</span><strong>{stats.total}</strong><small>正常 {stats.active} 张</small></div>
-        </article>
-        <article className="vcard-stat">
-          <span className="vcard-stat-icon"><CreditCard aria-hidden="true" /></span>
-          <div><span>卡内总余额</span><strong>{money(stats.balance)}</strong><small>全部卡片合计</small></div>
-        </article>
-        <article className="vcard-stat">
-          <span className="vcard-stat-icon"><Snowflake aria-hidden="true" /></span>
-          <div><span>冻结中</span><strong>{stats.frozen}</strong><small>含系统冻结</small></div>
-        </article>
+      <section className="vcard-statbar" aria-label="卡片概览">
+        <div className="vcard-statcell is-brand">
+          <span>平台余额</span>
+          <strong>{money(platformBalance)}</strong>
+          <small>用于开卡与卡片充值</small>
+        </div>
+        <div className="vcard-statcell">
+          <span>卡片总数</span>
+          <strong>{stats.total}</strong>
+          <small>正常 {stats.active} 张</small>
+        </div>
+        <div className="vcard-statcell">
+          <span>卡内总余额</span>
+          <strong>{money(stats.balance)}</strong>
+          <small>全部卡片合计</small>
+        </div>
+        <div className="vcard-statcell">
+          <span>冻结中</span>
+          <strong>{stats.frozen}</strong>
+          <small>含系统冻结</small>
+        </div>
+        <div className="vcard-statcell">
+          <span>已注销</span>
+          <strong>{closedRecords.length}</strong>
+          <small>可在状态下拉查看记录</small>
+        </div>
       </section>
 
       <div className="vcard-filters">
@@ -339,13 +348,13 @@ export function CardList({
                     <PlusCircle aria-hidden="true" />充值
                   </Button>
                   <button className="uc-secondary-action" type="button" onClick={() => onDetail(card)}>
-                    {editable("cardDetailLabel")}<ArrowRight aria-hidden="true" />
+                    {content.cardDetailLabel}
                   </button>
                   <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
                     <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
                   </button>
                   <button className="vcard-item-danger" type="button" onClick={() => onRequestDelete(card)} aria-label={content.cardDeleteCard}>
-                    <Trash2 aria-hidden="true" />
+                    <Trash2 aria-hidden="true" />{content.cardDeleteCard}
                   </button>
                 </div>
               </article>
