@@ -30,7 +30,7 @@ import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard"
 import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
-import { CardModule } from "@/components/card-module";
+import { CardModule, type PlatformFlowInput } from "@/components/card-module";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -54,6 +54,7 @@ import { defaultContent, type DemoContent } from "@/data/content";
 import { defaultFaqs, type FAQGroup, type FAQItem } from "@/data/faqs";
 import { defaultRechargeFlows, type RechargeFlow } from "@/data/recharge-flows";
 import { defaultCardBins, defaultCardFlows, defaultVirtualCards, type CardBin, type CardFlowItem, type VirtualCard } from "@/data/card-business";
+import { defaultPlatformFlows, type PlatformFlow } from "@/data/bill-flows";
 import type { ManagedOrder } from "@/data/order-management";
 import type { BatchTask } from "@/data/recharge-batch";
 import type { PaymentCompletion, PaymentIntent } from "@/data/payment-mocks";
@@ -528,7 +529,15 @@ export default function Home() {
   const [walletRecords, setWalletRecords] = useState(() => accountDashboardMock.walletRecords.map((item) => ({ ...item })));
   const [topUpRecords, setTopUpRecords] = useState(() => accountDashboardMock.topUpRecords.map((item) => ({ ...item })));
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
+  const [platformFlows, setPlatformFlows] = useState<PlatformFlow[]>(() => defaultPlatformFlows.map((flow) => ({ ...flow })));
+  /** 代充合并页的二级页签：套餐代充 / 成品号。 */
+  const [bizTab, setBizTab] = useState<"recharge" | "account">("recharge");
   const importInputRef = useRef<HTMLInputElement>(null);
+
+  /** 卡模块上报的平台余额流水：开卡扣费 / 卡充值 / 卡退款 / 销卡退款。 */
+  const pushPlatformFlow = (flow: PlatformFlowInput) => {
+    setPlatformFlows((current) => [{ id: `PF-${Date.now()}`, time: new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-"), status: "success" as const, ...flow }, ...current]);
+  };
 
   useEffect(() => {
     const syncHelpHash = () => {
@@ -558,6 +567,9 @@ export default function Home() {
         if (config.content.rechargeServiceDescription === "为已有账号升级或续费套餐") config.content.rechargeServiceDescription = "已有账号？选择 Plus、Pro、Max 等当前在售套餐。";
         if (config.content.startRechargeService === "开始代充") config.content.startRechargeService = "选择升级套餐";
         if (config.content.ordersPageSubtitle === "查看你的成品号和代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充服务订单。";
+        // 五页签改版：菜单更名（链式迁移，只匹配已知旧值）
+        if (["充值", "钱包充值"].includes(config.content.navTopup)) config.content.navTopup = "钱包/充值";
+        if (["我的订单", "订单中心"].includes(config.content.navOrders)) config.content.navOrders = "我的账单";
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
         if (config.content.invitePageSubtitle === "邀请好友注册并消费，可获得返佣奖励。") config.content.invitePageSubtitle = "邀请好友使用 SUKAI，查看你的邀请奖励与记录。";
@@ -596,10 +608,12 @@ export default function Home() {
   }, [brands, content, defaults, faqs, hydrated, products, rechargeFlows]);
 
   const isProductsPage = selectedMenu === "account" || selectedMenu === "recharge";
+  // 登录后代充/成品号合并成一页（页内 bizTab 切换）；游客态保持两个独立页签。
+  const productsBiz: "account" | "recharge" = isLoggedIn ? bizTab : selectedMenu === "account" ? "account" : "recharge";
   const visibleProducts = useMemo(() => {
     if (!isProductsPage) return [];
-    return products.filter((product) => product.businessType === selectedMenu && product.brand === selectedBrand);
-  }, [isProductsPage, products, selectedBrand, selectedMenu]);
+    return products.filter((product) => product.businessType === productsBiz && product.brand === selectedBrand);
+  }, [isProductsPage, products, selectedBrand, productsBiz]);
   const currentBrand = brands.find((brand) => brand.id === selectedBrand) ?? brands[0];
   const effectiveBalance = isLoggedIn ? walletBalance : 0;
   // 挂起订单对应的余额缺口（向上取整、最小 1），用于预填充值页金额。
@@ -611,7 +625,7 @@ export default function Home() {
   })();
   const editorProduct = products.find((product) => product.id === editorProductId) ?? null;
   const wizardFlow = wizardProduct ? rechargeFlows.find((flow) => flow.brand === wizardProduct.brand) : undefined;
-  const currentFaqGroup = faqs.find((group) => group.businessType === selectedMenu && group.brand === selectedBrand);
+  const currentFaqGroup = faqs.find((group) => group.businessType === (isProductsPage ? productsBiz : selectedMenu) && group.brand === selectedBrand);
   const sortedFaqItems = useMemo(
     () => [...(currentFaqGroup?.items ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
     [currentFaqGroup],
@@ -889,11 +903,10 @@ export default function Home() {
 
   const loggedInMenuItems: Array<{ id: MenuId; key: keyof DemoContent }> = [
     { id: "home", key: "navHome" },
-    { id: "account", key: "navAccount" },
+    { id: "card", key: "navCard" },
     { id: "recharge", key: "navRecharge" },
     { id: "topup", key: "navTopup" },
     { id: "orders", key: "navOrders" },
-    { id: "card", key: "navCard" },
   ];
   const publicMenuItems: Array<{ id: "home" | "account" | "recharge"; label: string }> = [
     { id: "home", label: "首页" },
@@ -1019,6 +1032,7 @@ export default function Home() {
                 updateContent={updateContent}
                 availableBalance={effectiveBalance}
                 topUpRecords={topUpRecords}
+                platformFlows={platformFlows}
                 onBack={() => navigateTo("wallet")}
                 onComplete={applyPaymentCompletion}
                 onSupport={() => setSupportSurface("floating")}
@@ -1042,9 +1056,9 @@ export default function Home() {
                 onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={navigateTo} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
-              <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
+              <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} cardFlows={cardFlows} />
             ) : selectedMenu === "invite" ? (
               <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "wallet" ? (
@@ -1052,7 +1066,7 @@ export default function Home() {
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
-                onNavigate={navigateTo}
+                onNavigate={(destination) => { if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }}
                 onOpenRecharge={openWalletRecharge}
                 availableBalance={walletBalance}
                 walletRecords={walletRecords}
@@ -1077,16 +1091,25 @@ export default function Home() {
                 editMode={editMode}
                 updateContent={updateContent}
                 onGoTopup={() => navigateTo("topup")}
+                onPlatformFlow={pushPlatformFlow}
               />
             ) : isProductsPage ? (
               <section className="commerce-panel">
+                {isLoggedIn ? (
+                  <Tabs value={bizTab} onValueChange={(value) => setBizTab(value as typeof bizTab)} className="uc-tabs-list biz-tabs">
+                    <TabsList>
+                      <TabsTrigger value="recharge"><Zap aria-hidden="true" /><EditableText active={editMode} value={content.bizTabRecharge} onChange={(value) => updateContent("bizTabRecharge", value)} /></TabsTrigger>
+                      <TabsTrigger value="account"><PackageOpen aria-hidden="true" /><EditableText active={editMode} value={content.bizTabAccount} onChange={(value) => updateContent("bizTabAccount", value)} /></TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                ) : null}
                 <header className="commerce-page-heading">
-                  <span className="commerce-page-icon" aria-hidden="true">{selectedMenu === "account" ? <PackageOpen /> : <Zap />}</span>
+                  <span className="commerce-page-icon" aria-hidden="true">{productsBiz === "account" ? <PackageOpen /> : <Zap />}</span>
                   <div>
-                    <h1><EditableText active={editMode} value={selectedMenu === "account" ? content.accountLabel : content.rechargeLabel} onChange={(value) => updateContent(selectedMenu === "account" ? "accountLabel" : "rechargeLabel", value)} /></h1>
-                    <p><EditableText active={editMode} value={selectedMenu === "account" ? content.accountPageSubtitle : content.rechargePageSubtitle} onChange={(value) => updateContent(selectedMenu === "account" ? "accountPageSubtitle" : "rechargePageSubtitle", value)} /></p>
+                    <h1><EditableText active={editMode} value={productsBiz === "account" ? content.accountLabel : content.rechargeLabel} onChange={(value) => updateContent(productsBiz === "account" ? "accountLabel" : "rechargeLabel", value)} /></h1>
+                    <p><EditableText active={editMode} value={productsBiz === "account" ? content.accountPageSubtitle : content.rechargePageSubtitle} onChange={(value) => updateContent(productsBiz === "account" ? "accountPageSubtitle" : "rechargePageSubtitle", value)} /></p>
                   </div>
-                  {selectedMenu === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
+                  {productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
                 </header>
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">
@@ -1102,7 +1125,7 @@ export default function Home() {
                   <div className="panel-context">
                     <strong>{currentBrand.name}</strong>
                     <span>
-                      {selectedMenu === "account" ? content.accountLabel : content.rechargeLabel} · {visibleProducts.length} {content.planUnit}
+                      {productsBiz === "account" ? content.accountLabel : content.rechargeLabel} · {visibleProducts.length} {content.planUnit}
                     </span>
                   </div>
                 </div>

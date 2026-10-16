@@ -126,8 +126,8 @@ export function cardTail(cardNo: string) {
 }
 
 export const cardStatusMeta: Record<CardStatus, { label: string; tone: "completed" | "processing" | "pending" | "failed" }> = {
-  processing: { label: "处理中", tone: "processing" },
-  active: { label: "正常", tone: "completed" },
+  processing: { label: "开卡中", tone: "processing" },
+  active: { label: "已激活", tone: "completed" },
   frozen: { label: "已冻结", tone: "pending" },
   system_frozen: { label: "系统冻结", tone: "failed" },
 };
@@ -148,6 +148,29 @@ export const cardFlowStatusLabel: Record<CardFlowStatus, string> = {
 /** 卡段剩余的评估口径：可开上限 − 已持有张数。 */
 export function remainingStock(bin: CardBin, owned: number) {
   return Math.max(0, bin.stock - owned);
+}
+
+/** 全部卡段加总的剩余可开张数（开卡中心顶部展示）。 */
+export function totalRemainingStock(bins: CardBin[], ownedCounts: Record<string, number>) {
+  return bins.reduce((sum, bin) => sum + remainingStock(bin, ownedCounts[bin.id] ?? 0), 0);
+}
+
+/** 前端 Demo 的 CSV 导出：生成文件并触发下载。 */
+export function downloadCsv(filename: string, header: string[], rows: Array<Array<string | number>>) {
+  const escape = (value: string | number) => {
+    const text = String(value ?? "");
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+  const csv = "\uFEFF" + [header, ...rows].map((row) => row.map(escape).join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
 }
 
 /* ------------------------------------------------------------------ */

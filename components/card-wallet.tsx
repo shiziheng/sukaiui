@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, CreditCard, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
-  Search, Snowflake, Table, Trash2,
+  ArrowLeft, ArrowRight, Copy, CreditCard, Download, EyeOff, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
+  RotateCcw, Search, Snowflake, Table, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ import {
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import {
-  binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, money,
+  binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, money,
   regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardRegion, type CardScheme,
   type CardStatus, type VirtualCard,
 } from "@/data/card-business";
@@ -38,6 +38,7 @@ export function CardList({
   onOpenMarket,
   onDetail,
   onFund,
+  onRefund,
   onRequestFreeze,
   onRequestDelete,
   content,
@@ -50,6 +51,7 @@ export function CardList({
   onOpenMarket: () => void;
   onDetail: (card: VirtualCard) => void;
   onFund: (card: VirtualCard) => void;
+  onRefund: (card: VirtualCard) => void;
   onRequestFreeze: (card: VirtualCard) => void;
   onRequestDelete: (card: VirtualCard) => void;
   content: DemoContent;
@@ -108,6 +110,18 @@ export function CardList({
   const closedAtOf = (card: VirtualCard) =>
     closedRecords.find((record) => record.card.id === card.id)?.closedAt ?? "—";
 
+  const statusTextOf = (card: VirtualCard) =>
+    showClosed ? "已注销" : cardStatusMeta[card.status].label;
+
+  const handleExport = () => {
+    downloadCsv(
+      `cards-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["卡号", "卡组织", "发行地", "状态", "余额(USD)", "开卡时间"],
+      filtered.map((card) => [card.cardNo, schemeLabel(card.scheme), regionLabel(card.region), statusTextOf(card), card.balance.toFixed(2), card.createdAt]),
+    );
+    toast.success(content.cardExportDone);
+  };
+
   const noFilterApplied =
     !keyword.trim() && statusFilter === "all" && schemeFilter === "all" && regionFilter === "all";
 
@@ -122,6 +136,9 @@ export function CardList({
           </div>
         </div>
         <div className="vcard-head-tools">
+          <button className="uc-secondary-action" type="button" onClick={handleExport} disabled={!filtered.length}>
+            <Download aria-hidden="true" />{editable("cardExport")}
+          </button>
           <div className="vcard-view-toggle" role="group" aria-label="展示方式">
             <button
               type="button"
@@ -291,6 +308,9 @@ export function CardList({
                         <button type="button" className="uc-secondary-action" onClick={() => onFund(card)} disabled={frozen}>
                           <PlusCircle aria-hidden="true" />充值
                         </button>
+                        <button type="button" className="uc-secondary-action" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
+                          <RotateCcw aria-hidden="true" />{content.cardRefund}
+                        </button>
                       </span>
                     </td>
                   </tr>
@@ -347,8 +367,14 @@ export function CardList({
                   <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
                   </Button>
-                  <button className="uc-secondary-action" type="button" onClick={() => onDetail(card)}>
-                    {content.cardDetailLabel}
+                  <button
+                    className="uc-secondary-action"
+                    type="button"
+                    onClick={() => onRefund(card)}
+                    disabled={frozen || card.balance <= 0}
+                    title={card.balance <= 0 ? content.cardRefundEmpty : content.cardRefund}
+                  >
+                    <RotateCcw aria-hidden="true" />{content.cardRefund}
                   </button>
                   <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
                     <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
@@ -366,9 +392,9 @@ export function CardList({
   );
 }
 
-/** 表格里的卡号统一脱敏：前 6 后 4。 */
+/** 表格里的卡号统一脱敏：前 4 后 4 明文，中间密文。 */
 function maskNo(cardNo: string) {
-  return cardNo.replace(/^(.{6})[\d]+(.{4})$/, "$1******$2");
+  return cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2");
 }
 
 /* ------------------------------------------------------------------ */
@@ -381,6 +407,7 @@ export function CardDetail({
   flows,
   onBack,
   onFund,
+  onRefund,
   onRequestFreeze,
   onRequestDelete,
   content,
@@ -392,6 +419,7 @@ export function CardDetail({
   flows: CardFlowItem[];
   onBack: () => void;
   onFund: (card: VirtualCard) => void;
+  onRefund: (card: VirtualCard) => void;
   onRequestFreeze: (card: VirtualCard) => void;
   onRequestDelete: (card: VirtualCard) => void;
   content: DemoContent;
@@ -399,7 +427,8 @@ export function CardDetail({
   updateContent: Editable;
 }) {
   const [revealed, setRevealed] = useState(false);
-  const [flowType, setFlowType] = useState<"all" | "recharge" | "consume">("all");
+  const [cvvState, setCvvState] = useState<"hidden" | "querying" | "shown">("hidden");
+  const [flowType, setFlowType] = useState<"all" | "recharge" | "consume" | "refund">("all");
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
@@ -412,6 +441,25 @@ export function CardDetail({
   const finance = buildCardFinance(card, flows);
   const frozen = card.status === "frozen" || card.status === "system_frozen";
   const statusMeta = cardStatusMeta[card.status];
+
+  /** CVV 点击后模拟从上游实时查询（约 0.9s），提示系统不存储。 */
+  const queryCvv = () => {
+    if (cvvState !== "hidden") return;
+    setCvvState("querying");
+    window.setTimeout(() => setCvvState("shown"), 900);
+  };
+
+  const handleExportFlows = () => {
+    downloadCsv(
+      `card-flows-${cardTail(card.cardNo)}-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["时间", "类型", "金额(USD)", "变动后余额", "商户/说明", "状态", "交易号"],
+      ownFlows.map((flow) => [
+        flow.time, cardFlowTypeLabel[flow.type], flow.amount.toFixed(2), flow.balanceAfter.toFixed(2),
+        flow.merchant, cardFlowStatusLabel[flow.status], flow.txNo,
+      ]),
+    );
+    toast.success(content.cardExportDone);
+  };
 
   const copy = async (value: string) => {
     const ok = await copyText(value);
@@ -453,19 +501,30 @@ export function CardDetail({
               <SensitiveRow
                 label={content.cardNoLabel}
                 value={card.cardNo}
-                display={card.cardNo.replace(/^(.{6})[\d]+(.{4})$/, "$1******$2")}
+                display={card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}
                 revealed={revealed}
                 onToggleReveal={() => setRevealed((current) => !current)}
                 onCopy={() => copy(card.cardNo)}
               />
-              <SensitiveRow
-                label={content.cardCvvLabel}
-                value={card.cvv}
-                display="•••"
-                revealed={revealed}
-                onToggleReveal={() => setRevealed((current) => !current)}
-                onCopy={() => copy(card.cvv)}
-              />
+              <div className="vcard-info-row is-sensitive">
+                <dt>{editable("cardCvvLabel")}</dt>
+                <dd>
+                  <span>{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
+                  <span className="vcard-info-tools">
+                    <button
+                      type="button"
+                      onClick={() => (cvvState === "shown" ? setCvvState("hidden") : queryCvv())}
+                      disabled={cvvState === "querying"}
+                      aria-label={cvvState === "hidden" ? content.cardCvvQuery : "隐藏 CVV"}
+                    >
+                      {cvvState === "shown" ? <EyeOff aria-hidden="true" /> : <Search aria-hidden="true" />}
+                    </button>
+                    {cvvState === "shown" ? (
+                      <button type="button" onClick={() => copy(card.cvv)} aria-label="复制 CVV"><Copy aria-hidden="true" /></button>
+                    ) : null}
+                  </span>
+                </dd>
+              </div>
               <div className="vcard-info-row">
                 <dt>{editable("cardExpLabel")}</dt>
                 <dd><span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span></dd>
@@ -486,6 +545,7 @@ export function CardDetail({
                 </dd>
               </div>
             </dl>
+            <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
           </section>
         </div>
 
@@ -511,6 +571,9 @@ export function CardDetail({
             <div className="vcard-action-list">
               <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
                 <PlusCircle aria-hidden="true" />充值
+              </Button>
+              <Button variant="outline" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
+                <RotateCcw aria-hidden="true" />{content.cardRefund}
               </Button>
               <Button variant="outline" onClick={() => onRequestFreeze(card)}>
                 <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
@@ -552,7 +615,11 @@ export function CardDetail({
             <option value="all">{content.cardAllTypes}</option>
             <option value="recharge">{cardFlowTypeLabel.recharge}</option>
             <option value="consume">{cardFlowTypeLabel.consume}</option>
+            <option value="refund">{cardFlowTypeLabel.refund}</option>
           </select>
+          <button className="uc-secondary-action" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
+            <Download aria-hidden="true" />{editable("cardExport")}
+          </button>
         </header>
 
         {visibleFlows.length ? (

@@ -242,3 +242,11 @@
   .vcard-filters .vbin-select{min-width:0;width:100%}
   .vcard-head-tools{width:100%;justify-content:space-between}
 }
+
+/* ---------- v0.13.0：开卡统计 / 费用外扣 / CVV 查询说明 ---------- */
+.vbin-head-stats{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vbin-head-stats .vbin-count.is-stock strong{color:var(--color-text-primary);font-size:15px}
+.vbin-fee-note{display:flex;align-items:center;gap:8px;margin:0 0 16px;padding:10px 14px;border:1px dashed var(--ds-border-strong);border-radius:10px;background:var(--color-surface-soft);font-size:12.5px;color:var(--color-text-secondary)}
+.vcard-cvv-note{display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:12px;color:var(--color-text-tertiary)}
+.vcard-cvv-note svg{width:14px;height:14px;flex:none}
+.vcard-info-tools button:disabled{opacity:.45;cursor:not-allowed}

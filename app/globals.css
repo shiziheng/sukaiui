@@ -1260,3 +1260,13 @@ button{font:inherit}
 .topup-card-main.is-network .topup-warning{margin-top:20px}
 .topup-card-body:has(.topup-card-main.is-network) .topup-card-info{align-self:stretch}
 .topup-card-body:has(.topup-card-main.is-network) .topup-info-card{align-content:space-between}
+
+/* v0.13.0 五页签改版：代充合并页二级页签 / 我的账单视图切换与流水类型筛选 */
+.biz-tabs{margin-bottom:14px}
+.biz-tabs [data-slot=tabs-trigger]{gap:6px}
+.biz-tabs [data-slot=tabs-trigger] svg{width:15px;height:15px}
+.orders-view-tabs{margin-bottom:16px}
+.bill-type-tabs{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
+.bill-type-tab{height:32px;padding:0 13px;border:1px solid var(--ds-border-default);border-radius:999px;background:var(--color-surface);font-size:12.5px;color:var(--color-text-secondary);cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.bill-type-tab:hover{border-color:var(--ds-border-strong);color:var(--color-text-primary)}
+.bill-type-tab[data-active=true]{background:#f6fbdc;border-color:var(--ds-border-selected);color:#5b6b1f;font-weight:500}

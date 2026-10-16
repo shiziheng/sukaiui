@@ -7,7 +7,7 @@ import { CardNotice, SchemeBadge } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import {
-  binTitle, money, regionLabel, remainingStock, schemeLabel, type CardBin, type CardRegion, type CardScheme,
+  binTitle, money, regionLabel, remainingStock, schemeLabel, totalRemainingStock, type CardBin, type CardRegion, type CardScheme,
 } from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
 
@@ -47,6 +47,8 @@ export function CardMarket({
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
 
+  const overallRest = totalRemainingStock(bins, ownedCounts);
+
   return (
     <section className="vbin-panel">
       <header className="vbin-panel-head">
@@ -57,8 +59,13 @@ export function CardMarket({
             <p>{editable("cardMarketSubtitle")}</p>
           </div>
         </div>
-        <span className="vbin-count">共 {visibleBins.length} 个卡段</span>
+        <div className="vbin-head-stats">
+          <span className="vbin-count">共 {visibleBins.length} 个卡段</span>
+          <span className="vbin-count is-stock">{editable("cardOverallStock")} · <strong>{overallRest}</strong> 张</span>
+        </div>
       </header>
+
+      <p className="vbin-fee-note">{editable("cardFeeExternal")}</p>
 
       <div className="vbin-filters">
         <label className="vbin-search">

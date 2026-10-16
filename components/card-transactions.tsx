@@ -13,9 +13,11 @@ import { type DemoContent } from "@/data/content";
 type Editable = (key: keyof DemoContent, value: string) => void;
 
 export function CardTransactions({
-  cards, flows, content, editMode, updateContent,
+  cards, closedCards = [], flows, content, editMode, updateContent,
 }: {
   cards: VirtualCard[];
+  /** 已销卡的卡片快照：流水保留，卡列显示「已销卡」。 */
+  closedCards?: VirtualCard[];
   flows: CardFlowItem[];
   content: DemoContent;
   editMode: boolean;
@@ -29,11 +31,15 @@ export function CardTransactions({
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
 
+  const allCards = useMemo(() => [...cards, ...closedCards], [cards, closedCards]);
+
   const cardMap = useMemo(() => {
     const map: Record<string, VirtualCard> = {};
-    for (const card of cards) map[card.id] = card;
+    for (const card of allCards) map[card.id] = card;
     return map;
-  }, [cards]);
+  }, [allCards]);
+
+  const closedIds = useMemo(() => new Set(closedCards.map((card) => card.id)), [closedCards]);
 
   const visible = useMemo(() => {
     const query = keyword.trim().toLowerCase();
@@ -68,9 +74,9 @@ export function CardTransactions({
           <span>卡片</span>
           <select className="vbin-select" value={cardId} onChange={(event) => setCardId(event.target.value)} aria-label="筛选卡片">
             <option value="all">{content.cardAllCards}</option>
-            {cards.map((card) => (
+            {allCards.map((card) => (
               <option key={card.id} value={card.id}>
-                尾号 {cardTail(card.cardNo)} · {card.scheme === "visa" ? "Visa" : card.scheme === "mastercard" ? "MasterCard" : "Discover"}
+                {closedIds.has(card.id) ? "已销卡 · " : ""}尾号 {cardTail(card.cardNo)} · {card.scheme === "visa" ? "Visa" : card.scheme === "mastercard" ? "MasterCard" : "Discover"}
               </option>
             ))}
           </select>
@@ -102,7 +108,7 @@ export function CardTransactions({
                 return (
                   <tr key={flow.id}>
                     <td><time>{flow.time}</time></td>
-                    <td>{card ? `•••• ${cardTail(card.cardNo)}` : "—"}</td>
+                    <td>{card ? `${closedIds.has(card.id) ? "已销卡 " : ""}•••• ${cardTail(card.cardNo)}` : "—"}</td>
                     <td><span className={`vcard-flow-type is-${flow.type}`}>{cardFlowTypeLabel[flow.type]}</span></td>
                     <td className={`vcard-flow-amount ${flow.amount > 0 ? "is-income" : "is-expense"}`}>{flow.amount > 0 ? "+" : "−"}{money(Math.abs(flow.amount))}</td>
                     <td className="vcard-flow-balance">{money(flow.balanceAfter)}</td>

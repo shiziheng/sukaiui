@@ -13,6 +13,17 @@ export type DemoContent = {
   navCard: string;
   navTopup: string;
   navOrders: string;
+  bizTabRecharge: string;
+  bizTabAccount: string;
+  billTabFlows: string;
+  billTabOrders: string;
+  billAllTypes: string;
+  billTypeRecharge: string;
+  billTypeAccount: string;
+  billTypeCommission: string;
+  billTypeCard: string;
+  walletFlowTitle: string;
+  walletFlowSubtitle: string;
   navInvite: string;
   personalCenter: string;
   logout: string;
@@ -367,6 +378,17 @@ export type DemoContent = {
   cardServiceTitle: string;
   cardServiceDescription: string;
   cardModuleSubtitle: string;
+  cardRefund: string;
+  cardRefundConfirmTitle: string;
+  cardRefundConfirmDescription: string;
+  cardRefundEmpty: string;
+  cardExport: string;
+  cardExportDone: string;
+  cardCvvQuery: string;
+  cardCvvQuerying: string;
+  cardCvvNote: string;
+  cardOverallStock: string;
+  cardFeeExternal: string;
 };
 
 export const defaultContent: DemoContent = {
@@ -382,8 +404,19 @@ export const defaultContent: DemoContent = {
   navAccount: "成品号",
   navRecharge: "代充",
   navCard: "虚拟卡",
-  navTopup: "充值",
-  navOrders: "我的订单",
+  navTopup: "钱包/充值",
+  navOrders: "我的账单",
+  bizTabRecharge: "套餐代充",
+  bizTabAccount: "成品号",
+  billTabFlows: "平台流水",
+  billTabOrders: "我的订单",
+  billAllTypes: "全部类型",
+  billTypeRecharge: "代充流水",
+  billTypeAccount: "成品号流水",
+  billTypeCommission: "退单/返佣",
+  billTypeCard: "卡流水",
+  walletFlowTitle: "余额流水",
+  walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
   navInvite: "我的邀请",
   personalCenter: "个人中心",
   logout: "退出登录",
@@ -639,6 +672,17 @@ export const defaultContent: DemoContent = {
   cardTabMarket: "开卡中心",
   cardTabTransactions: "消费记录",
   cardModuleSubtitle: "开卡、充值与消费记录，由平台余额统一管理。",
+  cardRefund: "退款",
+  cardRefundConfirmTitle: "卡内余额退款",
+  cardRefundConfirmDescription: "将把这张卡的全部余额退回平台余额，退款后卡内余额清零；部分卡段退款后可能被上游封卡，请谨慎操作。",
+  cardRefundEmpty: "卡内没有可退余额",
+  cardExport: "导出",
+  cardExportDone: "已导出 CSV 文件",
+  cardCvvQuery: "查询 CVV",
+  cardCvvQuerying: "上游查询中…",
+  cardCvvNote: "CVV 由上游实时查询，系统不存储。",
+  cardOverallStock: "整体剩余开卡数",
+  cardFeeExternal: "开卡费与充值费均从平台余额额外扣除（费用外扣）。",
   cardOpenAction: "开通虚拟卡",
   cardServiceTitle: "开通虚拟卡",
   cardServiceDescription: "订阅与广告投放专用，余额从平台余额一键划转。",

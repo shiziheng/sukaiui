@@ -11,13 +11,25 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
-import { accountStatusOptions, getOrderActions, getUnifiedStatus, orderManagementMock, rechargeStatusOptions, unifiedStatusOptions, type ManagedOrder, type ManagedOrderKind, type ManagedOrderStatus, type OrderActionId, type UnifiedOrderStatus } from "@/data/order-management";
+import {
+  accountStatusOptions, getOrderActions, getUnifiedStatus, orderManagementMock, rechargeStatusOptions, unifiedStatusOptions,
+  type ManagedOrder, type ManagedOrderKind, type ManagedOrderStatus, type OrderActionId, type UnifiedOrderStatus,
+} from "@/data/order-management";
+import {
+  billFlowTypeLabel, defaultBillFlows, type BillFlowItem, type BillFlowType,
+} from "@/data/bill-flows";
+import {
+  cardFlowStatusLabel, cardFlowTypeLabel, cardTail, money, type CardFlowItem,
+} from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
 
 type OrderTab = "all" | ManagedOrderKind;
 type QuickFilter = OrderTab | "pending";
 type StatusFilter = "all" | ManagedOrderStatus | UnifiedOrderStatus;
 type TimeFilter = "all" | "7" | "30" | "90" | "custom";
+/** 我的账单顶层视图：平台流水（代充/成品号/退单返佣/卡流水）或原订单列表。 */
+type BillView = "flows" | "orders";
+type FlowFilter = "all" | BillFlowType | "card";
 
 const PAGE_SIZE = 10;
 const DEMO_NOW = new Date("2026-09-15T23:59:59");
@@ -43,8 +55,11 @@ function withinTimeRange(order: ManagedOrder, range: TimeFilter, customFrom: str
   return created >= cutoff && created <= DEMO_NOW;
 }
 
-export function OrdersPage({ content, editMode, updateContent, extraOrders = [] }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; extraOrders?: ManagedOrder[] }) {
+export function OrdersPage({ content, editMode, updateContent, extraOrders = [], cardFlows = [] }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; extraOrders?: ManagedOrder[]; cardFlows?: CardFlowItem[] }) {
   const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
+  const [billFlows] = useState<BillFlowItem[]>(() => defaultBillFlows.map((flow) => ({ ...flow })));
+  const [view, setView] = useState<BillView>("flows");
+  const [flowFilter, setFlowFilter] = useState<FlowFilter>("all");
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -117,11 +132,104 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [] 
     { id: "pending" as const, icon: Clock3, labelKey: "orderPendingStat" as const, count: counts.pending },
   ];
 
+  type FlowRow = {
+    key: string; time: string; typeLabel: string; typeClass: string;
+    title: string; amount: number; balanceAfter: number; orderNo: string;
+    status: "success" | "processing" | "failed";
+  };
+
+  const billRows: FlowRow[] = useMemo(() => billFlows.map((flow) => ({
+    key: flow.id,
+    time: flow.time,
+    typeLabel: billFlowTypeLabel[flow.type],
+    typeClass: flow.type === "commission" ? "refund" : flow.type === "account_service" ? "consume" : "recharge",
+    title: flow.title,
+    amount: flow.amount,
+    balanceAfter: flow.balanceAfter,
+    orderNo: flow.orderNo,
+    status: flow.status,
+  })), [billFlows]);
+
+  const cardRows: FlowRow[] = useMemo(() => cardFlows.map((flow) => ({
+    key: flow.id,
+    time: flow.time,
+    typeLabel: `卡·${cardFlowTypeLabel[flow.type]}`,
+    typeClass: flow.type === "recharge" ? "recharge" : flow.type === "refund" ? "refund" : flow.type === "fee" ? "fee" : "consume",
+    title: flow.merchant,
+    amount: flow.amount,
+    balanceAfter: flow.balanceAfter,
+    orderNo: flow.txNo === "—" ? flow.id : flow.txNo,
+    status: flow.status,
+  })), [cardFlows]);
+
+  const allFlowRows = useMemo(() => (
+    [...billRows, ...cardRows].sort((a, b) => (a.time < b.time ? 1 : -1))
+  ), [billRows, cardRows]);
+
+  const filteredFlowRows = flowFilter === "all"
+    ? allFlowRows
+    : flowFilter === "card"
+      ? cardRows
+      : billRows.filter((row) => {
+        if (flowFilter === "recharge_service") return row.typeLabel === billFlowTypeLabel.recharge_service;
+        if (flowFilter === "account_service") return row.typeLabel === billFlowTypeLabel.account_service;
+        return row.typeLabel === billFlowTypeLabel.commission;
+      });
+
   return (
     <section className="user-center-page orders-page">
       <PageHeading titleKey="ordersPageTitle" subtitleKey="ordersPageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<ReceiptText />} aside={<span className="orders-period-summary">近30天 · {recentCount}个订单</span>} />
 
-      <div className="uc-light-stats order-stat-filters" aria-label="订单统计快捷筛选">
+      <Tabs value={view} onValueChange={(value) => setView(value as BillView)}>
+        <TabsList className="uc-tabs-list orders-view-tabs">
+          <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
+          <TabsTrigger value="orders"><EditableText active={editMode} value={content.billTabOrders} onChange={(value) => updateContent("billTabOrders", value)} /></TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {view === "flows" ? (
+        <section className="uc-card order-management-panel bill-flow-panel">
+          <div className="order-tabs-row">
+            <div className="bill-type-tabs" role="group" aria-label="流水类型筛选">
+              {([
+                ["all", content.billAllTypes],
+                ["recharge_service", content.billTypeRecharge],
+                ["account_service", content.billTypeAccount],
+                ["commission", content.billTypeCommission],
+                ["card", content.billTypeCard],
+              ] as const).map(([value, label]) => (
+                <button key={value} type="button" className="bill-type-tab" data-active={flowFilter === value} onClick={() => setFlowFilter(value)}>{label}</button>
+              ))}
+            </div>
+            <span className="order-result-count">共 <strong>{filteredFlowRows.length}</strong> 条流水</span>
+          </div>
+
+          {filteredFlowRows.length ? (
+            <div className="uc-table-wrap order-table-wrap">
+              <table className="uc-table order-management-table bill-flow-table">
+                <thead><tr><th>时间</th><th>类型</th><th>说明</th><th className="is-amount">金额</th><th>变动后余额</th><th>单号 / 交易号</th><th>状态</th></tr></thead>
+                <tbody>
+                  {filteredFlowRows.map((row) => (
+                    <tr key={row.key}>
+                      <td><time>{row.time}</time></td>
+                      <td><span className={`uc-kind-tag vcard-flow-type is-${row.typeClass}`}>{row.typeLabel}</span></td>
+                      <td>{row.title}</td>
+                      <td className={`is-amount vcard-flow-amount ${row.amount > 0 ? "is-income" : "is-expense"}`}>{row.amount > 0 ? "+" : "−"}{money(Math.abs(row.amount))}</td>
+                      <td>{money(row.balanceAfter)}</td>
+                      <td><code>{row.orderNo}</code></td>
+                      <td><span className={`vcard-flow-status is-${row.status}`}>{row.status === "success" ? "成功" : row.status === "processing" ? "处理中" : "失败"}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="uc-empty order-filter-empty"><Search aria-hidden="true" /><strong>暂无相关流水</strong><p>切换类型或完成新的交易后，流水会显示在这里。</p></div>
+          )}
+        </section>
+      ) : (
+        <>
+          <div className="uc-light-stats order-stat-filters" aria-label="订单统计快捷筛选">
         {statCards.map((card) => { const Icon = card.icon; return <button type="button" data-active={quickFilter === card.id} onClick={() => selectQuickFilter(card.id)} key={card.id}><Icon aria-hidden="true" /><span><EditableText active={editMode} value={content[card.labelKey]} onChange={(value) => updateContent(card.labelKey, value)} /></span><strong>{card.count}</strong></button>; })}
       </div>
 
@@ -147,6 +255,8 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [] 
 
         <footer className="order-pagination"><span>每页 {PAGE_SIZE} 条</span><div><button type="button" disabled={page === 1} onClick={() => setPage((current) => Math.max(1, current - 1))} aria-label="上一页"><ChevronLeft /></button>{Array.from({ length: pageCount }, (_, index) => <button type="button" data-active={page === index + 1} onClick={() => setPage(index + 1)} key={index + 1}>{index + 1}</button>)}<button type="button" disabled={page === pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} aria-label="下一页"><ChevronRight /></button></div></footer>
       </section>
+        </>
+      )}
 
       <OrderDetailDrawer order={drawerOrder} open={Boolean(drawerOrder)} focus={drawerFocus} content={content} editMode={editMode} updateContent={updateContent} onOpenChange={(open) => !open && setDrawerOrder(null)} onAction={handleAction} />
       <AlertDialog open={Boolean(cancelTarget)} onOpenChange={(open) => !open && setCancelTarget(null)}><AlertDialogContent className="order-cancel-dialog"><AlertDialogHeader><AlertDialogTitle><EditableText active={editMode} value={content.cancelOrderConfirmTitle} onChange={(value) => updateContent("cancelOrderConfirmTitle", value)} /></AlertDialogTitle><AlertDialogDescription><EditableText active={editMode} value={content.cancelOrderConfirmDescription} onChange={(value) => updateContent("cancelOrderConfirmDescription", value)} /></AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{content.cancel}</AlertDialogCancel><AlertDialogAction className="order-cancel-confirm" onClick={confirmCancel}><EditableText active={editMode} value={content.cancelOrderConfirmAction} onChange={(value) => updateContent("cancelOrderConfirmAction", value)} /></AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>

@@ -15,6 +15,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { type PlatformFlowType } from "@/data/bill-flows";
 import {
   binTitle, type CardBin, type CardFlowItem, type VirtualCard,
 } from "@/data/card-business";
@@ -23,10 +24,12 @@ import { type DemoContent } from "@/data/content";
 type Editable = (key: keyof DemoContent, value: string) => void;
 type CardTab = "cards" | "market" | "transactions";
 export type ClosedCardRecord = { card: VirtualCard; closedAt: string };
+/** 平台余额流水上报：开卡扣费 / 卡充值 / 卡退款 / 销卡退款，由父级写入余额流水。 */
+export type PlatformFlowInput = { type: PlatformFlowType; amount: number; balanceAfter: number; note: string };
 
 export function CardModule({
   cards, setCards, flows, setFlows, bins, platformBalance, setPlatformBalance,
-  content, editMode, updateContent, onGoTopup,
+  content, editMode, updateContent, onGoTopup, onPlatformFlow,
 }: {
   cards: VirtualCard[];
   setCards: Dispatch<SetStateAction<VirtualCard[]>>;
@@ -39,6 +42,7 @@ export function CardModule({
   editMode: boolean;
   updateContent: Editable;
   onGoTopup: () => void;
+  onPlatformFlow: (flow: PlatformFlowInput) => void;
 }) {
   const [tab, setTab] = useState<CardTab>("cards");
   const [detailCard, setDetailCard] = useState<VirtualCard | null>(null);
@@ -46,6 +50,7 @@ export function CardModule({
   const [fundCard, setFundCard] = useState<VirtualCard | null>(null);
   const [freezeTarget, setFreezeTarget] = useState<VirtualCard | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<VirtualCard | null>(null);
+  const [refundTarget, setRefundTarget] = useState<VirtualCard | null>(null);
   const [closedRecords, setClosedRecords] = useState<ClosedCardRecord[]>([]);
 
   const editable = (key: keyof DemoContent) => (
@@ -62,7 +67,9 @@ export function CardModule({
 
   const handleOpenComplete = (bin: CardBin, quantity: number) => {
     const total = Number((bin.openFee * quantity).toFixed(2));
-    setPlatformBalance((wb) => Number((wb - total).toFixed(2)));
+    const newBalance = Number((platformBalance - total).toFixed(2));
+    setPlatformBalance(newBalance);
+    onPlatformFlow({ type: "card_open", amount: -total, balanceAfter: newBalance, note: `开卡费 · ${binTitle(bin)} × ${quantity} 张` });
     const stamp = now();
     const prefix = bin.bin.replace(/\D/g, "");
     const restDigits = Math.max(16 - prefix.length, 0);
@@ -95,10 +102,12 @@ export function CardModule({
   };
 
   const handleFundComplete = (card: VirtualCard, amount: number) => {
-    setPlatformBalance((wb) => Number((wb - amount).toFixed(2)));
+    const newBalance = Number((platformBalance - amount).toFixed(2));
+    setPlatformBalance(newBalance);
+    onPlatformFlow({ type: "card_recharge", amount: -amount, balanceAfter: newBalance, note: `卡充值 · 尾号 ${card.cardNo.slice(-4)}` });
     const stamp = now();
-    const newBalance = Number((card.balance + amount).toFixed(2));
-    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, balance: newBalance } : c));
+    const cardBalance = Number((card.balance + amount).toFixed(2));
+    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, balance: cardBalance } : c));
     setFlows((fs) => [
       {
         id: `CF-KC-${Date.now()}`,
@@ -106,7 +115,7 @@ export function CardModule({
         time: stamp,
         type: "recharge",
         amount,
-        balanceAfter: newBalance,
+        balanceAfter: cardBalance,
         merchant: "平台余额划转",
         status: "success",
         txNo: "—",
@@ -134,13 +143,53 @@ export function CardModule({
   const confirmDelete = () => {
     const card = deleteTarget;
     if (!card) return;
-    setPlatformBalance((wb) => Number((wb + card.balance).toFixed(2)));
+    const newBalance = Number((platformBalance + card.balance).toFixed(2));
+    setPlatformBalance(newBalance);
+    onPlatformFlow({
+      type: "card_close",
+      amount: card.balance,
+      balanceAfter: newBalance,
+      note: card.balance > 0 ? `销卡退款 · 尾号 ${card.cardNo.slice(-4)}` : `销卡 · 尾号 ${card.cardNo.slice(-4)}`,
+    });
     setClosedRecords((records) => [{ card, closedAt: now() }, ...records]);
     setCards((cs) => cs.filter((c) => c.id !== card.id));
-    setFlows((fs) => fs.filter((f) => f.cardId !== card.id));
+    // 销卡后流水保留：交易记录页可见「已销卡」的历史流水。
     if (detailCard?.id === card.id) setDetailCard(null);
     toast.success("卡片已注销，余额已退回平台余额");
     setDeleteTarget(null);
+  };
+
+  const handleRefund = (card: VirtualCard) => { setRefundTarget(card); };
+  const confirmRefund = () => {
+    const card = refundTarget;
+    if (!card) return;
+    if (card.balance <= 0) {
+      toast.info(content.cardRefundEmpty);
+      setRefundTarget(null);
+      return;
+    }
+    const amount = card.balance;
+    const newBalance = Number((platformBalance + amount).toFixed(2));
+    setPlatformBalance(newBalance);
+    onPlatformFlow({ type: "card_refund", amount, balanceAfter: newBalance, note: `卡退款 · 尾号 ${card.cardNo.slice(-4)}` });
+    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, balance: 0 } : c));
+    setFlows((fs) => [
+      {
+        id: `CF-TK-${Date.now()}`,
+        cardId: card.id,
+        time: now(),
+        type: "refund",
+        amount,
+        balanceAfter: 0,
+        merchant: "卡内余额退款至平台余额",
+        status: "success",
+        txNo: "—",
+      },
+      ...fs,
+    ]);
+    if (detailCard?.id === card.id) setDetailCard({ ...card, balance: 0 });
+    toast.success(`退款成功，${amount.toFixed(2)} 美元已退回平台余额`);
+    setRefundTarget(null);
   };
 
   const freezeIsUnfreeze = freezeTarget?.status === "frozen";
@@ -162,6 +211,7 @@ export function CardModule({
           flows={flows}
           onBack={() => setDetailCard(null)}
           onFund={(card) => setFundCard(card)}
+          onRefund={handleRefund}
           onRequestFreeze={handleFreeze}
           onRequestDelete={handleDelete}
           content={content}
@@ -176,6 +226,7 @@ export function CardModule({
           onOpenMarket={() => setTab("market")}
           onDetail={setDetailCard}
           onFund={(card) => setFundCard(card)}
+          onRefund={handleRefund}
           onRequestFreeze={handleFreeze}
           onRequestDelete={handleDelete}
           content={content}
@@ -194,6 +245,7 @@ export function CardModule({
       ) : (
         <CardTransactions
           cards={cards}
+          closedCards={closedRecords.map((record) => record.card)}
           flows={flows}
           content={content}
           editMode={editMode}
@@ -234,6 +286,22 @@ export function CardModule({
           <AlertDialogFooter>
             <AlertDialogCancel>{editable("cancel")}</AlertDialogCancel>
             <AlertDialogAction className="card-freeze-confirm" onClick={confirmFreeze}>{editable("cardConfirmAction")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={Boolean(refundTarget)} onOpenChange={(open) => !open && setRefundTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{editable("cardRefundConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {editable("cardRefundConfirmDescription")}
+              {refundTarget ? ` 当前卡内余额 ${refundTarget.balance.toFixed(2)} 美元。` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{editable("cancel")}</AlertDialogCancel>
+            <AlertDialogAction className="card-freeze-confirm" onClick={confirmRefund}>{editable("cardConfirmAction")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
