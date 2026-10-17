@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
   RotateCcw, Search, Snowflake, Sparkles, Table, Trash2,
@@ -414,11 +414,20 @@ export function CardDetail({
   const frozen = card.status === "frozen" || card.status === "system_frozen";
   const statusMeta = cardStatusMeta[card.status];
 
-  /** CVV 点击后模拟从上游实时查询（约 0.9s），提示系统不存储。 */
-  const queryCvv = () => {
-    if (cvvState !== "hidden") return;
-    setCvvState("querying");
-    window.setTimeout(() => setCvvState("shown"), 900);
+  /** CVV 按需从上游实时获取（模拟约 0.9s 延迟，系统不存储），获取结果在本次会话内复用。 */
+  const cvvPromiseRef = useRef<Promise<string> | null>(null);
+  const ensureCvv = () => {
+    if (cvvState === "shown") return Promise.resolve(card.cvv);
+    if (!cvvPromiseRef.current) {
+      setCvvState("querying");
+      cvvPromiseRef.current = new Promise<string>((resolve) => {
+        window.setTimeout(() => {
+          setCvvState("shown");
+          resolve(card.cvv);
+        }, 900);
+      });
+    }
+    return cvvPromiseRef.current;
   };
 
   /** 卡剩余天数：按有效期月末倒推（纯前端计算）。 */
@@ -427,14 +436,13 @@ export function CardDetail({
     Math.ceil((new Date(card.expYear, card.expMonth, 0, 23, 59, 59).getTime() - Date.now()) / 86400000),
   );
 
-  /** 一键复制：卡号（明文）+ 有效期 + 持卡人 + 账单地址。CVV 不进一键复制，必须单独上游查询后手动复制。 */
+  /** 一键复制：卡号（明文）+ 有效期 + CVV 三项。CVV 未获取时先向上游实时查询再复制。 */
   const copyAllCardInfo = async () => {
-    const address = card.billingAddress;
+    const cvv = await ensureCvv();
     const text = [
       `卡号：${formatCardNumber(card.cardNo)}`,
       `有效期：${String(card.expMonth).padStart(2, "0")}/${card.expYear}`,
-      `持卡人：${card.holder}`,
-      `账单地址：${address.line1}, ${address.city}, ${address.state}, ${address.zip}, ${address.country}`,
+      `CVV：${cvv}`,
     ].join("\n");
     const ok = await copyText(text);
     if (!ok) {
@@ -442,8 +450,20 @@ export function CardDetail({
       return;
     }
     setCopiedAll(true);
-    toast.success("卡信息已复制（不含 CVV）");
+    setRevealed(true);
+    toast.success("卡号、有效期与 CVV 已复制");
     window.setTimeout(() => setCopiedAll(false), 1600);
+  };
+
+  /** 全部显示：卡号揭开 + CVV 向上游实时获取；全部隐藏：两项同时收回。 */
+  const handleRevealAll = () => {
+    if (revealed) {
+      setRevealed(false);
+      setCvvState("hidden");
+      return;
+    }
+    setRevealed(true);
+    void ensureCvv();
   };
 
   const handleExportFlows = () => {
@@ -501,8 +521,9 @@ export function CardDetail({
                 {statusMeta.label}
               </span>
               <div className="vcard-info-bulk">
-                <button className="uc-secondary-action" type="button" onClick={() => setRevealed((current) => !current)}>
-                  {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}{revealed ? "全部隐藏" : "全部显示"}
+                <button className="uc-secondary-action" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
+                  {cvvState === "querying" ? <Search aria-hidden="true" /> : revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  {cvvState === "querying" ? "获取中…" : revealed ? "全部隐藏" : "全部显示"}
                 </button>
                 <button className="uc-secondary-action" type="button" onClick={copyAllCardInfo}>
                   {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
@@ -526,7 +547,7 @@ export function CardDetail({
                     <button
                       type="button"
                       title="CVV 默认脱敏，点击后从上游实时获取"
-                      onClick={() => (cvvState === "shown" ? setCvvState("hidden") : queryCvv())}
+                      onClick={() => (cvvState === "shown" ? setCvvState("hidden") : void ensureCvv())}
                       disabled={cvvState === "querying"}
                       aria-label={cvvState === "hidden" ? content.cardCvvQuery : "隐藏 CVV"}
                     >
