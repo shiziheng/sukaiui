@@ -4,9 +4,9 @@
 
 /* 模块外壳与面板通用头部 */
 .card-module{display:block}
-.card-tabs{margin-bottom:22px}
+.card-tabs{margin-bottom:14px}
 .vcard-panel,.vbin-panel,.vtxn-panel{display:block}
-.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:12px;flex-wrap:wrap}
 .vcard-panel-copy,.vbin-panel-copy,.vtxn-panel-copy{display:flex;align-items:flex-start;gap:14px}
 .vcard-panel-copy h2,.vbin-panel-copy h2,.vtxn-panel-copy h2{margin:0;font-size:21px;line-height:1.3;font-weight:650;letter-spacing:-.02em;color:var(--color-text-primary)}
 .vcard-panel-copy p,.vbin-panel-copy p,.vtxn-panel-copy p{margin:3px 0 0;font-size:13px;color:var(--color-text-secondary)}
@@ -14,7 +14,7 @@
 
 /* ---------- 虚拟卡视觉（列表 / 详情大卡） ---------- */
 /* 高度由内容自然撑开（不再用 aspect-ratio 锁死裁切），保证卡号与底部信息完整显示 */
-.vcard{position:relative;display:flex;flex-direction:column;gap:12px;min-height:184px;padding:20px 22px;border-radius:15px;color:#fff;background:linear-gradient(135deg,#23262b 0%,#34383f 100%);box-shadow:var(--ds-shadow-card);overflow:hidden}
+.vcard{position:relative;display:flex;flex-direction:column;gap:10px;min-height:170px;padding:18px 20px;border-radius:15px;color:#fff;background:linear-gradient(135deg,#23262b 0%,#34383f 100%);box-shadow:var(--ds-shadow-card);overflow:hidden}
 .vcard.is-detail{max-width:460px;font-size:16px}
 .vcard.is-dimmed{filter:grayscale(.45);opacity:.78}
 .vcard-accent{position:absolute;inset:0 0 auto 0;height:3px;background:var(--color-brand);z-index:2}
@@ -52,15 +52,8 @@
 .vcard-status i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
 
 /* ---------- 我的卡片（列表） ---------- */
-/* 概览数据条：一条横排紧凑收纳，替代四张大统计卡 */
-.vcard-statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:14px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden}
-.vcard-statcell{display:flex;flex-direction:column;gap:1px;padding:11px 16px;border-left:1px solid var(--color-border);min-width:0}
-.vcard-statcell:first-child{border-left:0;background:linear-gradient(135deg,#fbffd6,#f4f7da)}
-.vcard-statcell span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap}
-.vcard-statcell strong{font-size:17px;font-weight:650;color:var(--color-text-primary);line-height:1.25;font-variant-numeric:tabular-nums}
-.vcard-statcell small{font-size:10px;color:var(--color-text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(345px,1fr));gap:20px}
-.vcard-item{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);transition:box-shadow .18s ease,border-color .18s ease}
+.vcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(345px,1fr));gap:14px}
+.vcard-item{display:flex;flex-direction:column;gap:10px;padding:10px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);transition:box-shadow .18s ease,border-color .18s ease}
 .vcard-item:hover{box-shadow:var(--ds-shadow-card);border-color:var(--ds-border-strong)}
 .vcard-item-face{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;border-radius:15px;overflow:hidden}
 .vcard-item-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -78,7 +71,7 @@
 .vcard-view-toggle button:hover{color:var(--color-text-primary)}
 .vcard-view-toggle button.is-active{background:var(--color-brand);color:#111214}
 .vcard-view-toggle svg{width:14px;height:14px}
-.vcard-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.vcard-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
 .vcard-filters .vcard-search{flex:1;min-width:200px}
 .vcard-filters .vbin-select{min-width:132px}
 .vcard-table-wrap{border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden}
@@ -224,17 +217,9 @@
 @media(max-width:1200px){.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:980px){
   .vcard-detail-top{grid-template-columns:1fr}
-  .vcard-statbar{grid-template-columns:repeat(2,1fr)}
-  .vcard-statcell{border-top:1px solid var(--color-border)}
-  .vcard-statcell:nth-child(-n+2){border-top:0}
-  .vcard-statcell:nth-child(odd){border-left:0}
-  .vcard-statcell:first-child{border-top:0}
 }
 @media(max-width:900px){.business-entry-grid{grid-template-columns:1fr}}
 @media(max-width:640px){
-  .vcard-statbar{grid-template-columns:1fr 1fr}
-  .vcard-statcell:nth-child(2){border-top:0}
-  .vcard-statcell:nth-child(3){border-top:1px solid var(--color-border)}
   .vcard-number{font-size:14px}
   .vcard-item-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
   .vbin-fees,.vbin-meta{grid-template-columns:1fr}

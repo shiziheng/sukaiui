@@ -222,7 +222,6 @@ export function CardModule({
         <CardList
           cards={cards}
           closedRecords={closedRecords}
-          platformBalance={platformBalance}
           onOpenMarket={() => setTab("market")}
           onDetail={setDetailCard}
           onFund={(card) => setFundCard(card)}

@@ -616,6 +616,8 @@ export default function Home() {
   }, [isProductsPage, products, selectedBrand, productsBiz]);
   const currentBrand = brands.find((brand) => brand.id === selectedBrand) ?? brands[0];
   const effectiveBalance = isLoggedIn ? walletBalance : 0;
+  /** 右上角展示的卡内总余额：当前持有卡片余额合计（注销卡不含，已从列表移除）。 */
+  const cardBalanceTotal = virtualCards.reduce((sum, card) => sum + card.balance, 0);
   // 挂起订单对应的余额缺口（向上取整、最小 1），用于预填充值页金额。
   const pendingOrderGapAmount = (() => {
     if (!pendingOrder) return undefined;
@@ -974,7 +976,8 @@ export default function Home() {
               <Pencil aria-hidden="true" />{content.editCopy}
             </button>
           ) : null}
-          {isLoggedIn ? <button className="header-balance" type="button" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" />${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包/充值" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-balance" type="button" title="卡内总余额 · 点击前往虚拟卡" onClick={() => navigateTo("card")}><CreditCard aria-hidden="true" /><span className="header-balance-tag">卡内</span>${cardBalanceTotal.toFixed(2)}</button> : null}
           {isLoggedIn ? <SiteMessages /> : null}
           <div
             className="top-support"

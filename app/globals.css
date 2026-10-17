@@ -1270,3 +1270,8 @@ button{font:inherit}
 .bill-type-tab{height:32px;padding:0 13px;border:1px solid var(--ds-border-default);border-radius:999px;background:var(--color-surface);font-size:12.5px;color:var(--color-text-secondary);cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}
 .bill-type-tab:hover{border-color:var(--ds-border-strong);color:var(--color-text-primary)}
 .bill-type-tab[data-active=true]{background:#f6fbdc;border-color:var(--ds-border-selected);color:#5b6b1f;font-weight:500}
+
+/* 顶栏余额双 chip：平台余额 / 卡内余额分开显示 */
+.header-balance{display:inline-flex;align-items:center;gap:5px}
+.header-balance-tag{font-size:11px;font-weight:600;color:rgba(241,242,238,.55);letter-spacing:.02em}
+@media(max-width:900px){.header-balance-tag{display:none}}

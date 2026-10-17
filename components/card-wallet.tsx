@@ -34,7 +34,6 @@ type ViewMode = "cards" | "table";
 export function CardList({
   cards,
   closedRecords,
-  platformBalance,
   onOpenMarket,
   onDetail,
   onFund,
@@ -47,7 +46,6 @@ export function CardList({
 }: {
   cards: VirtualCard[];
   closedRecords: ClosedCardRecord[];
-  platformBalance: number;
   onOpenMarket: () => void;
   onDetail: (card: VirtualCard) => void;
   onFund: (card: VirtualCard) => void;
@@ -68,13 +66,6 @@ export function CardList({
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
-
-  const stats = useMemo(() => {
-    const active = cards.filter((card) => card.status === "active").length;
-    const frozen = cards.filter((card) => card.status === "frozen" || card.status === "system_frozen").length;
-    const balance = cards.reduce((sum, card) => sum + card.balance, 0);
-    return { total: cards.length, active, frozen, balance };
-  }, [cards]);
 
   const showClosed = statusFilter === "closed";
 
@@ -165,34 +156,6 @@ export function CardList({
           ) : null}
         </div>
       </header>
-
-      <section className="vcard-statbar" aria-label="卡片概览">
-        <div className="vcard-statcell is-brand">
-          <span>平台余额</span>
-          <strong>{money(platformBalance)}</strong>
-          <small>用于开卡与卡片充值</small>
-        </div>
-        <div className="vcard-statcell">
-          <span>卡片总数</span>
-          <strong>{stats.total}</strong>
-          <small>正常 {stats.active} 张</small>
-        </div>
-        <div className="vcard-statcell">
-          <span>卡内总余额</span>
-          <strong>{money(stats.balance)}</strong>
-          <small>全部卡片合计</small>
-        </div>
-        <div className="vcard-statcell">
-          <span>冻结中</span>
-          <strong>{stats.frozen}</strong>
-          <small>含系统冻结</small>
-        </div>
-        <div className="vcard-statcell">
-          <span>已注销</span>
-          <strong>{closedRecords.length}</strong>
-          <small>可在状态下拉查看记录</small>
-        </div>
-      </section>
 
       <div className="vcard-filters">
         <div className="vbin-search vcard-search">
