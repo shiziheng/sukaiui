@@ -410,10 +410,6 @@ button{font:inherit}
 .orders-page .uc-light-stats strong{font-size:31px;font-weight:780;letter-spacing:-.04em}
 .orders-page .uc-detail-panel{border-color:#d4d6cf;box-shadow:0 9px 25px rgba(24,27,32,.055)}
 .orders-page .uc-filter-bar{min-height:76px;border-bottom:1px solid #e0e2dc;background:#fafbf8}
-.orders-page .uc-tabs-list{height:46px!important;gap:5px!important;border:1px solid #dcddd8!important;border-radius:10px!important;background:#f0f1ed!important;padding:4px!important}
-.orders-page .uc-tabs-list [data-slot=tabs-trigger]{height:36px!important;border-radius:7px!important;padding:0 13px!important;font-size:14px!important;font-weight:650!important}
-.orders-page .uc-tabs-list [data-slot=tabs-trigger][data-state=active]{background:#fff!important;box-shadow:0 2px 7px rgba(24,27,32,.07)!important}
-.orders-page .uc-tabs-list [data-slot=tabs-trigger][data-state=active]:after{display:none}
 .uc-status-filter select{height:38px;border-color:#cfd1ca;font-size:13px}
 .uc-table th{height:48px;background:#eef0eb;color:#5d635b;font-size:13px;font-weight:720}
 .uc-table td{height:70px;font-size:14px}
@@ -846,7 +842,7 @@ button{font:inherit}
 /* Standalone wallet top-up page */
 .topup-inset{background:var(--color-bg-page)}
 .topup-inset .main-content{width:min(1360px,100%)}
-.topup-page{display:grid;gap:24px;color:var(--color-text-primary)}
+.topup-page{display:grid;gap:12px;color:var(--color-text-primary)}
 .topup-heading{gap:20px}
 .topup-breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:8px;color:#8a8f88;font-size:12px;font-weight:620}
 .topup-breadcrumb strong{color:#4d534c;font-weight:660}
@@ -895,7 +891,8 @@ button{font:inherit}
 .topup-quick-amounts button:hover{border-color:#c2c7bb;background:#fff}
 .topup-quick-amounts button[data-selected=true]{border-color:var(--ds-border-selected);background:linear-gradient(145deg,#fff 16%,#fbfddf 100%);color:#3e4500;box-shadow:inset 0 0 0 1px rgba(223,255,0,.55)}
 .topup-step-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
-.topup-primary-button{height:var(--ds-button-large)!important;border:0!important;border-radius:var(--ds-radius-control)!important;background:var(--color-brand)!important;color:#111214!important;padding:0 24px!important;font-size:14px!important;font-weight:740!important;box-shadow:0 6px 16px rgba(102,114,0,.14)}
+.topup-primary-button{height:var(--ds-button-large)!important;border:1px solid #25282c!important;border-radius:var(--ds-radius-control)!important;background:#181a1d!important;color:#fff!important;padding:0 24px!important;font-size:14px!important;font-weight:740!important;box-shadow:0 6px 16px rgba(24,26,29,.18)}
+.topup-primary-button:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
 .topup-secondary-button{height:var(--ds-button-default)!important;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ds-border-strong)!important;border-radius:var(--ds-radius-control)!important;background:#fff!important;color:#3f453f!important;padding:0 18px!important;font-size:14px!important;font-weight:640!important}
 .topup-secondary-button:hover{border-color:#a9afa4!important;background:#fafbf7!important}
 .topup-secondary-button svg{width:15px;height:15px}
@@ -1265,7 +1262,7 @@ button{font:inherit}
 .biz-tabs{margin-bottom:14px}
 .biz-tabs [data-slot=tabs-trigger]{gap:6px}
 .biz-tabs [data-slot=tabs-trigger] svg{width:15px;height:15px}
-.orders-view-tabs{margin-bottom:16px}
+.orders-view-tabs{margin-bottom:0}
 .bill-type-tabs{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
 .bill-type-tab{height:32px;padding:0 13px;border:1px solid var(--ds-border-default);border-radius:999px;background:var(--color-surface);font-size:12.5px;color:var(--color-text-secondary);cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}
 .bill-type-tab:hover{border-color:var(--ds-border-strong);color:var(--color-text-primary)}
@@ -1298,3 +1295,5 @@ button{font:inherit}
 .uc-page-heading p,.commerce-page-heading p{margin-top:2px!important;font-size:13px!important}
 .commerce-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
 .commerce-panel .panel-toolbar{margin-bottom:0!important}
+/* 账单页：跟随全站 12px 纵向节奏（压过 user-center-page 的 24px） */
+.orders-page{gap:12px}

@@ -567,9 +567,11 @@ export default function Home() {
         if (config.content.rechargeServiceDescription === "为已有账号升级或续费套餐") config.content.rechargeServiceDescription = "已有账号？选择 Plus、Pro、Max 等当前在售套餐。";
         if (config.content.startRechargeService === "开始代充") config.content.startRechargeService = "选择升级套餐";
         if (config.content.ordersPageSubtitle === "查看你的成品号和代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充服务订单。";
-        // 五页签改版：菜单更名（链式迁移，只匹配已知旧值）
-        if (["充值", "钱包充值"].includes(config.content.navTopup)) config.content.navTopup = "钱包/充值";
+        // 五页签改版：菜单更名（链式迁移，只匹配已知旧值）；2026-10-17 拍板「钱包/充值」定名「充值」
+        if (["钱包充值", "钱包/充值"].includes(config.content.navTopup)) config.content.navTopup = "充值";
         if (["我的订单", "订单中心"].includes(config.content.navOrders)) config.content.navOrders = "我的账单";
+        // 账单词选「我的账单」：页内标题与菜单统一
+        if (config.content.ordersPageTitle === "我的订单") config.content.ordersPageTitle = "我的账单";
         // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）
         if (config.content.cardDeleteCard === "注销卡片") config.content.cardDeleteCard = "删卡";
         if (config.content.cardDeleteConfirmTitle === "注销这张卡？") config.content.cardDeleteConfirmTitle = "删掉这张卡？";
