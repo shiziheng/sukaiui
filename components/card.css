@@ -60,7 +60,7 @@
 .vcard-item-face{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;border-radius:15px;overflow:hidden}
 .vcard-item-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .vcard-item-action{height:32px!important;min-height:0;padding:0 4px!important;font-size:12px!important;gap:4px;white-space:nowrap}
-.vcard-item-actions .uc-secondary-action{height:32px;min-height:0;justify-content:center;padding:0 4px;font-size:12px;gap:4px;white-space:nowrap}
+.vcard-item-actions .uc-secondary-action{height:32px;min-height:0;justify-content:center;padding:0 4px;font-size:12px;gap:4px;white-space:nowrap;margin-left:0}
 .vcard-item-danger{width:auto;height:32px;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border:1px solid var(--ds-border-default);border-radius:var(--ds-radius-control,10px);background:var(--color-surface);color:var(--color-danger);font-size:12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;white-space:nowrap}
 .vcard-item-danger:hover{background:#fbeeed;border-color:var(--color-danger)}
 .vcard-item-danger svg{width:13px;height:13px;flex:none}
@@ -227,11 +227,16 @@
 @media(max-width:640px){
   .vcard-number{font-size:14px}
   .vcard-item-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* 工具行：导出+视图切换一行，开通虚拟卡通栏一行 */
+  .vcard-head-tools{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+  .vcard-head-tools .vcard-view-toggle{margin-left:auto}
+  .vcard-head-tools .vcard-open-entry{flex:1 1 100%;order:3}
+  /* 筛选栏：搜索框通栏，四个下拉 2×2 */
+  .vcard-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vcard-filters .vcard-search{grid-column:1 / -1}
+  .vcard-filters .vbin-select{min-width:0;width:100%}
   .vbin-fees,.vbin-meta{grid-template-columns:1fr}
   .vcard-info-row{grid-template-columns:88px 1fr}
-  .vcard-filters{flex-direction:column;align-items:stretch}
-  .vcard-filters .vbin-select{min-width:0;width:100%}
-  .vcard-head-tools{width:100%;justify-content:space-between}
 }
 
 /* ---------- v0.13.0：开卡统计 / 费用外扣 / CVV 查询说明 ---------- */
