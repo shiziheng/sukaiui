@@ -105,38 +105,6 @@ export function CardVisual({
   );
 }
 
-/** 详情页的敏感字段行：脱敏 + 显示 / 复制。 */
-export function SensitiveRow({
-  label,
-  value,
-  display,
-  revealed,
-  onToggleReveal,
-  onCopy,
-}: {
-  label: string;
-  value: string;
-  display: string;
-  revealed: boolean;
-  onToggleReveal: () => void;
-  onCopy: () => void;
-}) {
-  return (
-    <div className="vcard-info-row is-sensitive">
-      <dt>{label}</dt>
-      <dd>
-        <span>{revealed ? value : display}</span>
-        <span className="vcard-info-tools">
-          <button type="button" onClick={onToggleReveal} aria-label={revealed ? "隐藏" : "显示"}>
-            {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-          </button>
-          <button type="button" onClick={onCopy} aria-label="复制"><Copy aria-hidden="true" /></button>
-        </span>
-      </dd>
-    </div>
-  );
-}
-
 export function CardNotice({ items }: { items: string[] }) {
   if (!items.length) return null;
   return (

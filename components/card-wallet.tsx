@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import type { ClosedCardRecord } from "@/components/card-module";
 import {
-  CardVisual, SensitiveRow, copyText,
+  CardVisual, copyText,
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
@@ -436,6 +436,11 @@ export function CardDetail({
     Math.ceil((new Date(2000 + card.expYear, card.expMonth, 0, 23, 59, 59).getTime() - Date.now()) / 86400000),
   );
 
+  const addressOneLine = [
+    card.billingAddress.line1, card.billingAddress.line2, card.billingAddress.city,
+    card.billingAddress.state, card.billingAddress.zip, card.billingAddress.country,
+  ].filter(Boolean).join(", ");
+
   /** 一键复制：卡号（明文）+ 有效期 + CVV 三项。CVV 未获取时先向上游实时查询再复制。 */
   const copyAllCardInfo = async () => {
     const cvv = await ensureCvv();
@@ -537,28 +542,32 @@ export function CardDetail({
               </button>
             </div>
           </header>
-          <dl className="vcard-info-list">
-            <SensitiveRow
-              label={content.cardNoLabel}
-              value={card.cardNo}
-              display={card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}
-              revealed={revealed}
-              onToggleReveal={() => setRevealed((current) => !current)}
-              onCopy={() => copy(card.cardNo)}
-            />
-            <div className="vcard-info-row">
+          <dl className="vcard-field-grid">
+            <div className="vcard-field is-wide">
+              <dt>{content.cardNoLabel}</dt>
+              <dd>
+                <span className="vcard-field-value is-mono">{revealed ? formatCardNumber(card.cardNo) : card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}</span>
+                <span className="vcard-info-tools">
+                  <button type="button" onClick={() => setRevealed((current) => !current)} aria-label={revealed ? "隐藏卡号" : "显示卡号"}>
+                    {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  </button>
+                  <button type="button" onClick={() => copy(card.cardNo)} aria-label="复制卡号"><Copy aria-hidden="true" /></button>
+                </span>
+              </dd>
+            </div>
+            <div className="vcard-field">
               <dt>{editable("cardExpLabel")}</dt>
               <dd>
-                <span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
+                <span className="vcard-field-value is-mono">{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
                 <span className="vcard-info-tools">
                   <button type="button" onClick={() => copy(`${String(card.expMonth).padStart(2, "0")}/${card.expYear}`)} aria-label="复制有效期"><Copy aria-hidden="true" /></button>
                 </span>
               </dd>
             </div>
-            <div className="vcard-info-row is-sensitive">
+            <div className="vcard-field">
               <dt>{editable("cardCvvLabel")}</dt>
               <dd>
-                <span>{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
+                <span className="vcard-field-value is-mono">{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
                 <span className="vcard-info-tools">
                   <button
                     type="button"
@@ -575,24 +584,22 @@ export function CardDetail({
                 </span>
               </dd>
             </div>
-            <div className="vcard-info-row">
+            <div className="vcard-field">
               <dt>{editable("cardHolderLabel")}</dt>
               <dd>
-                <span>{card.holder}</span>
+                <span className="vcard-field-value">{card.holder}</span>
                 <span className="vcard-info-tools">
                   <button type="button" onClick={() => copy(card.holder)} aria-label="复制持卡人"><Copy aria-hidden="true" /></button>
                 </span>
               </dd>
             </div>
-            <div className="vcard-info-row is-address">
+            <div className="vcard-field is-wide">
               <dt>{editable("cardBillingLabel")}</dt>
               <dd>
-                <span>{card.billingAddress.line1}</span>
-                {card.billingAddress.line2 ? <span>{card.billingAddress.line2}</span> : null}
-                <span>{card.billingAddress.city}</span>
-                <span>{card.billingAddress.state}</span>
-                <span>{card.billingAddress.zip}</span>
-                <span>{card.billingAddress.country}</span>
+                <span className="vcard-field-value">{addressOneLine}</span>
+                <span className="vcard-info-tools">
+                  <button type="button" onClick={() => copy(addressOneLine)} aria-label="复制账单地址"><Copy aria-hidden="true" /></button>
+                </span>
               </dd>
             </div>
           </dl>
