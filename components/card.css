@@ -105,12 +105,11 @@
 .vcard-detail-actions .uc-secondary-action.is-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
 .vcard-detail-actions .vcard-action-primary{height:36px;padding:0 18px;font-size:13px}
 .vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}
-.vcard-detail-main{display:flex;flex-direction:column;gap:12px;min-width:0}
 .vcard-info-panel,.vcard-side-panel,.vcard-finance-panel,.vcard-flow-panel{padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
 .vcard-info-panel h3,.vcard-side-panel h3,.vcard-finance-panel h3,.vcard-flow-panel h3{margin:0 0 10px;font-size:15px;font-weight:650;color:var(--color-text-primary)}
 .vcard-finance-panel,.vcard-flow-panel{margin-top:12px}
 .vcard-info-list{margin:0;display:flex;flex-direction:column}
-.vcard-info-row{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--color-border)}
+.vcard-info-row{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:13px 0;border-top:1px solid var(--color-border)}
 .vcard-info-row:first-child{border-top:0}
 .vcard-info-row dt{margin:0;font-size:13px;color:var(--color-text-secondary)}
 .vcard-info-row dd{margin:0;font-size:13px;color:var(--color-text-primary);display:flex;flex-direction:column;gap:2px;word-break:break-word}

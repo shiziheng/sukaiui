@@ -430,10 +430,10 @@ export function CardDetail({
     return cvvPromiseRef.current;
   };
 
-  /** 卡剩余天数：按有效期月末倒推（纯前端计算）。 */
+  /** 卡剩余天数：按有效期月末倒推（年份存两位数，补足 2000+）。 */
   const daysLeft = Math.max(
     0,
-    Math.ceil((new Date(card.expYear, card.expMonth, 0, 23, 59, 59).getTime() - Date.now()) / 86400000),
+    Math.ceil((new Date(2000 + card.expYear, card.expMonth, 0, 23, 59, 59).getTime() - Date.now()) / 86400000),
   );
 
   /** 一键复制：卡号（明文）+ 有效期 + CVV 三项。CVV 未获取时先向上游实时查询再复制。 */
@@ -524,92 +524,80 @@ export function CardDetail({
       </header>
 
       <div className="vcard-detail-top">
-        <div className="vcard-detail-main">
-          <CardVisual
-            card={card}
-            variant="detail"
-            revealed={revealed}
-            onToggleReveal={() => setRevealed((current) => !current)}
-            content={content}
-            editMode={editMode}
-            updateContent={updateContent}
-          />
-
-          <section className="vcard-info-panel">
-            <header className="vcard-info-head">
-              <h3>{editable("cardInfoTitle")}</h3>
-              <div className="vcard-info-bulk">
-                <button className="uc-secondary-action" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
-                  {cvvState === "querying" ? <Search aria-hidden="true" /> : revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                  {cvvState === "querying" ? "获取中…" : revealed ? "全部隐藏" : "全部显示"}
-                </button>
-                <button className="uc-secondary-action" type="button" onClick={copyAllCardInfo}>
-                  {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
-                </button>
-              </div>
-            </header>
-            <dl className="vcard-info-list">
-              <SensitiveRow
-                label={content.cardNoLabel}
-                value={card.cardNo}
-                display={card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}
-                revealed={revealed}
-                onToggleReveal={() => setRevealed((current) => !current)}
-                onCopy={() => copy(card.cardNo)}
-              />
-              <div className="vcard-info-row is-sensitive">
-                <dt>{editable("cardCvvLabel")}</dt>
-                <dd>
-                  <span>{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
-                  <span className="vcard-info-tools">
-                    <button
-                      type="button"
-                      title="CVV 默认脱敏，点击后从上游实时获取"
-                      onClick={() => (cvvState === "shown" ? setCvvState("hidden") : void ensureCvv())}
-                      disabled={cvvState === "querying"}
-                      aria-label={cvvState === "hidden" ? content.cardCvvQuery : "隐藏 CVV"}
-                    >
-                      {cvvState === "shown" ? <EyeOff aria-hidden="true" /> : <Search aria-hidden="true" />}
-                    </button>
-                    {cvvState === "shown" ? (
-                      <button type="button" onClick={() => copy(card.cvv)} aria-label="复制 CVV"><Copy aria-hidden="true" /></button>
-                    ) : null}
-                  </span>
-                </dd>
-              </div>
-              <div className="vcard-info-row">
-                <dt>{editable("cardExpLabel")}</dt>
-                <dd>
-                  <span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
-                  <span className="vcard-info-tools">
-                    <button type="button" onClick={() => copy(`${String(card.expMonth).padStart(2, "0")}/${card.expYear}`)} aria-label="复制有效期"><Copy aria-hidden="true" /></button>
-                  </span>
-                </dd>
-              </div>
-              <div className="vcard-info-row">
-                <dt>{editable("cardHolderLabel")}</dt>
-                <dd>
-                  <span>{card.holder}</span>
-                  <span className="vcard-info-tools">
-                    <button type="button" onClick={() => copy(card.holder)} aria-label="复制持卡人"><Copy aria-hidden="true" /></button>
-                  </span>
-                </dd>
-              </div>
-              <div className="vcard-info-row is-address">
-                <dt>{editable("cardBillingLabel")}</dt>
-                <dd>
-                  <span>{card.billingAddress.line1}</span>
-                  {card.billingAddress.line2 ? <span>{card.billingAddress.line2}</span> : null}
-                  <span>{card.billingAddress.city}</span>
-                  <span>{card.billingAddress.state}</span>
-                  <span>{card.billingAddress.zip}</span>
-                  <span>{card.billingAddress.country}</span>
-                </dd>
-              </div>
-            </dl>
-            <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
-          </section>
-        </div>
+        <section className="vcard-info-panel">
+          <header className="vcard-info-head">
+            <h3>{editable("cardInfoTitle")}</h3>
+            <div className="vcard-info-bulk">
+              <button className="uc-secondary-action" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
+                {cvvState === "querying" ? <Search aria-hidden="true" /> : revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                {cvvState === "querying" ? "获取中…" : revealed ? "全部隐藏" : "全部显示"}
+              </button>
+              <button className="uc-secondary-action" type="button" onClick={copyAllCardInfo}>
+                {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
+              </button>
+            </div>
+          </header>
+          <dl className="vcard-info-list">
+            <SensitiveRow
+              label={content.cardNoLabel}
+              value={card.cardNo}
+              display={card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}
+              revealed={revealed}
+              onToggleReveal={() => setRevealed((current) => !current)}
+              onCopy={() => copy(card.cardNo)}
+            />
+            <div className="vcard-info-row">
+              <dt>{editable("cardExpLabel")}</dt>
+              <dd>
+                <span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
+                <span className="vcard-info-tools">
+                  <button type="button" onClick={() => copy(`${String(card.expMonth).padStart(2, "0")}/${card.expYear}`)} aria-label="复制有效期"><Copy aria-hidden="true" /></button>
+                </span>
+              </dd>
+            </div>
+            <div className="vcard-info-row is-sensitive">
+              <dt>{editable("cardCvvLabel")}</dt>
+              <dd>
+                <span>{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
+                <span className="vcard-info-tools">
+                  <button
+                    type="button"
+                    title="CVV 默认脱敏，点击后从上游实时获取"
+                    onClick={() => (cvvState === "shown" ? setCvvState("hidden") : void ensureCvv())}
+                    disabled={cvvState === "querying"}
+                    aria-label={cvvState === "hidden" ? content.cardCvvQuery : "隐藏 CVV"}
+                  >
+                    {cvvState === "shown" ? <EyeOff aria-hidden="true" /> : <Search aria-hidden="true" />}
+                  </button>
+                  {cvvState === "shown" ? (
+                    <button type="button" onClick={() => copy(card.cvv)} aria-label="复制 CVV"><Copy aria-hidden="true" /></button>
+                  ) : null}
+                </span>
+              </dd>
+            </div>
+            <div className="vcard-info-row">
+              <dt>{editable("cardHolderLabel")}</dt>
+              <dd>
+                <span>{card.holder}</span>
+                <span className="vcard-info-tools">
+                  <button type="button" onClick={() => copy(card.holder)} aria-label="复制持卡人"><Copy aria-hidden="true" /></button>
+                </span>
+              </dd>
+            </div>
+            <div className="vcard-info-row is-address">
+              <dt>{editable("cardBillingLabel")}</dt>
+              <dd>
+                <span>{card.billingAddress.line1}</span>
+                {card.billingAddress.line2 ? <span>{card.billingAddress.line2}</span> : null}
+                <span>{card.billingAddress.city}</span>
+                <span>{card.billingAddress.state}</span>
+                <span>{card.billingAddress.zip}</span>
+                <span>{card.billingAddress.country}</span>
+              </dd>
+            </div>
+          </dl>
+          <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
+        </section>
 
         <aside className="vcard-detail-side">
           <section className="vcard-side-panel is-meta">
