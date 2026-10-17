@@ -2,20 +2,20 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Copy, CreditCard, Download, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
-  RotateCcw, Search, Snowflake, Table, Trash2,
+  ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
+  RotateCcw, Search, Snowflake, Sparkles, Table, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import type { ClosedCardRecord } from "@/components/card-module";
 import {
-  CardVisual, SchemeBadge, SensitiveRow, copyText,
+  CardVisual, SensitiveRow, copyText,
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import {
-  binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, money,
-  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardScheme,
+  binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, money,
+  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardFlowType, type CardScheme,
   type CardStatus, type VirtualCard,
 } from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
@@ -377,6 +377,7 @@ export function CardDetail({
   onBack,
   onFund,
   onRefund,
+  onNote,
   onRequestFreeze,
   onRequestDelete,
   content,
@@ -389,6 +390,7 @@ export function CardDetail({
   onBack: () => void;
   onFund: (card: VirtualCard) => void;
   onRefund: (card: VirtualCard) => void;
+  onNote: (card: VirtualCard) => void;
   onRequestFreeze: (card: VirtualCard) => void;
   onRequestDelete: (card: VirtualCard) => void;
   content: DemoContent;
@@ -397,7 +399,8 @@ export function CardDetail({
 }) {
   const [revealed, setRevealed] = useState(false);
   const [cvvState, setCvvState] = useState<"hidden" | "querying" | "shown">("hidden");
-  const [flowType, setFlowType] = useState<"all" | "recharge" | "consume" | "refund">("all");
+  const [flowType, setFlowType] = useState<"all" | CardFlowType>("all");
+  const [copiedAll, setCopiedAll] = useState(false);
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
@@ -416,6 +419,31 @@ export function CardDetail({
     if (cvvState !== "hidden") return;
     setCvvState("querying");
     window.setTimeout(() => setCvvState("shown"), 900);
+  };
+
+  /** 卡剩余天数：按有效期月末倒推（纯前端计算）。 */
+  const daysLeft = Math.max(
+    0,
+    Math.ceil((new Date(card.expYear, card.expMonth, 0, 23, 59, 59).getTime() - Date.now()) / 86400000),
+  );
+
+  /** 一键复制：卡号（明文）+ 有效期 + 持卡人 + 账单地址。CVV 不进一键复制，必须单独上游查询后手动复制。 */
+  const copyAllCardInfo = async () => {
+    const address = card.billingAddress;
+    const text = [
+      `卡号：${formatCardNumber(card.cardNo)}`,
+      `有效期：${String(card.expMonth).padStart(2, "0")}/${card.expYear}`,
+      `持卡人：${card.holder}`,
+      `账单地址：${address.line1}, ${address.city}, ${address.state}, ${address.zip}, ${address.country}`,
+    ].join("\n");
+    const ok = await copyText(text);
+    if (!ok) {
+      toast.error("复制失败，请手动选择");
+      return;
+    }
+    setCopiedAll(true);
+    toast.success("卡信息已复制（不含 CVV）");
+    window.setTimeout(() => setCopiedAll(false), 1600);
   };
 
   const handleExportFlows = () => {
@@ -465,7 +493,22 @@ export function CardDetail({
           />
 
           <section className="vcard-info-panel">
-            <h3>{editable("cardInfoTitle")}</h3>
+            <header className="vcard-info-head">
+              <h3>{editable("cardInfoTitle")}</h3>
+              <span className={`vcard-status is-${statusMeta.tone}`}>
+                {frozen ? <Snowflake aria-hidden="true" /> : null}
+                {card.status === "processing" ? <i aria-hidden="true" /> : null}
+                {statusMeta.label}
+              </span>
+              <div className="vcard-info-bulk">
+                <button className="uc-secondary-action" type="button" onClick={() => setRevealed((current) => !current)}>
+                  {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}{revealed ? "全部隐藏" : "全部显示"}
+                </button>
+                <button className="uc-secondary-action" type="button" onClick={copyAllCardInfo}>
+                  {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
+                </button>
+              </div>
+            </header>
             <dl className="vcard-info-list">
               <SensitiveRow
                 label={content.cardNoLabel}
@@ -482,6 +525,7 @@ export function CardDetail({
                   <span className="vcard-info-tools">
                     <button
                       type="button"
+                      title="CVV 默认脱敏，点击后从上游实时获取"
                       onClick={() => (cvvState === "shown" ? setCvvState("hidden") : queryCvv())}
                       disabled={cvvState === "querying"}
                       aria-label={cvvState === "hidden" ? content.cardCvvQuery : "隐藏 CVV"}
@@ -496,11 +540,21 @@ export function CardDetail({
               </div>
               <div className="vcard-info-row">
                 <dt>{editable("cardExpLabel")}</dt>
-                <dd><span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span></dd>
+                <dd>
+                  <span>{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
+                  <span className="vcard-info-tools">
+                    <button type="button" onClick={() => copy(`${String(card.expMonth).padStart(2, "0")}/${card.expYear}`)} aria-label="复制有效期"><Copy aria-hidden="true" /></button>
+                  </span>
+                </dd>
               </div>
               <div className="vcard-info-row">
                 <dt>{editable("cardHolderLabel")}</dt>
-                <dd><span>{card.holder}</span></dd>
+                <dd>
+                  <span>{card.holder}</span>
+                  <span className="vcard-info-tools">
+                    <button type="button" onClick={() => copy(card.holder)} aria-label="复制持卡人"><Copy aria-hidden="true" /></button>
+                  </span>
+                </dd>
               </div>
               <div className="vcard-info-row is-address">
                 <dt>{editable("cardBillingLabel")}</dt>
@@ -519,20 +573,51 @@ export function CardDetail({
         </div>
 
         <aside className="vcard-detail-side">
-          <section className="vcard-side-panel is-balance">
-            <h3>{editable("cardOverviewTitle")}</h3>
-            <div className="vcard-side-balance">
-              <span>{editable("cardBalanceLabel")}</span>
-              <strong>{money(card.balance)}</strong>
-              <small>可用于订阅与线上消费</small>
+          <section className="vcard-side-panel is-meta">
+            <div className="vcard-days-meter">
+              <div className="vcard-days-copy">
+                <span>距有效期还有</span>
+                <strong>{daysLeft} <small>天</small></strong>
+              </div>
+              <div className="vcard-days-track" role="img" aria-label={`剩余有效期 ${daysLeft} 天`}>
+                <i style={{ width: `${Math.min(100, Math.round((daysLeft / 730) * 100))}%` }} />
+              </div>
+              <small>{String(card.expMonth).padStart(2, "0")}/{card.expYear} 到期</small>
             </div>
-            <dl className="vcard-side-meta">
-              <div><dt>{editable("cardBinLabel")}</dt><dd>{binTitle(card)}</dd></div>
-              <div><dt>{editable("cardSchemeLabel")}</dt><dd><SchemeBadge scheme={card.scheme} /><span>{schemeLabel(card.scheme)}</span></dd></div>
-              <div><dt>{editable("cardRegionLabel")}</dt><dd>{regionLabel(card.region)}</dd></div>
-              <div><dt>{editable("cardCreatedLabel")}</dt><dd>{card.createdAt}</dd></div>
-              <div><dt>{editable("cardRemarkLabel")}</dt><dd>{card.remark || "—"}</dd></div>
+            <dl className="vcard-meta-grid">
+              <div><dt>卡ID</dt><dd><code>{card.id}</code></dd></div>
+              <div><dt>建卡时间</dt><dd>{card.createdAt}</dd></div>
+              <div><dt>卡段</dt><dd>{binTitle(card)}</dd></div>
+              <div><dt>卡组织 / 发行地</dt><dd>{schemeLabel(card.scheme)} · {regionLabel(card.region)}</dd></div>
+              <div>
+                <dt>备注</dt>
+                <dd className="is-note">
+                  <span>{card.remark || "—"}</span>
+                  <button type="button" className="vcard-note-edit" onClick={() => onNote(card)} aria-label="编辑备注"><NotebookPen aria-hidden="true" /></button>
+                </dd>
+              </div>
+              <div><dt>系统备注</dt><dd>{card.systemRemark || "—"}</dd></div>
             </dl>
+          </section>
+
+          <section className="vcard-side-panel is-subscribe">
+            <h3><Sparkles aria-hidden="true" />订阅更新</h3>
+            {card.subscriptionUpdates?.length ? (
+              <ol className="vcard-subscribe-timeline">
+                {card.subscriptionUpdates.map((item, index) => (
+                  <li key={`${item.plan}-${item.time}`}>
+                    <i aria-hidden="true" />
+                    <div>
+                      <strong>{item.brand} {item.plan}</strong>
+                      <b>{money(item.amount)}</b>
+                      <time>{item.time}</time>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="vcard-subscribe-empty">暂无订阅更新</p>
+            )}
           </section>
 
           <section className="vcard-side-panel is-actions">
@@ -540,6 +625,9 @@ export function CardDetail({
             <div className="vcard-action-list">
               <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
                 <PlusCircle aria-hidden="true" />充值
+              </Button>
+              <Button variant="outline" onClick={() => onNote(card)}>
+                <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
               </Button>
               <Button variant="outline" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
                 <RotateCcw aria-hidden="true" />{content.cardRefund}
@@ -560,14 +648,21 @@ export function CardDetail({
       </div>
 
       <section className="vcard-finance-panel">
-        <h3>{editable("cardFinanceTitle")}</h3>
+        <header className="vcard-finance-head">
+          <h3>{editable("cardFinanceTitle")}</h3>
+          <small>数据截至 {finance.asOf || "—"} · 余额 = 充值 + 消费退款 − 消费 − 转出 − 手续费</small>
+        </header>
         <dl className="vcard-finance">
-          <div><dt>可用余额</dt><dd>{money(finance.balance)}</dd></div>
-          <div><dt>{editable("cardStatRecharge")}</dt><dd>{money(finance.rechargeTotal)}</dd></div>
-          <div><dt>{editable("cardStatConsume")}</dt><dd>{money(finance.consumeTotal)}</dd></div>
-          <div><dt>{editable("cardStatRefund")}</dt><dd>{money(finance.refundTotal)}</dd></div>
-          <div><dt>{editable("cardStatConsumeCount")}</dt><dd>{finance.consumeCount}</dd></div>
-          <div><dt>{editable("cardStatSuccessRate")}</dt><dd>{finance.successRate}%</dd></div>
+          <div className="is-brand"><dt>可用余额</dt><dd>{money(finance.balance)}</dd></div>
+          <div><dt>累计充值</dt><dd>{money(finance.rechargeTotal)}</dd></div>
+          <div><dt>累计消费</dt><dd>{money(finance.consumeTotal)}</dd></div>
+          <div><dt>消费退款</dt><dd>{money(finance.refundTotal)}</dd></div>
+          <div><dt>转出至平台</dt><dd>{money(finance.cashoutTotal)}</dd></div>
+          <div><dt>手续费</dt><dd>{finance.feeTotal ? money(finance.feeTotal) : "$0.00"}</dd></div>
+          <div><dt>交易笔数</dt><dd>{finance.consumeCount}</dd></div>
+          <div><dt>成功笔数</dt><dd>{finance.doneCount}</dd></div>
+          <div className="is-risk"><dt>失败笔数</dt><dd>{finance.failedCount}</dd></div>
+          <div className="is-risk"><dt>成功率</dt><dd>{finance.successRate}%</dd></div>
         </dl>
       </section>
 
@@ -585,6 +680,7 @@ export function CardDetail({
             <option value="recharge">{cardFlowTypeLabel.recharge}</option>
             <option value="consume">{cardFlowTypeLabel.consume}</option>
             <option value="refund">{cardFlowTypeLabel.refund}</option>
+            <option value="cashout">{cardFlowTypeLabel.cashout}</option>
           </select>
           <button className="uc-secondary-action" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
             <Download aria-hidden="true" />{editable("cardExport")}

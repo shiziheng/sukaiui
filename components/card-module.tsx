@@ -195,10 +195,10 @@ export function CardModule({
         id: `CF-TK-${Date.now()}`,
         cardId: card.id,
         time: now(),
-        type: "refund",
+        type: "cashout",
         amount,
         balanceAfter: 0,
-        merchant: "卡内余额退款至平台余额",
+        merchant: "转出至平台余额",
         status: "success",
         txNo: "—",
       },
@@ -229,6 +229,7 @@ export function CardModule({
           onBack={() => setDetailCard(null)}
           onFund={(card) => setFundCard(card)}
           onRefund={handleRefund}
+          onNote={openNote}
           onRequestFreeze={handleFreeze}
           onRequestDelete={handleDelete}
           content={content}

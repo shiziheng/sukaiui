@@ -110,24 +110,56 @@
 .vcard-info-tools button{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--ds-border-default);border-radius:8px;background:var(--color-surface);color:var(--color-text-secondary);cursor:pointer}
 .vcard-info-tools button:hover{background:var(--color-surface-soft);color:var(--color-text-primary)}
 .vcard-info-tools svg{width:14px;height:14px}
-.vcard-detail-side{display:flex;flex-direction:column;gap:18px}
-.vcard-side-balance{display:flex;flex-direction:column;gap:3px;padding:14px 16px;border-radius:12px;background:var(--color-surface-soft)}
-.vcard-side-balance span{font-size:12px;color:var(--color-text-secondary)}
-.vcard-side-balance strong{font-size:26px;font-weight:650;color:var(--color-text-primary);line-height:1.1}
-.vcard-side-balance small{font-size:11px;color:var(--color-text-tertiary)}
-.vcard-side-meta{margin:14px 0 0;display:flex;flex-direction:column;gap:0}
-.vcard-side-meta div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--color-border)}
-.vcard-side-meta dt{font-size:13px;color:var(--color-text-secondary)}
-.vcard-side-meta dd{margin:0;font-size:13px;color:var(--color-text-primary);display:inline-flex;align-items:center;gap:7px}
+.vcard-detail-side{display:flex;flex-direction:column;gap:14px}
+/* 信息面板头部：标题 + 当前状态徽章 + 批量操作（全部显示 / 一键复制） */
+.vcard-info-head{display:flex;align-items:center;gap:10px;margin:-2px 0 14px;flex-wrap:wrap}
+.vcard-info-head h3{margin:0}
+.vcard-info-bulk{margin-left:auto;display:inline-flex;gap:8px}
+/* 剩余有效期：数字 + 进度条（区别于参考站的纯文字行） */
+.vcard-days-meter{display:flex;flex-direction:column;gap:6px;padding:13px 15px;border-radius:12px;background:linear-gradient(135deg,#fbffd6,#f4f7da)}
+.vcard-days-copy{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.vcard-days-copy span{font-size:12px;color:#6b7326}
+.vcard-days-copy strong{font-size:24px;font-weight:720;color:#3e4500;line-height:1;font-variant-numeric:tabular-nums}
+.vcard-days-copy strong small{font-size:12px;font-weight:600;margin-left:2px}
+.vcard-days-track{height:6px;border-radius:999px;background:rgba(62,69,0,.12);overflow:hidden}
+.vcard-days-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#c8d43d,#9aa523)}
+.vcard-days-meter small{font-size:11px;color:#8a913f}
+/* 元信息：两列网格（区别于参考站的上下分行动式） */
+.vcard-meta-grid{margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.vcard-meta-grid div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vcard-meta-grid dt{font-size:11.5px;color:var(--color-text-tertiary)}
+.vcard-meta-grid dd{margin:0;font-size:13px;font-weight:600;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vcard-meta-grid dd code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500}
+.vcard-meta-grid dd.is-note{display:flex;align-items:center;gap:6px}
+.vcard-note-edit{display:grid;place-items:center;flex:none;width:24px;height:24px;border:0;border-radius:7px;background:var(--color-surface-soft);color:var(--color-text-secondary);cursor:pointer;transition:background .15s ease,color .15s ease}
+.vcard-note-edit:hover{background:var(--color-brand);color:#111214}
+.vcard-note-edit svg{width:13px;height:13px}
+/* 订阅更新：品牌色时间线（区别于参考站的绿色提示盒） */
+.vcard-side-panel.is-subscribe h3{display:inline-flex;align-items:center;gap:7px}
+.vcard-side-panel.is-subscribe h3 svg{width:15px;height:15px;color:#8a913f}
+.vcard-subscribe-timeline{margin:0;padding:2px 0 0 14px;list-style:none;position:relative}
+.vcard-subscribe-timeline:before{content:"";position:absolute;left:3px;top:8px;bottom:8px;width:2px;border-radius:2px;background:linear-gradient(180deg,#c8d43d,#e4e8bd)}
+.vcard-subscribe-timeline li{position:relative;display:flex;align-items:baseline;gap:8px;padding:6px 0 6px 10px}
+.vcard-subscribe-timeline li i{position:absolute;left:-14px;top:13px;width:8px;height:8px;border-radius:999px;background:#c8d43d;box-shadow:0 0 0 3px #f4f7da}
+.vcard-subscribe-timeline strong{font-size:13px;font-weight:650;color:var(--color-text-primary)}
+.vcard-subscribe-timeline b{margin-left:auto;font-size:13px;font-weight:650;color:#5b6b1f;font-variant-numeric:tabular-nums}
+.vcard-subscribe-timeline time{font-size:11.5px;color:var(--color-text-tertiary);white-space:nowrap}
+.vcard-subscribe-empty{margin:4px 0 0;font-size:13px;color:var(--color-text-tertiary)}
 .vcard-action-list{display:flex;flex-direction:column;gap:9px}
-.vcard-action-primary{background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vcard-action-primary{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
+.vcard-action-primary:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
 .vcard-action-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
 .vcard-action-note{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--color-text-tertiary)}
 .vcard-action-note svg{width:14px;height:14px;flex:none;margin-top:1px}
+.vcard-finance-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.vcard-finance-head h3{margin:0}
+.vcard-finance-head small{font-size:11.5px;color:var(--color-text-tertiary)}
 .vcard-finance{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px 18px}
 .vcard-finance div{display:flex;flex-direction:column;gap:3px}
 .vcard-finance dt{font-size:12px;color:var(--color-text-secondary)}
 .vcard-finance dd{margin:0;font-size:17px;font-weight:650;color:var(--color-text-primary)}
+.vcard-finance div.is-brand dd{color:#5b6b1f}
+.vcard-finance div.is-risk dd{color:var(--color-danger)}
 .vcard-flow-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
 .vcard-flow-head h3{margin:0!important}
 .vcard-flow-table .vcard-flow-amount,.vtxn-table .vcard-flow-amount{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -231,6 +263,7 @@
 @media(max-width:640px){
   .vcard-number{font-size:14px}
   .vcard-item-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .vcard-meta-grid{grid-template-columns:1fr}
   /* 工具行：导出+视图切换一行，开通虚拟卡通栏一行 */
   .vcard-head-tools{width:100%;display:flex;flex-wrap:wrap;gap:8px}
   .vcard-head-tools .vcard-view-toggle{margin-left:auto}
