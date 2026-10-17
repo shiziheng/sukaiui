@@ -487,16 +487,39 @@ export function CardDetail({
   return (
     <section className="vcard-detail">
       <header className="vcard-detail-head">
-        <button className="page-back-button" type="button" onClick={onBack}>
-          <ArrowLeft aria-hidden="true" />{editable("cardBackCards")}
-        </button>
         <div className="vcard-detail-title">
+          <button className="page-back-button" type="button" onClick={onBack}>
+            <ArrowLeft aria-hidden="true" />{editable("cardBackCards")}
+          </button>
           <h2>{binTitle(card)}</h2>
           <span className={`vcard-status is-${statusMeta.tone}`}>
             {frozen ? <Snowflake aria-hidden="true" /> : null}
             {card.status === "processing" ? <i aria-hidden="true" /> : null}
             {statusMeta.label}
           </span>
+        </div>
+        <div className="vcard-detail-actions">
+          <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
+            <PlusCircle aria-hidden="true" />充值
+          </Button>
+          <button
+            className="uc-secondary-action"
+            type="button"
+            onClick={() => onRefund(card)}
+            disabled={frozen || card.balance <= 0}
+            title={card.balance <= 0 ? content.cardRefundEmpty : undefined}
+          >
+            <RotateCcw aria-hidden="true" />{content.cardRefund}
+          </button>
+          <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
+            <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
+          </button>
+          <button className="uc-secondary-action is-danger" type="button" onClick={() => onRequestDelete(card)}>
+            <Trash2 aria-hidden="true" />{editable("cardDeleteCard")}
+          </button>
+          <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
+            <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
+          </button>
         </div>
       </header>
 
@@ -613,46 +636,24 @@ export function CardDetail({
               </div>
               <div><dt>系统备注</dt><dd>{card.systemRemark || "—"}</dd></div>
             </dl>
-          </section>
-
-          <section className="vcard-side-panel is-subscribe">
-            <h3><Sparkles aria-hidden="true" />订阅更新</h3>
-            {card.subscriptionUpdates?.length ? (
-              <ol className="vcard-subscribe-timeline">
-                {card.subscriptionUpdates.map((item, index) => (
-                  <li key={`${item.plan}-${item.time}`}>
-                    <i aria-hidden="true" />
-                    <div>
-                      <strong>{item.brand} {item.plan}</strong>
-                      <b>{money(item.amount)}</b>
-                      <time>{item.time}</time>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="vcard-subscribe-empty">暂无订阅更新</p>
-            )}
-          </section>
-
-          <section className="vcard-side-panel is-actions">
-            <h3>{editable("cardActionsTitle")}</h3>
-            <div className="vcard-action-list">
-              <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
-                <PlusCircle aria-hidden="true" />充值
-              </Button>
-              <Button variant="outline" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
-                <RotateCcw aria-hidden="true" />{content.cardRefund}
-              </Button>
-              <Button variant="outline" onClick={() => onRequestFreeze(card)}>
-                <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
-              </Button>
-              <Button variant="outline" className="vcard-action-danger" onClick={() => onRequestDelete(card)}>
-                <Trash2 aria-hidden="true" />{editable("cardDeleteCard")}
-              </Button>
-              <Button variant="outline" onClick={() => onNote(card)}>
-                <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
-              </Button>
+            <div className="vcard-sub-block">
+              <h3><Sparkles aria-hidden="true" />订阅更新</h3>
+              {card.subscriptionUpdates?.length ? (
+                <ol className="vcard-subscribe-timeline">
+                  {card.subscriptionUpdates.map((item, index) => (
+                    <li key={`${item.plan}-${item.time}`}>
+                      <i aria-hidden="true" />
+                      <div>
+                        <strong>{item.brand} {item.plan}</strong>
+                        <b>{money(item.amount)}</b>
+                        <time>{item.time}</time>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="vcard-subscribe-empty">暂无订阅更新</p>
+              )}
             </div>
           </section>
         </aside>
