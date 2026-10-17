@@ -348,10 +348,25 @@ export function CardList({
                   <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
                     <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
                   </button>
-                  <button className="vcard-item-danger" type="button" onClick={() => onRequestDelete(card)} aria-label={content.cardDeleteCard}>
+                  <button
+                    className="vcard-item-danger"
+                    type="button"
+                    onClick={() => onRequestDelete(card)}
+                    disabled={frozen}
+                    title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
+                    aria-label={content.cardDeleteCard}
+                  >
                     <Trash2 aria-hidden="true" />{content.cardDeleteCard}
                   </button>
                 </div>
+                {frozen ? (
+                  <p className="vcard-frozen-hint">
+                    <Snowflake aria-hidden="true" />
+                    {card.status === "system_frozen"
+                      ? "系统冻结：需联系客服处理，期间不支持充值、退款与删卡"
+                      : "卡片已冻结：期间不支持充值、退款与删卡，仅可解冻"}
+                  </p>
+                ) : null}
               </article>
             );
           })}
@@ -619,6 +634,15 @@ export function CardDetail({
               <small>{String(card.expMonth).padStart(2, "0")}/{card.expYear} 到期</small>
             </div>
             <dl className="vcard-meta-grid">
+              <div>
+                <dt>当前状态</dt>
+                <dd>
+                  <span className={`vcard-meta-status is-${statusMeta.tone}`}>
+                    {frozen ? <Snowflake aria-hidden="true" /> : null}
+                    {statusMeta.label}
+                  </span>
+                </dd>
+              </div>
               <div><dt>卡ID</dt><dd><code>{card.id}</code></dd></div>
               <div><dt>建卡时间</dt><dd>{card.createdAt}</dd></div>
               <div><dt>卡组织 / 发行地</dt><dd>{schemeLabel(card.scheme)} · {regionLabel(card.region)}</dd></div>

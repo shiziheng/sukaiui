@@ -298,3 +298,26 @@
 .vcard-cvv-note{display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:12px;color:var(--color-text-tertiary)}
 .vcard-cvv-note svg{width:14px;height:14px;flex:none}
 .vcard-info-tools button:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- v0.13.x：冻结提示 / 退款弹窗 / 详情状态徽章 ---------- */
+/* 卡列表卡片下的冻结提示条 */
+.vcard-frozen-hint{display:flex;align-items:flex-start;gap:6px;margin:0;padding:7px 10px;border:1px dashed rgba(169,99,91,.45);border-radius:9px;background:rgba(169,99,91,.08);color:#8a4a42;font-size:12px;line-height:1.5}
+.vcard-frozen-hint svg{width:13px;height:13px;flex:none;margin-top:2px}
+/* 卡详情页头的冻结提示条（system_frozen 走红色系） */
+.vcard-detail-alert{display:flex;align-items:flex-start;gap:9px;margin:0 0 10px;padding:10px 14px;border:1px solid rgba(214,170,60,.5);border-radius:12px;background:rgba(214,170,60,.12)}
+.vcard-detail-alert svg{width:16px;height:16px;flex:none;color:#9a7a1e;margin-top:2px}
+.vcard-detail-alert p{margin:0;font-size:13px;line-height:1.55;color:#6b5a1f}
+.vcard-detail-alert.is-system{border-color:rgba(169,99,91,.5);background:rgba(169,99,91,.1)}
+.vcard-detail-alert.is-system svg{color:var(--color-danger)}
+.vcard-detail-alert.is-system p{color:#7a4038}
+/* 详情右栏「当前状态」徽章（浅底配色） */
+.vcard-meta-status{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-meta-status svg{width:12px;height:12px}
+.vcard-meta-status.is-completed{background:rgba(93,128,107,.16);color:#3e6b4f}
+.vcard-meta-status.is-processing{background:rgba(214,170,60,.18);color:#8a6d16}
+.vcard-meta-status.is-pending{background:rgba(90,100,120,.14);color:#46536b}
+.vcard-meta-status.is-failed{background:rgba(169,99,91,.16);color:#8a4a42}
+/* 退款弹窗保留金额说明 */
+.vcard-refund-keep{margin:0;font-size:12.5px;line-height:1.5;color:var(--color-text-secondary)}
+.vcard-refund-keep b{color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.card-refund-dialog .card-recharge-amount input:disabled{opacity:.5;cursor:not-allowed}

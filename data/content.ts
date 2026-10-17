@@ -777,7 +777,7 @@ export const defaultContent: DemoContent = {
   cardFreezeConfirmTitle: "冻结这张卡？",
   cardFreezeConfirmDescription: "冻结后该卡将暂停消费，卡内余额保留，可随时解冻。",
   cardUnfreezeConfirmTitle: "解冻这张卡？",
-  cardUnfreezeConfirmDescription: "解冻后该卡将恢复消费能力。",
+  cardUnfreezeConfirmDescription: "解冻请求将通过上游接口执行，解冻后该卡恢复消费与充值、退款、删卡操作。",
   cardDeleteConfirmTitle: "删掉这张卡？",
   cardDeleteConfirmDescription: "删卡后卡片不可恢复，卡内余额将退回平台余额。",
   cardConfirmAction: "确认",

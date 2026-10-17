@@ -10,6 +10,7 @@ import { CardMarket } from "@/components/card-market";
 import { CardTransactions } from "@/components/card-transactions";
 import { CardOpenDialog } from "@/components/card-open-dialog";
 import { CardRechargeDialog } from "@/components/card-recharge-dialog";
+import { CardRefundDialog } from "@/components/card-refund-dialog";
 import { EditableText } from "@/components/editable-text";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -50,6 +51,7 @@ export function CardModule({
   const [openBin, setOpenBin] = useState<CardBin | null>(null);
   const [fundCard, setFundCard] = useState<VirtualCard | null>(null);
   const [freezeTarget, setFreezeTarget] = useState<VirtualCard | null>(null);
+  const [freezing, setFreezing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<VirtualCard | null>(null);
   const [refundTarget, setRefundTarget] = useState<VirtualCard | null>(null);
   const [noteTarget, setNoteTarget] = useState<VirtualCard | null>(null);
@@ -130,16 +132,22 @@ export function CardModule({
   const handleFreeze = (card: VirtualCard) => { setFreezeTarget(card); };
   const confirmFreeze = () => {
     const card = freezeTarget;
-    if (!card) return;
+    if (!card || freezing) return;
     if (card.status === "system_frozen") {
       toast.info("系统冻结的卡片需联系客服处理");
       setFreezeTarget(null);
       return;
     }
     const next = card.status === "frozen" ? "active" : "frozen";
-    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, status: next } : c));
-    toast.success(next === "frozen" ? "卡片已冻结" : "卡片已解冻");
-    setFreezeTarget(null);
+    // 冻结/解冻通过上游接口执行：模拟约 0.9s 的接口往返，期间禁止重复提交。
+    setFreezing(true);
+    window.setTimeout(() => {
+      setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, status: next } : c));
+      if (detailCard?.id === card.id) setDetailCard({ ...card, status: next });
+      setFreezing(false);
+      setFreezeTarget(null);
+      toast.success(next === "frozen" ? "上游已冻结卡片" : "上游已解冻，卡片恢复可用");
+    }, 900);
   };
 
   const handleDelete = (card: VirtualCard) => { setDeleteTarget(card); };
@@ -163,6 +171,31 @@ export function CardModule({
   };
 
   const handleRefund = (card: VirtualCard) => { setRefundTarget(card); };
+  /** 退款弹窗确认：指定金额从卡内余额退回平台余额（弹窗已保证退款后卡内 ≥ $0.10）。 */
+  const handleRefundComplete = (card: VirtualCard, amount: number) => {
+    const newBalance = Number((platformBalance + amount).toFixed(2));
+    setPlatformBalance(newBalance);
+    onPlatformFlow({ type: "card_refund", amount, balanceAfter: newBalance, note: `卡退款 · 尾号 ${card.cardNo.slice(-4)}` });
+    const cardBalance = Number((card.balance - amount).toFixed(2));
+    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, balance: cardBalance } : c));
+    setFlows((fs) => [
+      {
+        id: `CF-TK-${Date.now()}`,
+        cardId: card.id,
+        time: now(),
+        type: "cashout",
+        amount: -amount,
+        balanceAfter: cardBalance,
+        merchant: "转出至平台余额",
+        status: "success",
+        txNo: "—",
+      },
+      ...fs,
+    ]);
+    if (detailCard?.id === card.id) setDetailCard({ ...card, balance: cardBalance });
+    toast.success(`${amount.toFixed(2)} 美元已退回平台余额`);
+    setRefundTarget(null);
+  };
 
   const openNote = (card: VirtualCard) => {
     setNoteTarget(card);
@@ -177,37 +210,7 @@ export function CardModule({
     toast.success("备注已保存");
     setNoteTarget(null);
   };
-  const confirmRefund = () => {
-    const card = refundTarget;
-    if (!card) return;
-    if (card.balance <= 0) {
-      toast.info(content.cardRefundEmpty);
-      setRefundTarget(null);
-      return;
-    }
-    const amount = card.balance;
-    const newBalance = Number((platformBalance + amount).toFixed(2));
-    setPlatformBalance(newBalance);
-    onPlatformFlow({ type: "card_refund", amount, balanceAfter: newBalance, note: `卡退款 · 尾号 ${card.cardNo.slice(-4)}` });
-    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, balance: 0 } : c));
-    setFlows((fs) => [
-      {
-        id: `CF-TK-${Date.now()}`,
-        cardId: card.id,
-        time: now(),
-        type: "cashout",
-        amount,
-        balanceAfter: 0,
-        merchant: "转出至平台余额",
-        status: "success",
-        txNo: "—",
-      },
-      ...fs,
-    ]);
-    if (detailCard?.id === card.id) setDetailCard({ ...card, balance: 0 });
-    toast.success(`退款成功，${amount.toFixed(2)} 美元已退回平台余额`);
-    setRefundTarget(null);
-  };
+  const confirmRefund = () => {};
 
   const freezeIsUnfreeze = freezeTarget?.status === "frozen";
 
@@ -294,34 +297,29 @@ export function CardModule({
         updateContent={updateContent}
       />
 
-      <AlertDialog open={Boolean(freezeTarget)} onOpenChange={(open) => !open && setFreezeTarget(null)}>
+      <AlertDialog open={Boolean(freezeTarget)} onOpenChange={(open) => !open && !freezing && setFreezeTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{editable(freezeIsUnfreeze ? "cardUnfreezeConfirmTitle" : "cardFreezeConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>{editable(freezeIsUnfreeze ? "cardUnfreezeConfirmDescription" : "cardFreezeConfirmDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{editable("cancel")}</AlertDialogCancel>
-            <AlertDialogAction className="card-freeze-confirm" onClick={confirmFreeze}>{editable("cardConfirmAction")}</AlertDialogAction>
+            <AlertDialogCancel disabled={freezing}>{editable("cancel")}</AlertDialogCancel>
+            <AlertDialogAction className="card-freeze-confirm" onClick={confirmFreeze} disabled={freezing}>
+              {freezing ? "正在请求上游…" : editable("cardConfirmAction")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={Boolean(refundTarget)} onOpenChange={(open) => !open && setRefundTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{editable("cardRefundConfirmTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {editable("cardRefundConfirmDescription")}
-              {refundTarget ? ` 当前卡内余额 ${refundTarget.balance.toFixed(2)} 美元。` : ""}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{editable("cancel")}</AlertDialogCancel>
-            <AlertDialogAction className="card-freeze-confirm" onClick={confirmRefund}>{editable("cardConfirmAction")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CardRefundDialog
+        card={refundTarget}
+        onOpenChange={(open) => { if (!open) setRefundTarget(null); }}
+        onComplete={handleRefundComplete}
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+      />
 
       <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
