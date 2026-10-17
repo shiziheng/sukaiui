@@ -118,14 +118,8 @@ export function CardList({
 
   return (
     <section className="vcard-panel">
-      <header className="vcard-panel-head">
-        <div className="vcard-panel-copy">
-          <span className="section-title-icon"><CreditCard aria-hidden="true" /></span>
-          <div>
-            <h2>{showClosed ? editable("cardClosedTitle") : editable("cardCardsTitle")}</h2>
-            <p>{showClosed ? content.cardClosedEmptyHint : editable("cardCardsSubtitle")}</p>
-          </div>
-        </div>
+      {/* 标题说明区已按用户要求去掉，头部只保留工具按钮，把空间让给卡片区 */}
+      <header className="vcard-panel-head is-tools-only">
         <div className="vcard-head-tools">
           <button className="uc-secondary-action" type="button" onClick={handleExport} disabled={!filtered.length}>
             <Download aria-hidden="true" />{editable("cardExport")}
