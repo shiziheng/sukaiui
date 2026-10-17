@@ -1025,7 +1025,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card"].includes(selectedMenu) ? selectedMenu === "card" ? "dashboard-inset card-page-inset" : "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <WalletRechargePage
