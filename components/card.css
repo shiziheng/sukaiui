@@ -92,7 +92,11 @@
 
 /* ---------- 卡详情 ---------- */
 .vcard-detail{display:block}
-.vcard-detail-head{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.vcard-detail-head{display:flex;flex-direction:row;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+/* 返回「我的卡片」升级为深色实心钮：页面里最醒目的导航元素，不再是浮在上面的小幽灵按钮 */
+.vcard-detail-head .page-back-button{width:auto;justify-content:flex-start;height:38px;background:#17181b;color:#fff;border-color:#17181b;font-weight:650;box-shadow:0 3px 10px rgba(17,18,20,.18)}
+.vcard-detail-head .page-back-button:hover{background:#2b2d32;border-color:#2b2d32;color:#fff;box-shadow:0 4px 12px rgba(17,18,20,.24)}
+.vcard-detail-head .page-back-button svg{color:var(--color-brand)}
 .vcard-detail-title{display:flex;align-items:center;gap:12px}
 .vcard-detail-title h2{margin:0;font-size:22px;font-weight:650;color:var(--color-text-primary);letter-spacing:-.02em}
 .vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
@@ -149,8 +153,6 @@
 .vcard-action-primary{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
 .vcard-action-primary:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
 .vcard-action-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
-.vcard-action-note{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--color-text-tertiary)}
-.vcard-action-note svg{width:14px;height:14px;flex:none;margin-top:1px}
 .vcard-finance-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px}
 .vcard-finance-head h3{margin:0}
 .vcard-finance-head small{font-size:11.5px;color:var(--color-text-tertiary)}

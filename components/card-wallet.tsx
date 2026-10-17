@@ -515,11 +515,6 @@ export function CardDetail({
           <section className="vcard-info-panel">
             <header className="vcard-info-head">
               <h3>{editable("cardInfoTitle")}</h3>
-              <span className={`vcard-status is-${statusMeta.tone}`}>
-                {frozen ? <Snowflake aria-hidden="true" /> : null}
-                {card.status === "processing" ? <i aria-hidden="true" /> : null}
-                {statusMeta.label}
-              </span>
               <div className="vcard-info-bulk">
                 <button className="uc-secondary-action" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
                   {cvvState === "querying" ? <Search aria-hidden="true" /> : revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
@@ -608,7 +603,6 @@ export function CardDetail({
             <dl className="vcard-meta-grid">
               <div><dt>卡ID</dt><dd><code>{card.id}</code></dd></div>
               <div><dt>建卡时间</dt><dd>{card.createdAt}</dd></div>
-              <div><dt>卡段</dt><dd>{binTitle(card)}</dd></div>
               <div><dt>卡组织 / 发行地</dt><dd>{schemeLabel(card.scheme)} · {regionLabel(card.region)}</dd></div>
               <div>
                 <dt>备注</dt>
@@ -647,9 +641,6 @@ export function CardDetail({
               <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
                 <PlusCircle aria-hidden="true" />充值
               </Button>
-              <Button variant="outline" onClick={() => onNote(card)}>
-                <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
-              </Button>
               <Button variant="outline" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
                 <RotateCcw aria-hidden="true" />{content.cardRefund}
               </Button>
@@ -659,11 +650,10 @@ export function CardDetail({
               <Button variant="outline" className="vcard-action-danger" onClick={() => onRequestDelete(card)}>
                 <Trash2 aria-hidden="true" />{editable("cardDeleteCard")}
               </Button>
+              <Button variant="outline" onClick={() => onNote(card)}>
+                <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
+              </Button>
             </div>
-            <p className="vcard-action-note">
-              <LockKeyhole aria-hidden="true" />
-              卡号与 CVV 默认脱敏显示，请勿在不可信环境展示卡信息。
-            </p>
           </section>
         </aside>
       </div>
@@ -693,7 +683,6 @@ export function CardDetail({
             <span className="section-title-icon"><ReceiptText aria-hidden="true" /></span>
             <div>
               <h3>{editable("cardFlowTitle")}</h3>
-              <p>这张卡的充值、消费与退款记录，按时间倒序排列。</p>
             </div>
           </div>
           <select className="vbin-select" value={flowType} onChange={(event) => setFlowType(event.target.value as typeof flowType)} aria-label="流水类型">
