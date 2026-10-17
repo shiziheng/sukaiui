@@ -331,7 +331,7 @@ button{font:inherit}
 .home-assist-card:first-child{background:linear-gradient(145deg,#fff 0%,#fafce8 100%)}
 .home-assist-card dd{font-size:17px;font-weight:750}
 
-.commerce-panel{display:grid;gap:22px}
+.commerce-panel{display:grid;gap:12px}
 .commerce-page-heading{
   display:flex;
   align-items:center;
@@ -1289,7 +1289,7 @@ button{font:inherit}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active]{background:#17181b!important;color:var(--color-brand)!important;box-shadow:0 3px 10px rgba(17,18,20,.25)!important}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active] svg{color:var(--color-brand)!important}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active]:after{display:none!important}
-.biz-tabs{margin-bottom:12px}
+.commerce-panel .biz-tabs{margin-bottom:0}
 /* L3 页头带：钱包/用户中心 uc-page-heading 与代充 commerce-page-heading 统一紧凑节奏 */
 .uc-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
 .uc-page-heading .uc-page-heading-icon,.commerce-page-icon{width:36px!important;height:36px!important;border-radius:10px!important;box-shadow:none!important}
@@ -1297,4 +1297,4 @@ button{font:inherit}
 .uc-page-heading h1,.commerce-page-heading h1{font-size:20px!important;line-height:1.2!important;font-weight:720!important;letter-spacing:-.02em!important}
 .uc-page-heading p,.commerce-page-heading p{margin-top:2px!important;font-size:13px!important}
 .commerce-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
-.panel-toolbar{margin-bottom:16px!important}
+.commerce-panel .panel-toolbar{margin-bottom:0!important}

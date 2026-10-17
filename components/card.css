@@ -64,14 +64,15 @@
 .vcard-item-danger{width:auto;height:32px;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border:1px solid var(--ds-border-default);border-radius:var(--ds-radius-control,10px);background:var(--color-surface);color:var(--color-danger);font-size:12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;white-space:nowrap}
 .vcard-item-danger:hover{background:#fbeeed;border-color:var(--color-danger)}
 .vcard-item-danger svg{width:13px;height:13px;flex:none}
-.vcard-open-entry{background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vcard-open-entry{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
+.vcard-open-entry:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
 
 /* 我的卡片：筛选栏 / 视图切换 / 表格视图 / 删卡记录 */
 .vcard-head-tools{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
 .vcard-view-toggle{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface)}
 .vcard-view-toggle button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--color-text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
 .vcard-view-toggle button:hover{color:var(--color-text-primary)}
-.vcard-view-toggle button.is-active{background:var(--color-brand);color:#111214}
+.vcard-view-toggle button.is-active{background:#17181b;color:var(--color-brand);box-shadow:0 2px 6px rgba(17,18,20,.22)}
 .vcard-view-toggle svg{width:14px;height:14px}
 .vcard-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
 .vcard-filters .vcard-search{flex:1;min-width:200px}
