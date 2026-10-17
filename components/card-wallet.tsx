@@ -534,7 +534,13 @@ export function CardDetail({
           <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
             <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
           </button>
-          <button className="uc-secondary-action is-danger" type="button" onClick={() => onRequestDelete(card)}>
+          <button
+            className="uc-secondary-action is-danger"
+            type="button"
+            onClick={() => onRequestDelete(card)}
+            disabled={frozen}
+            title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
+          >
             <Trash2 aria-hidden="true" />{editable("cardDeleteCard")}
           </button>
           <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
@@ -542,6 +548,17 @@ export function CardDetail({
           </button>
         </div>
       </header>
+
+      {frozen ? (
+        <div className={`vcard-detail-alert ${card.status === "system_frozen" ? "is-system" : ""}`} role="status">
+          <Snowflake aria-hidden="true" />
+          <p>
+            {card.status === "system_frozen"
+              ? "该卡已被系统冻结（上游/风控触发），需联系客服处理；冻结期间不支持充值、退款与删卡。"
+              : "该卡已冻结，冻结期间不支持充值、退款与删卡，仅可解冻；解冻经上游确认后恢复使用。"}
+          </p>
+        </div>
+      ) : null}
 
       <div className="vcard-detail-top">
         <section className="vcard-info-panel">
@@ -705,16 +722,18 @@ export function CardDetail({
               <h3>{editable("cardFlowTitle")}</h3>
             </div>
           </div>
-          <select className="vbin-select" value={flowType} onChange={(event) => setFlowType(event.target.value as typeof flowType)} aria-label="流水类型">
-            <option value="all">{content.cardAllTypes}</option>
-            <option value="recharge">{cardFlowTypeLabel.recharge}</option>
-            <option value="consume">{cardFlowTypeLabel.consume}</option>
-            <option value="refund">{cardFlowTypeLabel.refund}</option>
-            <option value="cashout">{cardFlowTypeLabel.cashout}</option>
-          </select>
-          <button className="uc-secondary-action" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
-            <Download aria-hidden="true" />{editable("cardExport")}
-          </button>
+          <div className="vcard-flow-tools">
+            <select className="vbin-select" value={flowType} onChange={(event) => setFlowType(event.target.value as typeof flowType)} aria-label="流水类型">
+              <option value="all">{content.cardAllTypes}</option>
+              <option value="recharge">{cardFlowTypeLabel.recharge}</option>
+              <option value="consume">{cardFlowTypeLabel.consume}</option>
+              <option value="refund">{cardFlowTypeLabel.refund}</option>
+              <option value="cashout">{cardFlowTypeLabel.cashout}</option>
+            </select>
+            <button className="uc-secondary-action" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
+              <Download aria-hidden="true" />{editable("cardExport")}
+            </button>
+          </div>
         </header>
 
         {visibleFlows.length ? (

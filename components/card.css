@@ -289,6 +289,9 @@
   .vcard-filters .vbin-select{min-width:0;width:100%}
   .vbin-fees,.vbin-meta{grid-template-columns:1fr}
   .vcard-field-grid{grid-template-columns:1fr}
+  /* 流水头窄屏：筛选+导出通栏一行，下拉占满剩余宽度 */
+  .vcard-flow-tools{width:100%}
+  .vcard-flow-tools .vbin-select{flex:1 1 auto;min-width:0}
 }
 
 /* ---------- v0.13.0：开卡统计 / 费用外扣 / CVV 查询说明 ---------- */
@@ -321,3 +324,7 @@
 .vcard-refund-keep{margin:0;font-size:12.5px;line-height:1.5;color:var(--color-text-secondary)}
 .vcard-refund-keep b{color:var(--color-text-primary);font-variant-numeric:tabular-nums}
 .card-refund-dialog .card-recharge-amount input:disabled{opacity:.5;cursor:not-allowed}
+/* 流水面板头：类型筛选+导出归到右侧一组，select 与按钮同高对齐 */
+.vcard-flow-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+.vcard-flow-head .vbin-select{height:36px;border-radius:8px;font-size:13px;padding:0 30px 0 12px}
+.vcard-flow-head .uc-secondary-action{height:36px}
