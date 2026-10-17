@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy, Eye, EyeOff, Snowflake, TriangleAlert } from "lucide-react";
-import { toast } from "sonner";
+import { Copy, Eye, EyeOff, Snowflake, TriangleAlert } from "lucide-react";
 
 import { EditableText } from "@/components/editable-text";
 import {
@@ -61,33 +59,20 @@ export function CardStatusTag({ status }: { status: CardStatus }) {
 export function CardVisual({
   card,
   variant = "list",
-  revealed,
-  onToggleReveal,
+  revealed = false,
   content,
   editMode,
   updateContent,
 }: {
   card: VirtualCard;
   variant?: "list" | "detail";
-  revealed: boolean;
-  onToggleReveal: () => void;
+  revealed?: boolean;
+  onToggleReveal?: () => void;
   content: DemoContent;
   editMode: boolean;
   updateContent: (key: keyof DemoContent, value: string) => void;
 }) {
-  const [copied, setCopied] = useState(false);
   const dim = card.status === "frozen" || card.status === "system_frozen";
-
-  const handleCopy = async () => {
-    const ok = await copyText(card.cardNo);
-    if (!ok) {
-      toast.error("复制失败，请手动选择卡号");
-      return;
-    }
-    setCopied(true);
-    toast.success(content.cardCopied);
-    window.setTimeout(() => setCopied(false), 1600);
-  };
 
   return (
     <div className={`vcard is-${variant} ${dim ? "is-dimmed" : ""}`} data-scheme={card.scheme}>
@@ -102,14 +87,6 @@ export function CardVisual({
 
       <div className="vcard-number-row">
         <span className="vcard-number">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</span>
-        <span className="vcard-number-tools">
-          <button type="button" onClick={onToggleReveal} aria-label={revealed ? content.cardHide : content.cardReveal}>
-            {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-          </button>
-          <button type="button" onClick={handleCopy} aria-label={content.cardCopy}>
-            {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          </button>
-        </span>
       </div>
 
       <div className="vcard-balance">

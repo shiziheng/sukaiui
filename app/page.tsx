@@ -570,6 +570,10 @@ export default function Home() {
         // 五页签改版：菜单更名（链式迁移，只匹配已知旧值）
         if (["充值", "钱包充值"].includes(config.content.navTopup)) config.content.navTopup = "钱包/充值";
         if (["我的订单", "订单中心"].includes(config.content.navOrders)) config.content.navOrders = "我的账单";
+        // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）
+        if (config.content.cardDeleteCard === "注销卡片") config.content.cardDeleteCard = "删卡";
+        if (config.content.cardDeleteConfirmTitle === "注销这张卡？") config.content.cardDeleteConfirmTitle = "删掉这张卡？";
+        if (config.content.cardDeleteConfirmDescription === "注销后卡片不可恢复，卡内余额将退回平台余额。") config.content.cardDeleteConfirmDescription = "删卡后卡片不可恢复，卡内余额将退回平台余额。";
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
         if (config.content.downloadAction === "下载") config.content.downloadAction = "下载凭据";
         if (config.content.invitePageSubtitle === "邀请好友注册并消费，可获得返佣奖励。") config.content.invitePageSubtitle = "邀请好友使用 SUKAI，查看你的邀请奖励与记录。";

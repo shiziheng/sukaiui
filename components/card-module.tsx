@@ -11,6 +11,7 @@ import { CardTransactions } from "@/components/card-transactions";
 import { CardOpenDialog } from "@/components/card-open-dialog";
 import { CardRechargeDialog } from "@/components/card-recharge-dialog";
 import { EditableText } from "@/components/editable-text";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -51,6 +52,8 @@ export function CardModule({
   const [freezeTarget, setFreezeTarget] = useState<VirtualCard | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<VirtualCard | null>(null);
   const [refundTarget, setRefundTarget] = useState<VirtualCard | null>(null);
+  const [noteTarget, setNoteTarget] = useState<VirtualCard | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
   const [closedRecords, setClosedRecords] = useState<ClosedCardRecord[]>([]);
 
   const editable = (key: keyof DemoContent) => (
@@ -149,17 +152,31 @@ export function CardModule({
       type: "card_close",
       amount: card.balance,
       balanceAfter: newBalance,
-      note: card.balance > 0 ? `销卡退款 · 尾号 ${card.cardNo.slice(-4)}` : `销卡 · 尾号 ${card.cardNo.slice(-4)}`,
+      note: card.balance > 0 ? `删卡退款 · 尾号 ${card.cardNo.slice(-4)}` : `删卡 · 尾号 ${card.cardNo.slice(-4)}`,
     });
     setClosedRecords((records) => [{ card, closedAt: now() }, ...records]);
     setCards((cs) => cs.filter((c) => c.id !== card.id));
     // 销卡后流水保留：交易记录页可见「已销卡」的历史流水。
     if (detailCard?.id === card.id) setDetailCard(null);
-    toast.success("卡片已注销，余额已退回平台余额");
+    toast.success("卡片已删除，余额已退回平台余额");
     setDeleteTarget(null);
   };
 
   const handleRefund = (card: VirtualCard) => { setRefundTarget(card); };
+
+  const openNote = (card: VirtualCard) => {
+    setNoteTarget(card);
+    setNoteDraft(card.remark ?? "");
+  };
+  const confirmNote = () => {
+    const card = noteTarget;
+    if (!card) return;
+    const next = noteDraft.trim();
+    setCards((cs) => cs.map((c) => c.id === card.id ? { ...c, remark: next } : c));
+    if (detailCard?.id === card.id) setDetailCard({ ...card, remark: next });
+    toast.success("备注已保存");
+    setNoteTarget(null);
+  };
   const confirmRefund = () => {
     const card = refundTarget;
     if (!card) return;
@@ -225,7 +242,7 @@ export function CardModule({
           onOpenMarket={() => setTab("market")}
           onDetail={setDetailCard}
           onFund={(card) => setFundCard(card)}
-          onRefund={handleRefund}
+          onNote={openNote}
           onRequestFreeze={handleFreeze}
           onRequestDelete={handleDelete}
           content={content}
@@ -320,6 +337,30 @@ export function CardModule({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={Boolean(noteTarget)} onOpenChange={(open) => { if (!open) setNoteTarget(null); }}>
+        <DialogContent className="card-note-dialog">
+          <DialogHeader>
+            <DialogTitle>{editable("cardRemarkLabel")}</DialogTitle>
+            <DialogDescription>
+              {noteTarget ? `尾号 ${noteTarget.cardNo.slice(-4)} · ${binTitle(noteTarget)}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            className="card-note-textarea"
+            value={noteDraft}
+            onChange={(event) => setNoteDraft(event.target.value)}
+            placeholder="输入备注，方便识别这张卡的用途"
+            rows={3}
+            maxLength={60}
+            aria-label="备注内容"
+          />
+          <DialogFooter>
+            <button className="uc-secondary-action" type="button" onClick={() => setNoteTarget(null)}>{editable("cancel")}</button>
+            <button className="uc-primary-action" type="button" onClick={confirmNote}>保存</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

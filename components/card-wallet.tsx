@@ -2,20 +2,20 @@
 
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Copy, CreditCard, Download, EyeOff, LayoutGrid, LockKeyhole, PlusCircle, ReceiptText,
+  ArrowLeft, ArrowRight, Copy, CreditCard, Download, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
   RotateCcw, Search, Snowflake, Table, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import type { ClosedCardRecord } from "@/components/card-module";
 import {
-  CardVisual, SchemeBadge, SensitiveRow, copyText, type RevealMap,
+  CardVisual, SchemeBadge, SensitiveRow, copyText,
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import {
   binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, money,
-  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardRegion, type CardScheme,
+  regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardScheme,
   type CardStatus, type VirtualCard,
 } from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
@@ -23,7 +23,6 @@ import { type DemoContent } from "@/data/content";
 type Editable = (key: keyof DemoContent, value: string) => void;
 type StatusFilter = "all" | CardStatus | "closed";
 type SchemeFilter = "all" | CardScheme;
-type RegionFilter = "all" | CardRegion;
 type SortMode = "default" | "balance_desc" | "balance_asc";
 type ViewMode = "cards" | "table";
 
@@ -37,7 +36,7 @@ export function CardList({
   onOpenMarket,
   onDetail,
   onFund,
-  onRefund,
+  onNote,
   onRequestFreeze,
   onRequestDelete,
   content,
@@ -49,18 +48,18 @@ export function CardList({
   onOpenMarket: () => void;
   onDetail: (card: VirtualCard) => void;
   onFund: (card: VirtualCard) => void;
-  onRefund: (card: VirtualCard) => void;
+  onNote: (card: VirtualCard) => void;
   onRequestFreeze: (card: VirtualCard) => void;
   onRequestDelete: (card: VirtualCard) => void;
   content: DemoContent;
   editMode: boolean;
   updateContent: Editable;
 }) {
-  const [revealed, setRevealed] = useState<RevealMap>({});
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [schemeFilter, setSchemeFilter] = useState<SchemeFilter>("all");
-  const [regionFilter, setRegionFilter] = useState<RegionFilter>("all");
+  const [minBalance, setMinBalance] = useState("");
+  const [maxBalance, setMaxBalance] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("default");
   const [view, setView] = useState<ViewMode>("cards");
   const editable = (key: keyof DemoContent) => (
@@ -68,6 +67,10 @@ export function CardList({
   );
 
   const showClosed = statusFilter === "closed";
+  const minBalanceValue = Number(minBalance);
+  const maxBalanceValue = Number(maxBalance);
+  const hasMinBalance = minBalance.trim() !== "" && !Number.isNaN(minBalanceValue);
+  const hasMaxBalance = maxBalance.trim() !== "" && !Number.isNaN(maxBalanceValue);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -80,23 +83,23 @@ export function CardList({
         (card.remark ?? "").toLowerCase().includes(kw)
       );
     };
+    const matchBalance = (card: VirtualCard) =>
+      (!hasMinBalance || card.balance >= minBalanceValue) && (!hasMaxBalance || card.balance <= maxBalanceValue);
     if (showClosed) {
       return closedRecords
         .map((record) => record.card)
         .filter(matchKw)
-        .filter((card) => schemeFilter === "all" || card.scheme === schemeFilter)
-        .filter((card) => regionFilter === "all" || card.region === regionFilter);
+        .filter((card) => schemeFilter === "all" || card.scheme === schemeFilter);
     }
     let list = cards.filter((card) => {
       if (statusFilter !== "all" && card.status !== statusFilter) return false;
       if (schemeFilter === "all" ? false : card.scheme !== schemeFilter) return false;
-      if (regionFilter === "all" ? false : card.region !== regionFilter) return false;
-      return matchKw(card);
+      return matchKw(card) && matchBalance(card);
     });
     if (sortMode === "balance_desc") list = [...list].sort((a, b) => b.balance - a.balance);
     if (sortMode === "balance_asc") list = [...list].sort((a, b) => a.balance - b.balance);
     return list;
-  }, [cards, closedRecords, keyword, statusFilter, schemeFilter, regionFilter, sortMode, showClosed]);
+  }, [cards, closedRecords, keyword, statusFilter, schemeFilter, minBalance, maxBalance, minBalanceValue, maxBalanceValue, hasMinBalance, hasMaxBalance, sortMode, showClosed]);
 
   const closedAtOf = (card: VirtualCard) =>
     closedRecords.find((record) => record.card.id === card.id)?.closedAt ?? "—";
@@ -114,7 +117,7 @@ export function CardList({
   };
 
   const noFilterApplied =
-    !keyword.trim() && statusFilter === "all" && schemeFilter === "all" && regionFilter === "all";
+    !keyword.trim() && statusFilter === "all" && schemeFilter === "all" && minBalance.trim() === "" && maxBalance.trim() === "";
 
   return (
     <section className="vcard-panel">
@@ -191,16 +194,29 @@ export function CardList({
           <option value="mastercard">{schemeLabel("mastercard")}</option>
           <option value="discover">{schemeLabel("discover")}</option>
         </select>
-        <select
-          className="vbin-select"
-          value={regionFilter}
-          onChange={(event) => setRegionFilter(event.target.value as RegionFilter)}
-          aria-label="发行地"
-        >
-          <option value="all">{content.cardAllRegion}</option>
-          <option value="us">{regionLabel("us")}</option>
-          <option value="hk">{regionLabel("hk")}</option>
-        </select>
+        <div className="vcard-balance-range" role="group" aria-label="余额区间">
+          <input
+            className="vcard-range-input"
+            type="number"
+            min="0"
+            step="0.01"
+            value={minBalance}
+            onChange={(event) => setMinBalance(event.target.value)}
+            placeholder="最低余额"
+            aria-label="最低余额"
+          />
+          <span className="vcard-range-sep" aria-hidden="true">~</span>
+          <input
+            className="vcard-range-input"
+            type="number"
+            min="0"
+            step="0.01"
+            value={maxBalance}
+            onChange={(event) => setMaxBalance(event.target.value)}
+            placeholder="最高余额"
+            aria-label="最高余额"
+          />
+        </div>
         <select
           className="vbin-select"
           value={sortMode}
@@ -271,8 +287,8 @@ export function CardList({
                         <button type="button" className="uc-secondary-action" onClick={() => onFund(card)} disabled={frozen}>
                           <PlusCircle aria-hidden="true" />充值
                         </button>
-                        <button type="button" className="uc-secondary-action" onClick={() => onRefund(card)} disabled={frozen || card.balance <= 0}>
-                          <RotateCcw aria-hidden="true" />{content.cardRefund}
+                        <button type="button" className="uc-secondary-action" onClick={() => onNote(card)}>
+                          <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
                         </button>
                       </span>
                     </td>
@@ -289,8 +305,6 @@ export function CardList({
               <div className="vcard-item-face">
                 <CardVisual
                   card={card}
-                  revealed={Boolean(revealed[card.id])}
-                  onToggleReveal={() => setRevealed((current) => ({ ...current, [card.id]: !current[card.id] }))}
                   content={content}
                   editMode={editMode}
                   updateContent={updateContent}
@@ -319,28 +333,20 @@ export function CardList({
                 >
                   <CardVisual
                     card={card}
-                    revealed={Boolean(revealed[card.id])}
-                    onToggleReveal={() => setRevealed((current) => ({ ...current, [card.id]: !current[card.id] }))}
                     content={content}
                     editMode={editMode}
-                  updateContent={updateContent}
-                />
+                    updateContent={updateContent}
+                  />
                 </div>
                 <div className="vcard-item-actions">
                   <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
                   </Button>
-                  <button
-                    className="uc-secondary-action"
-                    type="button"
-                    onClick={() => onRefund(card)}
-                    disabled={frozen || card.balance <= 0}
-                    title={card.balance <= 0 ? content.cardRefundEmpty : content.cardRefund}
-                  >
-                    <RotateCcw aria-hidden="true" />{content.cardRefund}
-                  </button>
                   <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
                     <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
+                  </button>
+                  <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
+                    <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
                   </button>
                   <button className="vcard-item-danger" type="button" onClick={() => onRequestDelete(card)} aria-label={content.cardDeleteCard}>
                     <Trash2 aria-hidden="true" />{content.cardDeleteCard}
