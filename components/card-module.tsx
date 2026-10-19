@@ -129,12 +129,22 @@ export function CardModule({
     ]);
   };
 
-  const handleFreeze = (card: VirtualCard) => { setFreezeTarget(card); };
+  const handleFreeze = (card: VirtualCard) => {
+    if (card.status === "system_frozen") {
+      toast.info("系统冻结的卡片需联系客服处理");
+      return;
+    }
+    if (card.status === "processing") {
+      toast.info("开卡处理中，暂不可冻结");
+      return;
+    }
+    setFreezeTarget(card);
+  };
   const confirmFreeze = () => {
     const card = freezeTarget;
     if (!card || freezing) return;
-    if (card.status === "system_frozen") {
-      toast.info("系统冻结的卡片需联系客服处理");
+    if (card.status !== "active" && card.status !== "frozen") {
+      toast.info(card.status === "system_frozen" ? "系统冻结的卡片需联系客服处理" : "开卡处理中，暂不可冻结");
       setFreezeTarget(null);
       return;
     }

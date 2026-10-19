@@ -58,7 +58,8 @@
 .vcard-item-action{height:32px!important;min-height:0;padding:0 4px!important;font-size:12px!important;gap:4px;white-space:nowrap}
 .vcard-item-actions .uc-secondary-action{height:32px;min-height:0;justify-content:center;padding:0 4px;font-size:12px;gap:4px;white-space:nowrap;margin-left:0}
 .vcard-item-danger{width:auto;height:32px;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border:1px solid var(--ds-border-default);border-radius:var(--ds-radius-control,10px);background:var(--color-surface);color:var(--color-danger);font-size:12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;white-space:nowrap}
-.vcard-item-danger:hover{background:#fbeeed;border-color:var(--color-danger)}
+.vcard-item-danger:hover:not(:disabled){background:#fbeeed;border-color:var(--color-danger)}
+.vcard-item-danger:disabled,.vcard-detail-actions .uc-secondary-action.is-danger:disabled{border-color:var(--ds-border-default)!important;background:var(--color-surface);color:var(--color-text-tertiary)!important;opacity:.5;cursor:not-allowed}
 .vcard-item-danger svg{width:13px;height:13px;flex:none}
 .vcard-open-entry{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
 .vcard-open-entry:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}

@@ -342,8 +342,14 @@ export function CardList({
                   <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
                   </Button>
-                  <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
-                    <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
+                  <button
+                    className="uc-secondary-action"
+                    type="button"
+                    onClick={() => onRequestFreeze(card)}
+                    disabled={card.status === "processing" || card.status === "system_frozen"}
+                    title={card.status === "system_frozen" ? "系统冻结需联系客服处理" : card.status === "processing" ? "开卡处理中，暂不可冻结" : undefined}
+                  >
+                    <Snowflake aria-hidden="true" />{card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
                   </button>
                   <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
                     <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
@@ -531,8 +537,14 @@ export function CardDetail({
           >
             <RotateCcw aria-hidden="true" />{content.cardRefund}
           </button>
-          <button className="uc-secondary-action" type="button" onClick={() => onRequestFreeze(card)}>
-            <Snowflake aria-hidden="true" />{frozen ? content.cardUnfreeze : content.cardFreeze}
+          <button
+            className="uc-secondary-action"
+            type="button"
+            onClick={() => onRequestFreeze(card)}
+            disabled={card.status === "processing" || card.status === "system_frozen"}
+            title={card.status === "system_frozen" ? "系统冻结需联系客服处理" : card.status === "processing" ? "开卡处理中，暂不可冻结" : undefined}
+          >
+            <Snowflake aria-hidden="true" />{card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
           </button>
           <button
             className="uc-secondary-action is-danger"
