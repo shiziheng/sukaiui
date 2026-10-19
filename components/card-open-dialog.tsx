@@ -14,7 +14,8 @@ type Stage = "confirm" | "success";
 const MAX_QTY = 10;
 const REMARK_MAX = 60;
 const MIN_TOPUP = 10;
-const MAX_TOPUP = 500;
+const MAX_TOPUP = 10000;
+const STEP_TOPUP = 10;
 
 export function CardOpenDialog({
   bin, availableBalance, onOpenChange, onComplete, onGoTopup, onViewCards, content, editMode, updateContent,
@@ -22,7 +23,7 @@ export function CardOpenDialog({
   bin: CardBin | null;
   availableBalance: number;
   onOpenChange: (open: boolean) => void;
-  onComplete: (bin: CardBin, quantity: number, holder: string, remark: string, initialTopup: number) => void;
+  onComplete: (bin: CardBin, quantity: number, holder: string, remark: string, topupAmount: number) => void;
   onGoTopup: () => void;
   onViewCards: () => void;
   content: DemoContent;
@@ -30,7 +31,7 @@ export function CardOpenDialog({
   updateContent: (key: keyof DemoContent, value: string) => void;
 }) {
   const [quantity, setQuantity] = useState(1);
-  const [initialTopup, setInitialTopup] = useState(MIN_TOPUP);
+  const [topupText, setTopupText] = useState(String(MIN_TOPUP));
   const [holder, setHolder] = useState(randomCardHolder);
   const [remark, setRemark] = useState("");
   const [stage, setStage] = useState<Stage>("confirm");
@@ -38,24 +39,33 @@ export function CardOpenDialog({
   const guard = useRef(false);
 
   useEffect(() => {
-    if (bin) { setQuantity(1); setInitialTopup(MIN_TOPUP); setHolder(randomCardHolder()); setRemark(""); setStage("confirm"); setSubmitting(false); guard.current = false; }
+    if (bin) { setQuantity(1); setTopupText(String(MIN_TOPUP)); setHolder(randomCardHolder()); setRemark(""); setStage("confirm"); setSubmitting(false); guard.current = false; }
   }, [bin]);
 
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
 
+  const parsedTopup = Number.parseFloat(topupText);
+  const topupInvalid = !Number.isFinite(parsedTopup) || parsedTopup < MIN_TOPUP || parsedTopup > MAX_TOPUP;
+  const topupAmount = topupInvalid ? 0 : Number(parsedTopup.toFixed(2));
   const openFeeTotal = bin ? Number((bin.openFee * quantity).toFixed(2)) : 0;
-  const topupTotal = Number((initialTopup * quantity).toFixed(2));
+  const topupTotal = Number((topupAmount * quantity).toFixed(2));
   const totalFee = Number((openFeeTotal + topupTotal).toFixed(2));
   const gap = Math.max(Number((totalFee - availableBalance).toFixed(2)), 0);
-  const sufficient = bin ? availableBalance >= totalFee : false;
+  const sufficient = bin ? !topupInvalid && availableBalance >= totalFee : false;
+
+  const stepTopup = (delta: number) => {
+    const base = topupInvalid ? MIN_TOPUP : parsedTopup;
+    const next = Math.min(MAX_TOPUP, Math.max(MIN_TOPUP, Number((base + delta).toFixed(2))));
+    setTopupText(String(next));
+  };
 
   const handleConfirm = () => {
     if (!bin || !sufficient || guard.current) return;
     guard.current = true;
     setSubmitting(true);
-    onComplete(bin, quantity, holder, remark.trim(), initialTopup);
+    onComplete(bin, quantity, holder, remark.trim(), topupAmount);
     setStage("success");
     setSubmitting(false);
   };
@@ -86,12 +96,18 @@ export function CardOpenDialog({
 
       <div className="card-open-amounts">
         <div className="quantity-row is-column">
-          <div><strong>初始充值额（最低 {money(MIN_TOPUP)}）</strong><span>开卡后立即划入卡内</span></div>
-          <div className="quantity-control">
-            <button type="button" aria-label="减少充值额" disabled={initialTopup <= MIN_TOPUP} onClick={() => setInitialTopup(Math.max(MIN_TOPUP, initialTopup - 10))}><Minus /></button>
-            <span>{money(initialTopup)}</span>
-            <button type="button" aria-label="增加充值额" disabled={initialTopup >= MAX_TOPUP} onClick={() => setInitialTopup(Math.min(MAX_TOPUP, initialTopup + 10))}><Plus /></button>
+          <div><strong>充值金额（不低于 {money(MIN_TOPUP)}）</strong><span>开卡后立即划入卡内</span></div>
+          <div className={`quantity-control card-open-topup-control ${topupInvalid ? "is-invalid" : ""}`}>
+            <button type="button" aria-label="减少充值金额" onClick={() => stepTopup(-STEP_TOPUP)}><Minus /></button>
+            <input
+              aria-label="充值金额"
+              inputMode="decimal"
+              value={topupText}
+              onChange={(event) => setTopupText(event.target.value.replace(/[^\d.]/g, ""))}
+            />
+            <button type="button" aria-label="增加充值金额" onClick={() => stepTopup(STEP_TOPUP)}><Plus /></button>
           </div>
+          {topupInvalid ? <p className="card-open-topup-hint">充值金额需在 {money(MIN_TOPUP)} – {money(MAX_TOPUP)} 之间</p> : null}
         </div>
         <div className="quantity-row is-column">
           <div><strong>{editable("cardQuantityLabel")}</strong><span>最多 {MAX_QTY} 张</span></div>
@@ -125,7 +141,7 @@ export function CardOpenDialog({
 
       <dl className="payment-breakdown">
         <div><dt>{editable("cardOpenFee")}</dt><dd>{money(bin.openFee)} × {quantity}</dd></div>
-        <div><dt>初始充值</dt><dd>{money(initialTopup)} × {quantity}</dd></div>
+        <div><dt>充值金额</dt><dd>{money(topupAmount)} × {quantity}</dd></div>
         <div><dt>{editable("cardOpenTotalLabel")}（{quantity} 张）</dt><dd className="card-open-total">{money(totalFee)}</dd></div>
         <div><dt>平台余额</dt><dd>{money(availableBalance)}</dd></div>
       </dl>

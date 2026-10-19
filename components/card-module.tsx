@@ -70,9 +70,9 @@ export function CardModule({
 
   const now = () => new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-");
 
-  const handleOpenComplete = (bin: CardBin, quantity: number, holder: string, remark: string, initialTopup: number) => {
+  const handleOpenComplete = (bin: CardBin, quantity: number, holder: string, remark: string, topupAmount: number) => {
     const feeTotal = Number((bin.openFee * quantity).toFixed(2));
-    const topupTotal = Number((initialTopup * quantity).toFixed(2));
+    const topupTotal = Number((topupAmount * quantity).toFixed(2));
     const total = Number((feeTotal + topupTotal).toFixed(2));
     const newBalance = Number((platformBalance - total).toFixed(2));
     setPlatformBalance(newBalance);
@@ -80,10 +80,10 @@ export function CardModule({
       type: "card_open",
       amount: -feeTotal,
       balanceAfter: newBalance,
-      note: `开卡费 · ${binTitle(bin)} × ${quantity} 张${topupTotal ? `（含首充 ${money(topupTotal)}）` : ""}`,
+      note: `开卡费 · ${binTitle(bin)} × ${quantity} 张${topupTotal ? `（含开卡充值 ${money(topupTotal)}）` : ""}`,
     });
     if (topupTotal) {
-      onPlatformFlow({ type: "card_recharge", amount: -topupTotal, balanceAfter: newBalance, note: `开卡首充 · ${binTitle(bin)} × ${quantity} 张` });
+      onPlatformFlow({ type: "card_recharge", amount: -topupTotal, balanceAfter: newBalance, note: `开卡充值 · ${binTitle(bin)} × ${quantity} 张` });
     }
     const stamp = now();
     const prefix = bin.bin.replace(/\D/g, "");
@@ -102,7 +102,7 @@ export function CardModule({
         expMonth: 10,
         expYear: 28,
         cvv: String(Math.floor(Math.random() * 900) + 100),
-        balance: initialTopup,
+        balance: topupAmount,
         currency: "USD",
         status: "active",
         createdAt: stamp,
@@ -114,16 +114,16 @@ export function CardModule({
       });
     }
     setCards((cs) => [...created, ...cs]);
-    if (initialTopup > 0) {
+    if (topupAmount > 0) {
       setFlows((fs) => [
         ...created.map((card, index) => ({
           id: `CF-KC-${Date.now()}-${String(index).padStart(2, "0")}`,
           cardId: card.id,
           time: stamp,
           type: "recharge" as const,
-          amount: initialTopup,
-          balanceAfter: initialTopup,
-          merchant: "平台余额划转（开卡首充）",
+          amount: topupAmount,
+          balanceAfter: topupAmount,
+          merchant: "平台余额划转（开卡充值）",
           status: "success" as const,
           txNo: "—",
         })),
