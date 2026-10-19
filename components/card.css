@@ -373,3 +373,25 @@
 .payment-breakdown dd.card-open-total{font-weight:650;color:var(--color-text-primary)}
 /* 成功页三按钮允许换行 */
 .payment-success-actions{flex-wrap:wrap}
+/* 初始充值额 + 开卡数量：两列并排（对齐参考站） */
+.card-open-amounts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.quantity-row.is-column{flex-direction:column;align-items:stretch;gap:8px}
+.quantity-row.is-column>div:first-child strong{display:block;font-size:12.5px;color:var(--color-text-secondary);font-weight:600}
+.quantity-row.is-column>div:first-child span{font-size:11.5px;color:var(--color-text-tertiary)}
+.quantity-row.is-column .quantity-control{justify-content:space-between}
+/* 完整费率标准折叠块 */
+.card-open-fees-fold{border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-soft);overflow:hidden}
+.card-open-fees-fold summary{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;font-size:13px;color:var(--color-text-primary);cursor:pointer;list-style:none;user-select:none}
+.card-open-fees-fold summary::-webkit-details-marker{display:none}
+.card-open-fees-fold summary::after{content:"";width:8px;height:8px;border-right:1.5px solid var(--color-text-tertiary);border-bottom:1.5px solid var(--color-text-tertiary);transform:rotate(45deg);transition:transform .15s ease;flex:none}
+.card-open-fees-fold[open] summary::after{transform:rotate(225deg)}
+.card-open-fees-fold[open] summary{border-bottom:1px solid var(--color-border)}
+.card-open-fees-list{margin:0;padding:6px 14px;display:flex;flex-direction:column}
+.card-open-fees-list div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0}
+.card-open-fees-list div+div{border-top:1px dashed var(--color-border)}
+.card-open-fees-list dt{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-fees-list dt small{color:var(--color-text-tertiary);font-size:11.5px}
+.card-open-fees-list dd{margin:0;font-size:12.5px;font-weight:600;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+@media (max-width:520px){
+  .card-open-amounts{grid-template-columns:1fr}
+}

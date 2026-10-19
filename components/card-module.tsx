@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type PlatformFlowType } from "@/data/bill-flows";
 import {
-  binTitle, type CardBin, type CardFlowItem, type VirtualCard,
+  binTitle, money, type CardBin, type CardFlowItem, type VirtualCard,
 } from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
 
@@ -70,11 +70,21 @@ export function CardModule({
 
   const now = () => new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-");
 
-  const handleOpenComplete = (bin: CardBin, quantity: number, holder: string, remark: string) => {
-    const total = Number((bin.openFee * quantity).toFixed(2));
+  const handleOpenComplete = (bin: CardBin, quantity: number, holder: string, remark: string, initialTopup: number) => {
+    const feeTotal = Number((bin.openFee * quantity).toFixed(2));
+    const topupTotal = Number((initialTopup * quantity).toFixed(2));
+    const total = Number((feeTotal + topupTotal).toFixed(2));
     const newBalance = Number((platformBalance - total).toFixed(2));
     setPlatformBalance(newBalance);
-    onPlatformFlow({ type: "card_open", amount: -total, balanceAfter: newBalance, note: `开卡费 · ${binTitle(bin)} × ${quantity} 张` });
+    onPlatformFlow({
+      type: "card_open",
+      amount: -feeTotal,
+      balanceAfter: newBalance,
+      note: `开卡费 · ${binTitle(bin)} × ${quantity} 张${topupTotal ? `（含首充 ${money(topupTotal)}）` : ""}`,
+    });
+    if (topupTotal) {
+      onPlatformFlow({ type: "card_recharge", amount: -topupTotal, balanceAfter: newBalance, note: `开卡首充 · ${binTitle(bin)} × ${quantity} 张` });
+    }
     const stamp = now();
     const prefix = bin.bin.replace(/\D/g, "");
     const restDigits = Math.max(16 - prefix.length, 0);
@@ -92,7 +102,7 @@ export function CardModule({
         expMonth: 10,
         expYear: 28,
         cvv: String(Math.floor(Math.random() * 900) + 100),
-        balance: 0,
+        balance: initialTopup,
         currency: "USD",
         status: "active",
         createdAt: stamp,
@@ -104,6 +114,22 @@ export function CardModule({
       });
     }
     setCards((cs) => [...created, ...cs]);
+    if (initialTopup > 0) {
+      setFlows((fs) => [
+        ...created.map((card, index) => ({
+          id: `CF-KC-${Date.now()}-${String(index).padStart(2, "0")}`,
+          cardId: card.id,
+          time: stamp,
+          type: "recharge" as const,
+          amount: initialTopup,
+          balanceAfter: initialTopup,
+          merchant: "平台余额划转（开卡首充）",
+          status: "success" as const,
+          txNo: "—",
+        })),
+        ...fs,
+      ]);
+    }
   };
 
   const handleFundComplete = (card: VirtualCard, amount: number) => {
