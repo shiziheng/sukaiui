@@ -348,3 +348,28 @@
 .vcard-flow-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
 .vcard-flow-head .vbin-select{height:36px;border-radius:8px;font-size:13px;padding:0 30px 0 12px}
 .vcard-flow-head .uc-secondary-action{height:36px}
+
+/* ---------- v0.13.x：开卡弹窗对齐参考站（持卡人/备注/限制/明细） ---------- */
+/* 卡段头下元数据行：地区 · 卡类型 + 上游产品码 */
+.card-open-meta-line{margin:0;font-size:12.5px;color:var(--color-text-tertiary)}
+.card-open-upstream{margin-left:10px;padding-left:10px;border-left:1px solid var(--color-border);color:var(--color-text-tertiary)}
+/* 持卡人行：随机名（等宽）+ 换一个 */
+.card-open-holder{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-soft)}
+.card-open-holder-label{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-holder-name{flex:1;min-width:0;font-family:var(--font-mono,ui-monospace,monospace);font-size:14px;font-weight:650;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-open-holder-shuffle{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-danger);cursor:pointer}
+.card-open-holder-shuffle svg{width:13px;height:13px}
+.card-open-holder-shuffle:hover{text-decoration:underline}
+/* 备注输入 */
+.card-open-remark{display:flex;flex-direction:column;gap:6px}
+.card-open-remark label{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-remark-box{display:flex;align-items:center;gap:10px;padding:0 12px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface);transition:border-color .15s ease}
+.card-open-remark-box:focus-within{border-color:var(--ds-border-strong)}
+.card-open-remark-box input{flex:1;min-width:0;border:0;background:none;padding:10px 0;font-size:13px;color:var(--color-text-primary);outline:none}
+.card-open-remark-box input::placeholder{color:var(--color-text-tertiary)}
+.card-open-remark-box span{flex:none;font-size:11.5px;color:var(--color-text-tertiary);font-variant-numeric:tabular-nums}
+/* 弹窗里的限制警示块与合计强调 */
+.card-open-restrictions{margin:2px 0 0}
+.payment-breakdown dd.card-open-total{font-weight:650;color:var(--color-text-primary)}
+/* 成功页三按钮允许换行 */
+.payment-success-actions{flex-wrap:wrap}

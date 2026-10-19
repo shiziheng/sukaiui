@@ -70,7 +70,7 @@ export function CardModule({
 
   const now = () => new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-");
 
-  const handleOpenComplete = (bin: CardBin, quantity: number) => {
+  const handleOpenComplete = (bin: CardBin, quantity: number, holder: string, remark: string) => {
     const total = Number((bin.openFee * quantity).toFixed(2));
     const newBalance = Number((platformBalance - total).toFixed(2));
     setPlatformBalance(newBalance);
@@ -88,7 +88,7 @@ export function CardModule({
         bin: bin.bin,
         scheme: bin.scheme,
         region: bin.region,
-        holder: "Ava Johnson",
+        holder,
         expMonth: 10,
         expYear: 28,
         cvv: String(Math.floor(Math.random() * 900) + 100),
@@ -96,7 +96,7 @@ export function CardModule({
         currency: "USD",
         status: "active",
         createdAt: stamp,
-        remark: "",
+        remark,
         billingAddress: {
           line1: "Street -", city: "City -", state: "State -", zip: "Zip Code -",
           country: bin.region === "hk" ? "Hong Kong, China" : "United States",
