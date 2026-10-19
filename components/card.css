@@ -211,19 +211,39 @@
 .vbin-notices{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
 .vbin-notices li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.45;color:var(--color-text-secondary)}
 .vbin-notices svg{width:13px;height:13px;flex:none;margin-top:2px;color:#9a7320}
-.vbin-fees{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)}
-.vbin-fees div{display:flex;flex-direction:column;gap:2px}
-.vbin-fees dt{font-size:12px;color:var(--color-text-secondary)}
-.vbin-fees dd{margin:0;font-size:16px;font-weight:650;color:var(--color-text-primary)}
-.vbin-fees small{font-size:11px;font-weight:400;color:var(--color-text-tertiary)}
-.vbin-meta{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-.vbin-meta div{display:flex;flex-direction:column;gap:2px}
-.vbin-meta dt{font-size:12px;color:var(--color-text-secondary)}
-.vbin-meta dd{margin:0;font-size:13px;color:var(--color-text-primary)}
-.vbin-meta dd.is-low{color:var(--color-danger);font-weight:600}
-.vbin-meta code{font-size:12px;color:var(--color-text-tertiary)}
+/* 限制/规则：暖色警示块（对齐参考站，多条合并一块） */
+.vbin-notice-block{padding:9px 12px;border-radius:10px;background:#f9f3e2}
+.vbin-notice-block .vcard-notices li{color:#7a5a17}
+.vbin-notice-block .vcard-notices svg{color:#a9832c}
+
+/* 费用：价签式（开卡费大字，其他费用独立行） */
+.vbin-pricing{display:flex;flex-direction:column;gap:4px}
+.vbin-price-line{margin:0;display:flex;align-items:baseline;gap:8px}
+.vbin-price-label{font-size:13px;color:var(--color-text-secondary)}
+.vbin-price-value{font-size:22px;font-weight:650;color:var(--color-danger);font-variant-numeric:tabular-nums}
+.vbin-price-line small{font-size:12px;color:var(--color-text-tertiary)}
+.vbin-price-sub{margin:0;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--color-text-secondary)}
+.vbin-price-sub strong{font-weight:650;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.vbin-fee-extra{margin:2px 0 0;font-size:12.5px;color:#a26415}
+
+/* 元数据行：地区·剩余 左，BIN 右，上细分隔线 */
+.vbin-meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid var(--color-border);font-size:12.5px;color:var(--color-text-tertiary)}
+.vbin-meta-sep{font-style:normal;margin:0 6px}
+.vbin-meta-row em{font-style:normal;color:var(--color-text-primary);font-weight:600}
+.vbin-meta-row em.is-low{color:var(--color-danger)}
+.vbin-meta-row code{font-size:12px;color:var(--color-text-tertiary)}
+
+/* AI 订阅价格快照 */
+.vbin-sub{display:flex;flex-direction:column;gap:2px}
+.vbin-sub-head{margin:0 0 4px;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-primary)}
+.vbin-sub-dot{width:7px;height:7px;border-radius:50%;background:var(--color-success);flex:none}
+.vbin-sub-row{margin:0;display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;line-height:1.9;color:var(--color-text-secondary)}
+.vbin-sub-row em{font-style:normal;font-weight:600;color:var(--color-success);font-variant-numeric:tabular-nums;margin-left:4px}
+.vbin-sub-row time{font-size:11.5px;color:var(--color-text-tertiary)}
 .vbin-card-foot{margin-top:auto}
-.vbin-open-button{width:100%;background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vbin-open-button{width:100%;border-radius:999px;background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vbin-open-button svg{width:15px;height:15px;margin-left:2px}
+.vbin-open-button:disabled svg{display:none}
 
 /* ---------- 消费记录（全局流水） ---------- */
 .vtxn-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
@@ -288,7 +308,6 @@
   .vcard-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .vcard-filters .vcard-search{grid-column:1 / -1}
   .vcard-filters .vbin-select{min-width:0;width:100%}
-  .vbin-fees,.vbin-meta{grid-template-columns:1fr}
   .vcard-field-grid{grid-template-columns:1fr}
   /* 流水头窄屏：筛选+导出通栏一行，下拉占满剩余宽度 */
   .vcard-flow-tools{width:100%}

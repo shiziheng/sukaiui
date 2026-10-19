@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CreditCard, Search, Sparkles } from "lucide-react";
+import { ArrowRight, CreditCard, Search, Sparkles } from "lucide-react";
 
 import { CardNotice, SchemeBadge } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
@@ -108,28 +108,57 @@ export function CardMarket({
                   <span className="vbin-tag is-support">{content.cardSupportRecharge}</span>
                 </div>
 
-                <CardNotice items={bin.restrictions} />
-
-                <dl className="vbin-fees">
-                  <div>
-                    <dt>{editable("cardOpenFee")}</dt>
-                    <dd>{money(bin.openFee)} <small>/ 张</small></dd>
+                {bin.restrictions.length ? (
+                  <div className="vbin-notice-block">
+                    <CardNotice items={bin.restrictions} />
                   </div>
-                  <div>
-                    <dt>{editable("cardRechargeFeeLabel")}</dt>
-                    <dd>{bin.rechargeFeePercent}%</dd>
-                  </div>
-                </dl>
+                ) : null}
 
-                <dl className="vbin-meta">
-                  <div><dt>{editable("cardRegionLabel")}</dt><dd>{regionLabel(bin.region)}</dd></div>
-                  <div><dt>BIN</dt><dd><code>{bin.bin}</code></dd></div>
-                  <div><dt>{editable("cardRemaining")}</dt><dd className={rest <= 20 ? "is-low" : ""}>{rest} 张</dd></div>
-                </dl>
+                <div className="vbin-pricing">
+                  <p className="vbin-price-line">
+                    <span className="vbin-price-label">{editable("cardOpenFee")}</span>
+                    <span className="vbin-price-value">{money(bin.openFee)}</span>
+                    <small>/ 张</small>
+                  </p>
+                  {bin.rechargeFeePercent > 0 ? (
+                    <p className="vbin-price-sub">
+                      <span>{editable("cardRechargeFeeLabel")}</span>
+                      <strong>{bin.rechargeFeePercent}%</strong>
+                    </p>
+                  ) : null}
+                  {bin.consumeFee.fixed > 0 ? (
+                    <p className="vbin-fee-extra">
+                      {bin.smallAmountFeeThreshold
+                        ? `低于 ${money(bin.smallAmountFeeThreshold)} 收 ${money(bin.consumeFee.fixed)}/笔`
+                        : `消费手续费 ${money(bin.consumeFee.fixed)}/笔`}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="vbin-meta-row">
+                  <span>
+                    {regionLabel(bin.region)}
+                    <i className="vbin-meta-sep">·</i>
+                    剩余 <em className={rest <= 20 ? "is-low" : ""}>{rest}</em> 张
+                  </span>
+                  <code>BIN {bin.bin}</code>
+                </div>
+
+                {bin.subscriptionPrices?.length ? (
+                  <div className="vbin-sub">
+                    <p className="vbin-sub-head"><span className="vbin-sub-dot" aria-hidden="true" />OpenAI 最新</p>
+                    {bin.subscriptionPrices.map((item) => (
+                      <p className="vbin-sub-row" key={item.label}>
+                        <span>{item.label} <em>{money(item.price)}</em></span>
+                        <time>{item.date}</time>
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
 
                 <div className="vbin-card-foot">
                   <Button className="vbin-open-button" disabled={rest <= 0} onClick={() => onOpen(bin)}>
-                    {rest > 0 ? editable("cardOpenNow") : "已开完"}
+                    {rest > 0 ? <>{editable("cardOpenNow")}<ArrowRight aria-hidden="true" /></> : "已开完"}
                   </Button>
                 </div>
               </article>

@@ -23,6 +23,14 @@ export type CardFlowType = "recharge" | "consume" | "refund" | "cashout" | "fee"
 export type CardFlowStatus = "success" | "processing" | "failed";
 
 /** 卡段（卡 BIN）：开卡的库存与费率来源。 */
+export type CardBinSubscriptionPrice = {
+  /** 档位名，如 Plus / 5x / 20x。 */
+  label: string;
+  price: number;
+  /** 快照日期（MM-DD）。 */
+  date: string;
+};
+
 export type CardBin = {
   id: string;
   bin: string;
@@ -40,6 +48,10 @@ export type CardBin = {
   /** 可开张数上限；剩余可开 = 上限 − 已持有张数。 */
   stock: number;
   recommended?: boolean;
+  /** 小额消费费阈值（$）：低于该金额的按笔收 consumeFee.fixed，否则免。 */
+  smallAmountFeeThreshold?: number;
+  /** AI 订阅价格快照（取最近一次抓取），无则不展示。 */
+  subscriptionPrices?: CardBinSubscriptionPrice[];
 };
 
 export type BillingAddress = {
@@ -203,11 +215,20 @@ export const defaultCardBins: CardBin[] = [
     id: "bin-537872", bin: "537872", scheme: "mastercard", region: "us", cardType: "通用卡",
     scenes: ["OpenAI · ChatGPT 订阅", "常规线上消费"], restrictions: [],
     openFee: 0.1, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 500, recommended: true,
+    subscriptionPrices: [
+      { label: "Plus", price: 15.63, date: "10-19" },
+      { label: "5x", price: 92.17, date: "10-19" },
+      { label: "20x", price: 141.71, date: "10-08" },
+    ],
   },
   {
     id: "bin-486555", bin: "486555", scheme: "visa", region: "us", cardType: "常规卡",
     scenes: ["OpenAI · ChatGPT 订阅"], restrictions: ["禁止 Claude 相关消费"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 300,
+    subscriptionPrices: [
+      { label: "Plus", price: 15.63, date: "10-17" },
+      { label: "5x", price: 92.17, date: "10-09" },
+    ],
   },
   {
     id: "bin-446602", bin: "446602", scheme: "visa", region: "us", cardType: "常规卡",
@@ -223,6 +244,7 @@ export const defaultCardBins: CardBin[] = [
     id: "bin-474613", bin: "474613", scheme: "visa", region: "us", cardType: "申请制专用卡",
     scenes: ["通用消费"], restrictions: ["可充 Claude，但不建议开通 GPT Pro", "退款将封卡，请谨慎操作"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0.4, percent: 0 }, stock: 80,
+    smallAmountFeeThreshold: 50,
   },
   {
     id: "bin-4416405", bin: "4416405", scheme: "visa", region: "us", cardType: "申请制专用卡",
