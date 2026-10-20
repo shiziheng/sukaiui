@@ -146,8 +146,8 @@ export function CardOpenDialog({
         <div><dt>平台余额</dt><dd>{money(availableBalance)}</dd></div>
       </dl>
 
-      <details className="card-open-fees-fold">
-        <summary>查看完整费率标准</summary>
+      <section className="card-open-fees-fold">
+        <p className="card-open-fees-head">完整费率标准</p>
         <dl className="card-open-fees-list">
           {cardFeeSchedule(bin).map((row) => (
             <div key={row.label}>
@@ -156,7 +156,7 @@ export function CardOpenDialog({
             </div>
           ))}
         </dl>
-      </details>
+      </section>
 
       {sufficient ? (
         <div className="payment-balance-method"><span><Check />平台余额</span><small>开卡后剩余 {money(availableBalance - totalFee)}</small></div>
