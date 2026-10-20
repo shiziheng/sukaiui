@@ -1,0 +1,422 @@
+/* 虚拟卡业务模块样式 —— 独立文件，由 components/card-module.tsx 引入 */
+/* 虚拟卡业务模块：开卡中心 / 我的卡片 / 卡详情 / 消费记录 / 开卡·充值弹窗 */
+/* ================================================================== */
+
+/* 模块外壳与面板通用头部 */
+.card-module{display:block}
+.card-tabs{margin-bottom:12px}
+.vcard-panel,.vbin-panel,.vtxn-panel{display:block}
+/* L3 页头带：与代充/钱包页头同款渐变带，工具按钮收进带内右侧 */
+.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid #daddd4;border-radius:14px;background:linear-gradient(110deg,#fff 0%,#fafbf5 72%,#f3f6dc 100%);box-shadow:var(--ds-shadow-subtle)}
+.vcard-panel-copy,.vbin-panel-copy,.vtxn-panel-copy{display:flex;align-items:center;gap:12px;min-width:0}
+.vcard-panel-copy .section-title-icon,.vbin-panel-copy .section-title-icon,.vtxn-panel-copy .section-title-icon{width:36px;height:36px;border-radius:10px;flex:none}
+.vcard-panel-copy h2,.vbin-panel-copy h2,.vtxn-panel-copy h2{margin:0;font-size:20px;line-height:1.2;font-weight:720;letter-spacing:-.02em;color:var(--color-text-primary)}
+.vcard-panel-copy p,.vbin-panel-copy p,.vtxn-panel-copy p{margin:2px 0 0;font-size:13px;color:var(--color-text-secondary)}
+.vbin-count,.vtxn-count{font-size:13px;color:var(--color-text-secondary);white-space:nowrap}
+
+/* ---------- 虚拟卡视觉（列表 / 详情大卡） ---------- */
+/* 高度由内容自然撑开（不再用 aspect-ratio 锁死裁切），保证卡号与底部信息完整显示 */
+.vcard{position:relative;display:flex;flex-direction:column;gap:10px;min-height:170px;padding:18px 20px;border-radius:15px;color:#fff;background:linear-gradient(135deg,#23262b 0%,#34383f 100%);box-shadow:var(--ds-shadow-card);overflow:hidden}
+.vcard.is-detail{max-width:460px;font-size:16px}
+.vcard.is-dimmed{filter:grayscale(.45);opacity:.78}
+.vcard-accent{position:absolute;inset:0 0 auto 0;height:3px;background:var(--color-brand);z-index:2}
+.vcard:before{content:"";position:absolute;right:-40px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(223,255,0,.16),transparent 70%);z-index:0}
+.vcard>*,.vcard-head,.vcard-foot,.vcard-status{position:relative;z-index:1}
+.vcard-head{display:flex;align-items:center;justify-content:flex-start;gap:9px}
+.vcard-bin{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.vcard-scheme{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.03em;background:rgba(255,255,255,.16);color:#fff}
+.vcard-scheme.is-visa{background:rgba(25,31,113,.55)}
+.vcard-scheme.is-mastercard{background:rgba(200,30,40,.5)}
+.vcard-scheme.is-discover{background:rgba(0,0,0,.42)}
+.vcard-chip{width:42px;height:30px;border-radius:6px;background:linear-gradient(135deg,#e9cf8d,#b9913f);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);position:relative}
+.vcard-chip i{position:absolute;left:6px;right:6px;height:2px;background:rgba(0,0,0,.28)}
+.vcard-chip i:nth-child(1){top:9px}
+.vcard-chip i:nth-child(2){top:14px}
+.vcard-chip i:nth-child(3){top:19px}
+.vcard-number-row{display:flex;align-items:center;margin-top:2px}
+.vcard-number{flex:1;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;letter-spacing:.06em;color:#fff;white-space:nowrap;overflow:hidden}
+.vcard-balance{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto}
+.vcard-balance span{font-size:12px;color:rgba(255,255,255,.7)}
+.vcard-balance strong{font-size:24px;font-weight:650;color:#fff;letter-spacing:.01em}
+.vcard-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;font-size:12.5px;color:rgba(255,255,255,.72)}
+.vcard-foot b{font-weight:600;color:rgba(255,255,255,.55);margin-right:5px}
+.vcard-region{padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:11px}
+.vcard-status{position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(4px);z-index:3}
+.vcard-status.is-completed{background:rgba(93,128,107,.34);color:#cdeed6}
+.vcard-status.is-processing{background:rgba(214,170,60,.32);color:#f0d28a}
+.vcard-status.is-pending{background:rgba(255,255,255,.2);color:#ecece6}
+.vcard-status.is-failed{background:rgba(169,99,91,.4);color:#f1c5bf}
+.vcard-status svg{width:13px;height:13px}
+.vcard-status i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+
+/* ---------- 我的卡片（列表） ---------- */
+.vcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(345px,1fr));gap:14px}
+/* 卡项外壳已去掉：卡面即视觉本体，不再包白色边框盒 */
+.vcard-item{display:flex;flex-direction:column;gap:10px}
+.vcard-item-face{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;border-radius:15px;overflow:hidden}
+.vcard-item-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vcard-item-action{height:32px!important;min-height:0;padding:0 4px!important;font-size:12px!important;gap:4px;white-space:nowrap}
+.vcard-item-actions .uc-secondary-action{height:32px;min-height:0;justify-content:center;padding:0 4px;font-size:12px;gap:4px;white-space:nowrap;margin-left:0}
+.vcard-item-danger{width:auto;height:32px;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border:1px solid var(--ds-border-default);border-radius:var(--ds-radius-control,10px);background:var(--color-surface);color:var(--color-danger);font-size:12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;white-space:nowrap}
+.vcard-item-danger:hover:not(:disabled){background:#fbeeed;border-color:var(--color-danger)}
+.vcard-item-danger:disabled,.vcard-detail-actions .uc-secondary-action.is-danger:disabled{border-color:var(--ds-border-default)!important;background:var(--color-surface);color:var(--color-text-tertiary)!important;opacity:.5;cursor:not-allowed}
+.vcard-item-danger svg{width:13px;height:13px;flex:none}
+.vcard-open-entry{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
+.vcard-open-entry:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
+
+/* 我的卡片：筛选栏 / 视图切换 / 表格视图 / 删卡记录 */
+.vcard-head-tools{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
+.vcard-view-toggle{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface)}
+.vcard-view-toggle button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--color-text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.vcard-view-toggle button:hover{color:var(--color-text-primary)}
+.vcard-view-toggle button.is-active{background:#17181b;color:var(--color-brand);box-shadow:0 2px 6px rgba(17,18,20,.22)}
+.vcard-view-toggle svg{width:14px;height:14px}
+.vcard-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+/* 余额区间（参考 Zovo：最小 ~ 最大 两个数字输入） */
+.vcard-balance-range{display:inline-flex;align-items:center;gap:6px}
+.vcard-range-input{width:104px;height:38px;padding:0 10px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);color:var(--color-text-primary);font-size:13px;font-variant-numeric:tabular-nums}
+.vcard-range-input:focus{outline:none;border-color:var(--ds-border-strong)}
+.vcard-range-input::placeholder{color:var(--color-text-tertiary)}
+.vcard-range-sep{color:var(--color-text-tertiary);font-size:13px}
+/* 备注弹窗 */
+.card-note-textarea{width:100%;resize:vertical;min-height:76px;padding:10px 12px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);color:var(--color-text-primary);font-size:13px;line-height:1.5;font-family:inherit}
+.card-note-textarea:focus{outline:none;border-color:var(--ds-border-strong)}
+.vcard-filters .vcard-search{flex:1;min-width:200px}
+.vcard-filters .vbin-select{min-width:132px}
+.vcard-table-wrap{border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden}
+.vcard-table-view th,.vcard-table-view td{padding:12px 14px;text-align:left;white-space:nowrap}
+.vcard-table-no{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--color-text-primary)}
+.vcard-table-actions{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vcard-item.is-closed .vcard{filter:grayscale(.7);opacity:.82}
+.vcard-closed-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px dashed var(--ds-border-default);border-radius:10px;font-size:12px;color:var(--color-text-secondary)}
+.vcard-closed-meta strong{font-weight:600;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+
+/* ---------- 卡详情 ---------- */
+.vcard-detail{display:block}
+.vcard-detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+/* 返回「我的卡片」升级为深色实心钮：页面里最醒目的导航元素，不再是浮在上面的小幽灵按钮 */
+.vcard-detail-head .page-back-button{width:auto;justify-content:flex-start;height:38px;background:#17181b;color:#fff;border-color:#17181b;font-weight:650;box-shadow:0 3px 10px rgba(17,18,20,.18)}
+.vcard-detail-head .page-back-button:hover{background:#2b2d32;border-color:#2b2d32;color:#fff;box-shadow:0 4px 12px rgba(17,18,20,.24)}
+.vcard-detail-head .page-back-button svg{color:var(--color-brand)}
+.vcard-detail-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
+.vcard-detail-title h2{margin:0;font-size:22px;font-weight:650;color:var(--color-text-primary);letter-spacing:-.02em}
+/* 页头右侧操作条：充值深色主钮 + 四个次级动作横排 */
+.vcard-detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vcard-detail-actions .uc-secondary-action{height:36px;min-height:0;margin-left:0;padding:0 14px;font-size:13px;gap:5px;white-space:nowrap}
+.vcard-detail-actions .uc-secondary-action.is-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
+.vcard-detail-actions .vcard-action-primary{height:36px;padding:0 18px;font-size:13px}
+.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:12px}
+.vcard-info-panel,.vcard-side-panel,.vcard-finance-panel,.vcard-flow-panel{padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
+.vcard-info-panel h3,.vcard-side-panel h3,.vcard-finance-panel h3,.vcard-flow-panel h3{margin:0 0 10px;font-size:15px;font-weight:650;color:var(--color-text-primary)}
+.vcard-finance-panel,.vcard-flow-panel{margin-top:12px}
+/* 卡信息字段网格：label 在上、值+行内图标在下，替代旧「表格行」样式 */
+.vcard-field-grid{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+.vcard-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vcard-field.is-wide{grid-column:1/-1}
+.vcard-field dt{font-size:11.5px;color:var(--color-text-tertiary)}
+.vcard-field dd{margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.vcard-field-value{font-size:14px;font-weight:600;color:var(--color-text-primary);word-break:break-word}
+.vcard-field-value.is-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.04em}
+.vcard-info-tools{display:inline-flex;gap:4px;flex:none}
+.vcard-info-tools button{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--ds-border-default);border-radius:8px;background:var(--color-surface);color:var(--color-text-secondary);cursor:pointer}
+.vcard-info-tools button:hover{background:var(--color-surface-soft);color:var(--color-text-primary)}
+.vcard-info-tools svg{width:14px;height:14px}
+/* 右栏单面板：天数条 + 元数据 + 订阅更新 三节，随左栏高度拉伸铺满（两栏等高） */
+.vcard-detail-side{display:block}
+.vcard-side-panel.is-meta{display:flex;flex-direction:column;justify-content:space-between;gap:14px;height:100%}
+/* 信息面板头部：标题 + 当前状态徽章 + 批量操作（全部显示 / 一键复制） */
+.vcard-info-head{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+.vcard-info-head h3{margin:0}
+.vcard-info-bulk{margin-left:auto;display:inline-flex;gap:8px}
+/* 剩余有效期：数字 + 进度条（区别于参考站的纯文字行） */
+.vcard-days-meter{display:flex;flex-direction:column;gap:5px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#fbffd6,#f4f7da)}
+.vcard-days-copy{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.vcard-days-copy span{font-size:12px;color:#6b7326}
+.vcard-days-copy strong{font-size:22px;font-weight:720;color:#3e4500;line-height:1;font-variant-numeric:tabular-nums}
+.vcard-days-copy strong small{font-size:12px;font-weight:600;margin-left:2px}
+.vcard-days-track{height:6px;border-radius:999px;background:rgba(62,69,0,.12);overflow:hidden}
+.vcard-days-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#c8d43d,#9aa523)}
+.vcard-days-meter small{font-size:11px;color:#8a913f}
+/* 元信息：两列网格（区别于参考站的上下分行动式） */
+.vcard-meta-grid{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.vcard-meta-grid div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vcard-meta-grid dt{font-size:11.5px;color:var(--color-text-tertiary)}
+.vcard-meta-grid dd{margin:0;font-size:13px;font-weight:600;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vcard-meta-grid dd code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:500}
+.vcard-meta-grid dd.is-note{display:flex;align-items:center;gap:6px}
+.vcard-note-edit{display:grid;place-items:center;flex:none;width:24px;height:24px;border:0;border-radius:7px;background:var(--color-surface-soft);color:var(--color-text-secondary);cursor:pointer;transition:background .15s ease,color .15s ease}
+.vcard-note-edit:hover{background:var(--color-brand);color:#111214}
+.vcard-note-edit svg{width:13px;height:13px}
+/* 订阅更新：品牌色时间线（合并进元数据面板的第二节的标题） */
+.vcard-sub-block h3{display:inline-flex;align-items:center;gap:7px;margin:2px 0 0;font-size:15px;font-weight:650;color:var(--color-text-primary)}
+.vcard-sub-block h3 svg{width:15px;height:15px;color:#8a913f}
+.vcard-subscribe-timeline{margin:0;padding:2px 0 0 14px;list-style:none;position:relative}
+.vcard-subscribe-timeline:before{content:"";position:absolute;left:3px;top:8px;bottom:8px;width:2px;border-radius:2px;background:linear-gradient(180deg,#c8d43d,#e4e8bd)}
+.vcard-subscribe-timeline li{position:relative;display:flex;align-items:baseline;gap:8px;padding:5px 0 5px 10px}
+.vcard-subscribe-timeline li i{position:absolute;left:-14px;top:13px;width:8px;height:8px;border-radius:999px;background:#c8d43d;box-shadow:0 0 0 3px #f4f7da}
+.vcard-subscribe-timeline strong{font-size:13px;font-weight:650;color:var(--color-text-primary)}
+.vcard-subscribe-timeline b{margin-left:auto;font-size:13px;font-weight:650;color:#5b6b1f;font-variant-numeric:tabular-nums}
+.vcard-subscribe-timeline time{font-size:11.5px;color:var(--color-text-tertiary);white-space:nowrap}
+.vcard-subscribe-empty{margin:4px 0 0;font-size:13px;color:var(--color-text-tertiary)}
+.vcard-action-primary{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
+.vcard-action-primary:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}
+.vcard-finance-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.vcard-finance-head h3{margin:0}
+.vcard-finance-head small{font-size:11.5px;color:var(--color-text-tertiary)}
+/* 财务 10 格定 5 列 × 2 行（窄屏降 2 列），不再自适应换行参差 */
+.vcard-finance{margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 16px}
+.vcard-finance div{display:flex;flex-direction:column;gap:3px}
+.vcard-finance dt{font-size:12px;color:var(--color-text-secondary)}
+.vcard-finance dd{margin:0;font-size:17px;font-weight:650;color:var(--color-text-primary)}
+.vcard-finance div.is-brand dd{color:#5b6b1f}
+.vcard-finance div.is-risk dd{color:var(--color-danger)}
+.vcard-flow-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.vcard-flow-head h3{margin:0!important}
+.vcard-flow-table .vcard-flow-amount,.vtxn-table .vcard-flow-amount{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vcard-flow-amount.is-income{color:var(--color-success)}
+.vcard-flow-amount.is-expense{color:var(--color-text-primary)}
+.vcard-flow-type{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-flow-type.is-recharge{background:#edf5ef;color:#4e745d}
+.vcard-flow-type.is-consume{background:#eef0ea;color:#4a4d44}
+.vcard-flow-type.is-refund{background:#e7eefb;color:#3f5fa6}
+.vcard-flow-type.is-fee{background:#f1f1ec;color:#7a7c72}
+.vcard-flow-status{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-flow-status.is-success{background:#edf5ef;color:#4e745d}
+.vcard-flow-status.is-processing{background:#fbf2da;color:#9a7320}
+.vcard-flow-status.is-failed{background:#fbeeed;color:#a9635b}
+.vcard-flow-balance{color:var(--color-text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vcard-flow-table code,.vtxn-table code{font-size:12px;color:var(--color-text-tertiary)}
+
+/* ---------- 开卡中心（卡段市场） ---------- */
+.vbin-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.vbin-search,.vtxn-search{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;height:40px;padding:0 13px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);color:var(--color-text-tertiary)}
+.vbin-search svg,.vtxn-search svg{width:16px;height:16px;flex:none}
+.vbin-search input,.vtxn-search input{flex:1;border:0;outline:0;background:transparent;font-size:14px;color:var(--color-text-primary)}
+.vbin-select{height:40px;padding:0 34px 0 13px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6f6b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--color-text-primary);font-size:14px;cursor:pointer;appearance:none;-webkit-appearance:none}
+.vbin-select-wrap{display:inline-flex;flex-direction:column;gap:5px}
+.vbin-select-wrap>span{font-size:12px;color:var(--color-text-secondary)}
+.vbin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.vbin-card{position:relative;display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden;transition:box-shadow .18s ease,border-color .18s ease}
+.vbin-card:hover{box-shadow:var(--ds-shadow-card);border-color:var(--ds-border-strong)}
+.vbin-card.is-recommended{border-color:var(--ds-border-selected)}
+.vbin-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.vbin-card-head h3{margin:0;font-size:16px;font-weight:650;color:var(--color-text-primary)}
+.vbin-card-badges{display:inline-flex;align-items:center;gap:7px;flex:none}
+.vbin-recommend{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--color-brand);color:#111214}
+.vbin-recommend svg{width:12px;height:12px}
+.vbin-tags{display:flex;flex-wrap:wrap;gap:7px}
+.vbin-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;background:var(--color-surface-soft);color:var(--color-text-secondary)}
+.vbin-tag.is-type{background:var(--color-dark);color:#fff}
+.vbin-tag.is-support{background:#edf5ef;color:#4e745d}
+.vbin-notices{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.vbin-notices li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.45;color:var(--color-text-secondary)}
+.vbin-notices svg{width:13px;height:13px;flex:none;margin-top:2px;color:#9a7320}
+/* 限制/规则：暖色警示块（对齐参考站，多条合并一块） */
+.vbin-notice-block{padding:9px 12px;border-radius:10px;background:#f9f3e2}
+.vbin-notice-block .vcard-notices li{color:#7a5a17}
+.vbin-notice-block .vcard-notices svg{color:#a9832c}
+
+/* 费用：价签式（开卡费大字，其他费用独立行） */
+.vbin-pricing{display:flex;flex-direction:column;gap:4px}
+.vbin-price-line{margin:0;display:flex;align-items:baseline;gap:8px}
+.vbin-price-label{font-size:13px;color:var(--color-text-secondary)}
+.vbin-price-value{font-size:22px;font-weight:650;color:var(--color-danger);font-variant-numeric:tabular-nums}
+.vbin-price-line small{font-size:12px;color:var(--color-text-tertiary)}
+.vbin-price-sub{margin:0;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--color-text-secondary)}
+.vbin-price-sub strong{font-weight:650;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.vbin-fee-extra{margin:2px 0 0;font-size:12.5px;color:#a26415}
+
+/* 元数据行：地区·剩余 左，BIN 右，上细分隔线 */
+.vbin-meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid var(--color-border);font-size:12.5px;color:var(--color-text-tertiary)}
+.vbin-meta-sep{font-style:normal;margin:0 6px}
+.vbin-meta-row em{font-style:normal;color:var(--color-text-primary);font-weight:600}
+.vbin-meta-row em.is-low{color:var(--color-danger)}
+.vbin-meta-row code{font-size:12px;color:var(--color-text-tertiary)}
+
+/* AI 订阅价格快照 */
+.vbin-sub{display:flex;flex-direction:column;gap:2px}
+.vbin-sub-head{margin:0 0 4px;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-primary)}
+.vbin-sub-dot{width:7px;height:7px;border-radius:50%;background:var(--color-success);flex:none}
+.vbin-sub-row{margin:0;display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;line-height:1.9;color:var(--color-text-secondary)}
+.vbin-sub-row em{font-style:normal;font-weight:600;color:var(--color-success);font-variant-numeric:tabular-nums;margin-left:4px}
+.vbin-sub-row time{font-size:11.5px;color:var(--color-text-tertiary)}
+.vbin-card-foot{margin-top:auto}
+.vbin-open-button{width:100%;border-radius:999px;background:var(--color-brand)!important;color:#111214!important;border:0!important}
+.vbin-open-button svg{width:15px;height:15px;margin-left:2px}
+.vbin-open-button:disabled svg{display:none}
+
+/* ---------- 消费记录（全局流水） ---------- */
+.vtxn-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
+.vtxn-filters .vbin-select-wrap{min-width:150px}
+.vtxn-filters .vtxn-search{flex:1;min-width:220px}
+.vtxn-summary{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:14px;font-size:13px;color:var(--color-text-secondary)}
+.vtxn-summary strong{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
+.vtxn-summary strong.is-income{color:var(--color-success)}
+.vtxn-summary strong.is-expense{color:var(--color-danger)}
+
+/* 空状态间距微调 */
+.uc-empty.vcard-empty,.uc-empty.vbin-empty,.uc-empty.vtxn-empty{margin-top:8px}
+
+/* ---------- 开卡 / 充值弹窗 ---------- */
+.card-open-dialog .purchase-dialog-body,.card-recharge-dialog .purchase-dialog-body{padding-top:20px}
+.card-open-bin{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--ds-border-default);border-radius:12px;background:var(--color-surface-soft)}
+.card-open-bin .vcard-bin{font-size:13px;font-weight:600;color:var(--color-text-primary);text-transform:none;letter-spacing:0}
+.card-open-region{font-size:12px;color:var(--color-text-secondary)}
+.card-open-meta{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card-open-meta div{display:flex;flex-direction:column;gap:2px}
+.card-open-meta dt{font-size:12px;color:var(--color-text-secondary)}
+.card-open-meta dd{margin:0;font-size:15px;font-weight:650;color:var(--color-text-primary)}
+.card-recharge-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--ds-border-default);border-radius:12px;background:var(--color-surface-soft)}
+.card-recharge-card .vcard-bin{font-size:13px;font-weight:600;color:var(--color-text-primary);text-transform:none;letter-spacing:0}
+.card-recharge-tail{font-size:12px;color:var(--color-text-secondary)}
+.card-recharge-balance{margin-left:auto;font-size:12px;font-weight:600;color:var(--color-text-primary)}
+.card-recharge-balance:before{content:"当前余额 "}
+.card-recharge-amount{display:flex;flex-direction:column;gap:10px}
+.card-recharge-amount input{height:46px;padding:0 14px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface);font-size:18px;font-weight:600;color:var(--color-text-primary);outline:0}
+.card-recharge-amount input:focus{border-color:var(--ds-border-selected)}
+.card-recharge-quick{display:flex;flex-wrap:wrap;gap:8px}
+.card-recharge-quick button{height:34px;padding:0 14px;border:1px solid var(--ds-border-default);border-radius:999px;background:var(--color-surface);color:var(--color-text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s ease,color .15s ease}
+.card-recharge-quick button:hover:not(:disabled){border-color:var(--ds-border-selected);color:var(--color-text-primary)}
+.card-recharge-quick button:disabled{opacity:.4;cursor:not-allowed}
+
+/* 冻结 / 注销确认按钮 */
+.card-freeze-confirm{background:var(--color-brand)!important;color:#111214!important}
+.card-delete-confirm{background:var(--color-danger)!important;color:#fff!important}
+
+/* ---------- 虚拟卡模块响应式（新增独立媒体块，不改动既有窄屏共享块） ---------- */
+/* 注：一级/二级菜单间距维持全局默认（桌面 72px / 手机 118px 配两行顶栏），卡片页不做覆盖 */
+@media(max-width:1200px){.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:980px){
+  .vcard-detail-top{grid-template-columns:1fr}
+  .vcard-side-panel.is-meta{height:auto;justify-content:flex-start}
+  .vcard-finance{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){.business-entry-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .vcard-number{font-size:14px}
+  .vcard-item-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* 详情页头：返回+标题一行，操作条通栏换行 */
+  .vcard-detail-actions{width:100%}
+  .vcard-detail-actions .uc-secondary-action{flex:1 1 auto;justify-content:center;padding:0 10px}
+  .vcard-detail-actions .vcard-action-primary{flex:1 1 auto;justify-content:center}
+  .vcard-meta-grid{grid-template-columns:1fr}
+  /* 工具行：导出+视图切换一行，开通虚拟卡通栏一行 */
+  .vcard-head-tools{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+  .vcard-head-tools .vcard-view-toggle{margin-left:auto}
+  .vcard-head-tools .vcard-open-entry{flex:1 1 100%;order:3}
+  /* 筛选栏：搜索框通栏，四个下拉 2×2 */
+  .vcard-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vcard-filters .vcard-search{grid-column:1 / -1}
+  .vcard-filters .vbin-select{min-width:0;width:100%}
+  .vcard-field-grid{grid-template-columns:1fr}
+  /* 流水头窄屏：筛选+导出通栏一行，下拉占满剩余宽度 */
+  .vcard-flow-tools{width:100%}
+  .vcard-flow-tools .vbin-select{flex:1 1 auto;min-width:0}
+}
+
+/* ---------- v0.13.0：开卡统计 / 费用外扣 / CVV 查询说明 ---------- */
+.vbin-head-stats{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vbin-head-stats .vbin-count.is-stock strong{color:var(--color-text-primary);font-size:15px}
+.vbin-fee-inline{margin-left:6px;color:var(--color-text-tertiary)}
+.vbin-fee-inline::before{content:"·";margin-right:6px;color:var(--color-text-tertiary)}
+.vcard-cvv-note{display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:12px;color:var(--color-text-tertiary)}
+.vcard-cvv-note svg{width:14px;height:14px;flex:none}
+.vcard-info-tools button:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- v0.13.x：冻结提示 / 退款弹窗 / 详情状态徽章 ---------- */
+/* 卡列表卡片下的冻结提示条 */
+.vcard-frozen-hint{display:flex;align-items:flex-start;gap:6px;margin:0;padding:7px 10px;border:1px dashed rgba(169,99,91,.45);border-radius:9px;background:rgba(169,99,91,.08);color:#8a4a42;font-size:12px;line-height:1.5}
+.vcard-frozen-hint svg{width:13px;height:13px;flex:none;margin-top:2px}
+/* 卡详情页头的冻结提示条（system_frozen 走红色系） */
+.vcard-detail-alert{display:flex;align-items:flex-start;gap:9px;margin:0 0 10px;padding:10px 14px;border:1px solid rgba(214,170,60,.5);border-radius:12px;background:rgba(214,170,60,.12)}
+.vcard-detail-alert svg{width:16px;height:16px;flex:none;color:#9a7a1e;margin-top:2px}
+.vcard-detail-alert p{margin:0;font-size:13px;line-height:1.55;color:#6b5a1f}
+.vcard-detail-alert.is-system{border-color:rgba(169,99,91,.5);background:rgba(169,99,91,.1)}
+.vcard-detail-alert.is-system svg{color:var(--color-danger)}
+.vcard-detail-alert.is-system p{color:#7a4038}
+/* 详情右栏「当前状态」徽章（浅底配色） */
+.vcard-meta-status{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.vcard-meta-status svg{width:12px;height:12px}
+.vcard-meta-status.is-completed{background:rgba(93,128,107,.16);color:#3e6b4f}
+.vcard-meta-status.is-processing{background:rgba(214,170,60,.18);color:#8a6d16}
+.vcard-meta-status.is-pending{background:rgba(90,100,120,.14);color:#46536b}
+.vcard-meta-status.is-failed{background:rgba(169,99,91,.16);color:#8a4a42}
+/* 退款弹窗保留金额说明 */
+.vcard-refund-keep{margin:0;font-size:12.5px;line-height:1.5;color:var(--color-text-secondary)}
+.vcard-refund-keep b{color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.card-refund-dialog .card-recharge-amount input:disabled{opacity:.5;cursor:not-allowed}
+/* 流水面板头：类型筛选+导出归到右侧一组，select 与按钮同高对齐 */
+.vcard-flow-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+.vcard-flow-head .vbin-select{height:36px;border-radius:8px;font-size:13px;padding:0 30px 0 12px}
+.vcard-flow-head .uc-secondary-action{height:36px}
+
+/* ---------- v0.13.x：开卡弹窗对齐参考站（持卡人/备注/限制/明细） ---------- */
+/* 卡段头下元数据行：地区 · 卡类型 + 上游产品码 */
+.card-open-meta-line{margin:0;font-size:12.5px;color:var(--color-text-tertiary)}
+.card-open-upstream{margin-left:10px;padding-left:10px;border-left:1px solid var(--color-border);color:var(--color-text-tertiary)}
+/* 持卡人行：随机名（等宽）+ 换一个 */
+.card-open-holder{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-soft)}
+.card-open-holder-label{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-holder-name{flex:1;min-width:0;font-family:var(--font-mono,ui-monospace,monospace);font-size:14px;font-weight:650;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-open-holder-shuffle{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-danger);cursor:pointer}
+.card-open-holder-shuffle svg{width:13px;height:13px}
+.card-open-holder-shuffle:hover{text-decoration:underline}
+/* 备注输入 */
+.card-open-remark{display:flex;flex-direction:column;gap:6px}
+.card-open-remark label{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-remark-box{display:flex;align-items:center;gap:10px;padding:0 12px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface);transition:border-color .15s ease}
+.card-open-remark-box:focus-within{border-color:var(--ds-border-strong)}
+.card-open-remark-box input{flex:1;min-width:0;border:0;background:none;padding:10px 0;font-size:13px;color:var(--color-text-primary);outline:none}
+.card-open-remark-box input::placeholder{color:var(--color-text-tertiary)}
+.card-open-remark-box span{flex:none;font-size:11.5px;color:var(--color-text-tertiary);font-variant-numeric:tabular-nums}
+/* 弹窗里的限制警示块与合计强调 */
+.card-open-restrictions{margin:2px 0 0}
+.payment-breakdown dd.card-open-total{font-weight:650;color:var(--color-text-primary)}
+/* 成功页三按钮允许换行 */
+.payment-success-actions{flex-wrap:wrap}
+/* 初始充值额 + 开卡数量：两列并排（对齐参考站） */
+.card-open-amounts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.quantity-row.is-column{flex-direction:column;align-items:stretch;gap:8px}
+.quantity-row.is-column>div:first-child strong{display:block;font-size:12.5px;color:var(--color-text-secondary);font-weight:600}
+.quantity-row.is-column>div:first-child span{font-size:11.5px;color:var(--color-text-tertiary)}
+.quantity-row.is-column .quantity-control{justify-content:space-between}
+/* 充值金额：可手动输入的步进器 */
+.card-open-topup-control input{width:64px;border:0;background:none;padding:0;font-size:14px;font-weight:650;color:var(--color-text-primary);text-align:center;outline:none;font-variant-numeric:tabular-nums}
+.card-open-topup-control.is-invalid{border-color:var(--color-danger)}
+.card-open-topup-hint{margin:0;font-size:11.5px;color:var(--color-danger)}
+/* 完整费率标准块（demo 阶段常开展示） */
+.card-open-fees-fold{border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-soft);overflow:hidden}
+.card-open-fees-head{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:13px;color:var(--color-text-primary);cursor:pointer;list-style:none;user-select:none}
+.card-open-fees-head::-webkit-details-marker{display:none}
+.card-open-fees-head>span{flex:1;min-width:0}
+.card-open-fees-head small{flex:none;font-size:11.5px;font-weight:400;color:var(--color-text-tertiary)}
+.card-open-fees-head::after{content:"";flex:none;width:7px;height:7px;border-right:1.5px solid var(--color-text-tertiary);border-bottom:1.5px solid var(--color-text-tertiary);transform:rotate(45deg);transition:transform .15s ease;margin-left:2px;margin-top:-3px}
+.card-open-fees-fold[open] .card-open-fees-head{border-bottom:1px solid var(--color-border)}
+.card-open-fees-fold[open] .card-open-fees-head::after{transform:rotate(225deg);margin-top:2px}
+.card-open-fees-list{margin:0;padding:6px 14px;display:flex;flex-direction:column}
+.card-open-fees-list div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0}
+.card-open-fees-list div+div{border-top:1px dashed var(--color-border)}
+.card-open-fees-list dt{font-size:12.5px;color:var(--color-text-secondary)}
+.card-open-fees-list dt small{color:var(--color-text-tertiary);font-size:11.5px}
+.card-open-fees-list dd{margin:0;font-size:12.5px;font-weight:600;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+@media (max-width:520px){
+  .card-open-amounts{grid-template-columns:1fr}
+}
+/* 开卡弹窗：桌面双栏（左填参数 / 右费用信息），避免费率块滚出视口 */
+.purchase-dialog-account.card-open-dialog{width:min(920px,calc(100vw - 32px))!important;max-width:920px!important}
+.card-open-cols{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:16px 22px;align-items:start}
+.card-open-col{display:grid;gap:13px;min-width:0;align-content:start}
+.card-open-col .card-open-amounts{grid-template-columns:1fr}
+@media (max-width:860px){
+  .card-open-cols{grid-template-columns:1fr}
+  .card-open-col .card-open-amounts{grid-template-columns:1fr 1fr}
+  .purchase-dialog-account.card-open-dialog{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}
+}
+
+/* 导出卡片信息：字段说明 + 敏感提示 */
+.card-export-dialog{width:min(520px,calc(100vw - 32px))!important;max-width:520px!important}
+.card-export-dialog .purchase-dialog-body{display:grid;gap:12px}
+.card-export-fields{display:grid;gap:1px;margin:0;border:1px solid #e6e8df;border-radius:10px;background:#e6e8df;overflow:hidden}
+.card-export-fields>div{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:12px;background:#fff;padding:11px 14px}
+.card-export-fields dt{color:#2b302a;font-size:12.5px;font-weight:680}
+.card-export-fields dd{margin:0;color:#9aa095;font-size:11.5px;text-align:right}

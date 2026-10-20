@@ -10,8 +10,20 @@ export type DemoContent = {
   navHome: string;
   navAccount: string;
   navRecharge: string;
+  navCard: string;
   navTopup: string;
   navOrders: string;
+  bizTabRecharge: string;
+  bizTabAccount: string;
+  billTabFlows: string;
+  billTabOrders: string;
+  billAllTypes: string;
+  billTypeRecharge: string;
+  billTypeAccount: string;
+  billTypeCommission: string;
+  billTypeCard: string;
+  walletFlowTitle: string;
+  walletFlowSubtitle: string;
   navInvite: string;
   personalCenter: string;
   logout: string;
@@ -260,6 +272,123 @@ export type DemoContent = {
   topupCountdownHint: string;
   topupSupportStripTitle: string;
   topupSupportStripHint: string;
+  /* ---- 虚拟卡 ---- */
+  cardPageTitle: string;
+  cardPageSubtitle: string;
+  cardTabCards: string;
+  cardTabMarket: string;
+  cardTabTransactions: string;
+  cardOpenAction: string;
+  cardMarketTitle: string;
+  cardMarketSubtitle: string;
+  cardOpenNow: string;
+  cardOpenFee: string;
+  cardRechargeFeeLabel: string;
+  cardRemaining: string;
+  cardRegionLabel: string;
+  cardSceneLabel: string;
+  cardRestrictionLabel: string;
+  cardSupportRecharge: string;
+  cardSearchPlaceholder: string;
+  cardAllScheme: string;
+  cardAllRegion: string;
+  cardEmptyBins: string;
+  cardEmptyBinsHint: string;
+  cardOpenDialogTitle: string;
+  cardOpenDialogDescConfirm: string;
+  cardOpenDialogDescSuccess: string;
+  cardQuantityLabel: string;
+  cardOpenTotalLabel: string;
+  cardBalanceMethodLabel: string;
+  cardInsufficientHint: string;
+  cardGoTopup: string;
+  cardOpenSuccessTitle: string;
+  cardOpenSuccessDesc: string;
+  cardViewCards: string;
+  cardContinueOpen: string;
+  cardRechargeTitle: string;
+  cardRechargeDescConfirm: string;
+  cardRechargeDescSuccess: string;
+  cardRechargeAmountLabel: string;
+  cardRechargeSuccessTitle: string;
+  cardRechargeSuccessDesc: string;
+  cardRechargeFeeNote: string;
+  cardCardsTitle: string;
+  cardCardsSubtitle: string;
+  cardEmptyCards: string;
+  cardEmptyCardsHint: string;
+  cardGoOpen: string;
+  cardFilterSearch: string;
+  cardAllStatus: string;
+  cardClosedStatus: string;
+  cardSortDefault: string;
+  cardSortBalanceDesc: string;
+  cardSortBalanceAsc: string;
+  cardViewCard: string;
+  cardViewTable: string;
+  cardClosedTitle: string;
+  cardClosedAt: string;
+  cardClosedEmpty: string;
+  cardClosedEmptyHint: string;
+  cardDetailLabel: string;
+  cardReveal: string;
+  cardHide: string;
+  cardCopy: string;
+  cardCopied: string;
+  cardInfoTitle: string;
+  cardNoLabel: string;
+  cardExpLabel: string;
+  cardCvvLabel: string;
+  cardHolderLabel: string;
+  cardBillingLabel: string;
+  cardBalanceLabel: string;
+  cardStatusLabel: string;
+  cardOverviewTitle: string;
+  cardActionsTitle: string;
+  cardBinLabel: string;
+  cardSchemeLabel: string;
+  cardCreatedLabel: string;
+  cardRemarkLabel: string;
+  cardFreeze: string;
+  cardUnfreeze: string;
+  cardDeleteCard: string;
+  cardBackCards: string;
+  cardFinanceTitle: string;
+  cardFlowTitle: string;
+  cardTxnTitle: string;
+  cardTxnSubtitle: string;
+  cardAllCards: string;
+  cardAllTypes: string;
+  cardSearchMerchant: string;
+  cardNoRecords: string;
+  cardNoRecordsHint: string;
+  cardStatRecharge: string;
+  cardStatConsume: string;
+  cardStatRefund: string;
+  cardStatConsumeCount: string;
+  cardStatSuccessRate: string;
+  cardFreezeConfirmTitle: string;
+  cardFreezeConfirmDescription: string;
+  cardUnfreezeConfirmTitle: string;
+  cardUnfreezeConfirmDescription: string;
+  cardDeleteConfirmTitle: string;
+  cardDeleteConfirmDescription: string;
+  cardConfirmAction: string;
+  cardCloseAction: string;
+  cardServiceTitle: string;
+  cardServiceDescription: string;
+  cardModuleSubtitle: string;
+  cardRefund: string;
+  cardRefundConfirmTitle: string;
+  cardRefundConfirmDescription: string;
+  cardRefundEmpty: string;
+  cardExport: string;
+  cardExportDone: string;
+  cardCvvQuery: string;
+  cardCvvQuerying: string;
+  cardCvvNote: string;
+  cardOverallStock: string;
+  cardFeeExternal: string;
 };
 
 export const defaultContent: DemoContent = {
@@ -274,8 +403,20 @@ export const defaultContent: DemoContent = {
   navHome: "首页",
   navAccount: "成品号",
   navRecharge: "代充",
+  navCard: "虚拟卡",
   navTopup: "充值",
-  navOrders: "我的订单",
+  navOrders: "我的账单",
+  bizTabRecharge: "套餐代充",
+  bizTabAccount: "成品号",
+  billTabFlows: "平台流水",
+  billTabOrders: "我的订单",
+  billAllTypes: "全部类型",
+  billTypeRecharge: "代充流水",
+  billTypeAccount: "成品号流水",
+  billTypeCommission: "退单/返佣",
+  billTypeCard: "卡流水",
+  walletFlowTitle: "余额流水",
+  walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
   navInvite: "我的邀请",
   personalCenter: "个人中心",
   logout: "退出登录",
@@ -394,7 +535,7 @@ export const defaultContent: DemoContent = {
   recentOrders: "最近消费订单",
   viewAllOrders: "查看全部订单",
   goBrowse: "去逛逛",
-  ordersPageTitle: "我的订单",
+  ordersPageTitle: "我的账单",
   ordersPageSubtitle: "查看和管理你的成品号与代充服务订单。",
   allOrdersTab: "全部订单",
   accountOrdersTab: "成品号订单",
@@ -524,4 +665,121 @@ export const defaultContent: DemoContent = {
   topupCountdownHint: "请在有效期内完成转账，过期可以重新生成支付信息。",
   topupSupportStripTitle: "充值未到账或金额有疑问？",
   topupSupportStripHint: "提供充值单号，客服可帮你核对链上记录。",
+  /* ---- 虚拟卡 ---- */
+  cardPageTitle: "虚拟卡",
+  cardPageSubtitle: "开通虚拟卡用平台余额充值，卡内余额按需划转，支付订阅与线上消费更灵活。",
+  cardTabCards: "我的卡片",
+  cardTabMarket: "开卡中心",
+  cardTabTransactions: "消费记录",
+  cardModuleSubtitle: "开卡、充值与消费记录，由平台余额统一管理。",
+  cardRefund: "退款",
+  cardRefundConfirmTitle: "卡内余额退款",
+  cardRefundConfirmDescription: "将把这张卡的全部余额退回平台余额，退款后卡内余额清零；部分卡段退款后可能被上游封卡，请谨慎操作。",
+  cardRefundEmpty: "卡内没有可退余额",
+  cardExport: "导出",
+  cardExportDone: "已导出 CSV 文件",
+  cardCvvQuery: "查询 CVV",
+  cardCvvQuerying: "上游查询中…",
+  cardCvvNote: "CVV 由上游实时查询，系统不存储。",
+  cardOverallStock: "整体剩余开卡数",
+  cardFeeExternal: "开卡费与充值费均从平台余额额外扣除（费用外扣）。",
+  cardOpenAction: "开通虚拟卡",
+  cardServiceTitle: "开通虚拟卡",
+  cardServiceDescription: "订阅与广告投放专用，余额从平台余额一键划转。",
+  cardMarketTitle: "选择卡段开卡",
+  cardMarketSubtitle: "不同卡段在卡组织、发行地与费率上不同，按你的使用场景挑一个。",
+  cardOpenNow: "立即开卡",
+  cardOpenFee: "开卡费",
+  cardRechargeFeeLabel: "充值手续费",
+  cardRemaining: "剩余可开",
+  cardRegionLabel: "发行地",
+  cardSceneLabel: "适用场景",
+  cardRestrictionLabel: "使用限制",
+  cardSupportRecharge: "支持代充",
+  cardSearchPlaceholder: "搜索卡段、BIN 或适用场景",
+  cardAllScheme: "全部卡组织",
+  cardAllRegion: "全部发行地",
+  cardEmptyBins: "没有匹配的卡段",
+  cardEmptyBinsHint: "换个关键词，或清空筛选条件再看看。",
+  cardOpenDialogTitle: "开卡确认",
+  cardOpenDialogDescConfirm: "确认卡段与数量，开卡费将从平台余额中扣除。",
+  cardOpenDialogDescSuccess: "开卡申请已提交，卡片稍后会出现在「我的卡片」。",
+  cardQuantityLabel: "开卡数量",
+  cardOpenTotalLabel: "应付开卡费",
+  cardBalanceMethodLabel: "平台余额",
+  cardInsufficientHint: "平台余额不足，充值到账后即可继续开卡。",
+  cardGoTopup: "去充值",
+  cardOpenSuccessTitle: "开卡成功",
+  cardOpenSuccessDesc: "卡片已生成，可在「我的卡片」查看卡号、安全信息与余额。",
+  cardViewCards: "查看我的卡片",
+  cardContinueOpen: "继续开卡",
+  cardRechargeTitle: "卡片充值",
+  cardRechargeDescConfirm: "从平台余额划转到卡片余额，1:1 到账，不收充值手续费。",
+  cardRechargeDescSuccess: "卡片余额已更新，可直接用于线上消费。",
+  cardRechargeAmountLabel: "充值金额",
+  cardRechargeSuccessTitle: "充值成功",
+  cardRechargeSuccessDesc: "充值金额已计入卡片余额，可继续用于订阅与线上消费。",
+  cardRechargeFeeNote: "充值金额 1:1 计入卡片余额，平台不收充值手续费。",
+  cardCardsTitle: "我的卡片",
+  cardCardsSubtitle: "查看卡号、余额与卡片状态，余额不足时随时从平台余额划转。",
+  cardEmptyCards: "还没有卡片",
+  cardEmptyCardsHint: "去开卡中心挑一个卡段，开通你的第一张虚拟卡。",
+  cardGoOpen: "去开卡",
+  cardFilterSearch: "搜索卡号 / 备注",
+  cardAllStatus: "全部状态",
+  cardClosedStatus: "已注销",
+  cardSortDefault: "最近开卡",
+  cardSortBalanceDesc: "余额从高到低",
+  cardSortBalanceAsc: "余额从低到高",
+  cardViewCard: "卡片视图",
+  cardViewTable: "表格视图",
+  cardClosedTitle: "删卡记录",
+  cardClosedAt: "注销时间",
+  cardClosedEmpty: "暂无删卡记录",
+  cardClosedEmptyHint: "注销卡片后会在这里保留记录，卡内余额自动退回平台余额。",
+  cardDetailLabel: "卡详情",
+  cardReveal: "显示",
+  cardHide: "隐藏",
+  cardCopy: "复制",
+  cardCopied: "已复制",
+  cardInfoTitle: "卡信息",
+  cardNoLabel: "卡号",
+  cardExpLabel: "有效期",
+  cardCvvLabel: "CVV",
+  cardHolderLabel: "持卡人",
+  cardBillingLabel: "账单地址",
+  cardBalanceLabel: "卡内余额",
+  cardStatusLabel: "卡片状态",
+  cardOverviewTitle: "卡片概览",
+  cardActionsTitle: "卡片操作",
+  cardBinLabel: "所属卡段",
+  cardSchemeLabel: "卡组织",
+  cardCreatedLabel: "开卡时间",
+  cardRemarkLabel: "备注",
+  cardFreeze: "冻结",
+  cardUnfreeze: "解冻",
+  cardDeleteCard: "删卡",
+  cardBackCards: "返回我的卡片",
+  cardFinanceTitle: "卡财务数据",
+  cardFlowTitle: "卡流水",
+  cardTxnTitle: "消费记录",
+  cardTxnSubtitle: "查看每张卡片的消费明细、结算金额与处理状态。",
+  cardAllCards: "全部卡片",
+  cardAllTypes: "全部类型",
+  cardSearchMerchant: "搜索商户或交易号",
+  cardNoRecords: "暂无记录",
+  cardNoRecordsHint: "有交易发生时会显示在这里。",
+  cardStatRecharge: "累计卡充值",
+  cardStatConsume: "累计消费",
+  cardStatRefund: "累计退款",
+  cardStatConsumeCount: "消费笔数",
+  cardStatSuccessRate: "消费成功率",
+  cardFreezeConfirmTitle: "冻结这张卡？",
+  cardFreezeConfirmDescription: "冻结后该卡将暂停消费，卡内余额保留，可随时解冻。",
+  cardUnfreezeConfirmTitle: "解冻这张卡？",
+  cardUnfreezeConfirmDescription: "解冻请求将通过上游接口执行，解冻后该卡恢复消费与充值、退款、删卡操作。",
+  cardDeleteConfirmTitle: "删掉这张卡？",
+  cardDeleteConfirmDescription: "删卡后卡片不可恢复，卡内余额将退回平台余额。",
+  cardConfirmAction: "确认",
+  cardCloseAction: "完成",
 };

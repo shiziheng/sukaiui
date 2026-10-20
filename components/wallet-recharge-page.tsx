@@ -19,6 +19,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock } from "@/data/account-dashboard";
+import { platformFlowTypeLabel, type PlatformFlow, type PlatformFlowType } from "@/data/bill-flows";
 import { type DemoContent } from "@/data/content";
 import {
   completeMockPayment,
@@ -66,6 +67,7 @@ export function WalletRechargePage({
   updateContent,
   availableBalance,
   topUpRecords,
+  platformFlows,
   onBack,
   onComplete,
   onSupport,
@@ -78,6 +80,8 @@ export function WalletRechargePage({
   updateContent: CopyUpdater;
   availableBalance: number;
   topUpRecords: typeof accountDashboardMock.topUpRecords;
+  /** 平台余额流水：充值、开卡扣费、卡充值、卡退款、销卡退款。 */
+  platformFlows: PlatformFlow[];
   onBack: () => void;
   onComplete: (completion: PaymentCompletion) => void;
   onSupport: () => void;
@@ -94,7 +98,13 @@ export function WalletRechargePage({
   const [network, setNetwork] = useState<PaymentNetwork>("trc20");
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [completion, setCompletion] = useState<PaymentCompletion | null>(null);
+  const [flowFilter, setFlowFilter] = useState<"all" | PlatformFlowType>("all");
   const recentRecords = topUpRecords.slice(0, 3);
+
+  const visibleFlows = platformFlows
+    .filter((flow) => flowFilter === "all" || flow.type === flowFilter)
+    .slice()
+    .sort((a, b) => (a.time < b.time ? 1 : -1));
 
   const resetToStart = () => {
     setIntent(null);
@@ -353,6 +363,44 @@ export function WalletRechargePage({
           </div>
         </article>) : <p className="topup-note">还没有充值记录，完成第一笔充值后会显示在这里。</p>}
       </div>
+    </section>
+
+    <section className="topup-card topup-records" id="platform-flows">
+      <header className="topup-supplement-heading">
+        <div><h2>{editable("walletFlowTitle")}</h2><p>{editable("walletFlowSubtitle")}</p></div>
+        <label className="vbin-select-wrap">
+          <select className="vbin-select" value={flowFilter} onChange={(event) => setFlowFilter(event.target.value as typeof flowFilter)} aria-label="流水类型">
+            <option value="all">全部类型</option>
+            {(Object.keys(platformFlowTypeLabel) as PlatformFlowType[]).map((type) => (
+              <option value={type} key={type}>{platformFlowTypeLabel[type]}</option>
+            ))}
+          </select>
+        </label>
+      </header>
+      {visibleFlows.length ? (
+        <div className="uc-table-wrap">
+          <table className="uc-table vtxn-table">
+            <thead><tr>
+              <th>时间</th><th>类型</th><th>金额</th><th>变动后余额</th><th>说明</th><th>状态</th><th>流水号</th>
+            </tr></thead>
+            <tbody>
+              {visibleFlows.map((flow) => (
+                <tr key={flow.id}>
+                  <td><time>{flow.time}</time></td>
+                  <td><span className={`vcard-flow-type is-${flow.type === "topup" ? "recharge" : flow.type === "card_open" ? "fee" : "consume"}`}>{platformFlowTypeLabel[flow.type]}</span></td>
+                  <td className={`vcard-flow-amount ${flow.amount > 0 ? "is-income" : "is-expense"}`}>{flow.amount > 0 ? "+" : "−"}{money(Math.abs(flow.amount))}</td>
+                  <td className="vcard-flow-balance">{money(flow.balanceAfter)}</td>
+                  <td>{flow.note}</td>
+                  <td><span className={`vcard-flow-status is-${flow.status}`}>{flow.status === "success" ? "成功" : flow.status === "processing" ? "处理中" : "失败"}</span></td>
+                  <td><code>{flow.id}</code></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="topup-note">暂无相关流水。</p>
+      )}
     </section>
 
     <section className="topup-card topup-faq">

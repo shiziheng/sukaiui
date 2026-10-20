@@ -1,0 +1,117 @@
+"use client";
+
+import { Copy, Eye, EyeOff, Snowflake, TriangleAlert } from "lucide-react";
+
+import { EditableText } from "@/components/editable-text";
+import {
+  binTitle, cardStatusMeta, formatCardNumber, maskCardNumber, regionLabel, schemeLabel,
+  type CardScheme, type CardStatus, type VirtualCard,
+} from "@/data/card-business";
+import { type DemoContent } from "@/data/content";
+
+/** 列表里同时显示多张卡，脱敏状态由父级按卡维护。 */
+export type RevealMap = Record<string, boolean>;
+
+export async function copyText(text: string) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* 非安全上下文会抛错，落到下面的兜底方案 */
+  }
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+export function SchemeBadge({ scheme }: { scheme: CardScheme }) {
+  return <span className={`vcard-scheme is-${scheme}`}>{schemeLabel(scheme)}</span>;
+}
+
+export function CardStatusTag({ status }: { status: CardStatus }) {
+  const meta = cardStatusMeta[status];
+  return (
+    <span className={`vcard-status is-${meta.tone}`}>
+      {status === "frozen" || status === "system_frozen" ? <Snowflake aria-hidden="true" /> : null}
+      {status === "processing" ? <i aria-hidden="true" /> : null}
+      {meta.label}
+    </span>
+  );
+}
+
+/**
+ * 卡片视觉：默认脱敏，显示 / 隐藏由父级控制。
+ * list 用于卡片列表，detail 用于卡详情的大卡。
+ */
+export function CardVisual({
+  card,
+  variant = "list",
+  revealed = false,
+  content,
+  editMode,
+  updateContent,
+}: {
+  card: VirtualCard;
+  variant?: "list" | "detail";
+  revealed?: boolean;
+  onToggleReveal?: () => void;
+  content: DemoContent;
+  editMode: boolean;
+  updateContent: (key: keyof DemoContent, value: string) => void;
+}) {
+  const dim = card.status === "frozen" || card.status === "system_frozen";
+
+  return (
+    <div className={`vcard is-${variant} ${dim ? "is-dimmed" : ""}`} data-scheme={card.scheme}>
+      <span className="vcard-accent" aria-hidden="true" />
+
+      <header className="vcard-head">
+        <span className="vcard-bin">{binTitle(card)}</span>
+        <SchemeBadge scheme={card.scheme} />
+      </header>
+
+      <span className="vcard-chip" aria-hidden="true"><i /><i /><i /></span>
+
+      <div className="vcard-number-row">
+        <span className="vcard-number">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</span>
+      </div>
+
+      <div className="vcard-balance">
+        <span><EditableText active={editMode} value={content.cardBalanceLabel} onChange={(value) => updateContent("cardBalanceLabel", value)} /></span>
+        <strong>${card.balance.toFixed(2)}</strong>
+      </div>
+
+      <footer className="vcard-foot">
+        <span><b><EditableText active={editMode} value={content.cardExpLabel} onChange={(value) => updateContent("cardExpLabel", value)} /></b>{String(card.expMonth).padStart(2, "0")}/{card.expYear}</span>
+        <span><b><EditableText active={editMode} value={content.cardHolderLabel} onChange={(value) => updateContent("cardHolderLabel", value)} /></b>{card.holder}</span>
+        <span className="vcard-region">{regionLabel(card.region)}</span>
+      </footer>
+
+      <CardStatusTag status={card.status} />
+    </div>
+  );
+}
+
+export function CardNotice({ items }: { items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <ul className="vcard-notices">
+      {items.map((item) => (
+        <li key={item}><TriangleAlert aria-hidden="true" />{item}</li>
+      ))}
+    </ul>
+  );
+}
