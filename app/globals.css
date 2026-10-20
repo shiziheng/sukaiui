@@ -1515,3 +1515,105 @@ button{font:inherit}
   .dash-panel-head{flex-wrap:wrap;row-gap:8px}
   .dash-legend.is-pair{width:100%;justify-content:flex-start}
 }
+
+/* ==================================================================
+   未登录落地页：平台定位升级为「账号 · 代充 · 虚拟卡」三条业务线
+   （只作用于 .compact-home 内的新增模块，不改动登录后页面）
+   ================================================================== */
+.compact-service-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.compact-service-card{padding:25px}
+.compact-service-card h3{font-size:24px}
+.compact-new-tag{display:inline-flex;align-items:center;border-radius:999px;background:var(--compact-lime);color:#1b2118;padding:3px 7px;font-size:9px;font-style:normal;font-weight:820;letter-spacing:.1em}
+.compact-hero-tertiary{display:inline-flex;align-items:center;gap:6px;margin-top:13px;border:0;background:none;color:#c9d4c4;padding:0;font-size:13px;font-weight:620;cursor:pointer;transition:color .18s ease,gap .18s ease}
+.compact-hero-tertiary:hover{color:#e8ff8a;gap:10px}
+.compact-hero-tertiary svg{width:14px;height:14px}
+.compact-orbit-node-card{right:13%;top:3%;animation-delay:-1.5s}
+.compact-orbit-node-card b{color:var(--compact-lime)}
+.compact-orbit-card-icon{width:24px;height:17px;display:grid;place-items:center;border-radius:4px;background:linear-gradient(135deg,#dfff00,#a8c400);color:#1a2016;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.compact-orbit-card-icon svg{width:12px;height:12px;stroke-width:2.4}
+
+/* 三条业务对比表 */
+.compact-decide-section{padding:0 0 96px;background:#f7f8f4}
+.compact-compare-scroll{margin-top:24px;overflow-x:auto;border-radius:18px;-webkit-overflow-scrolling:touch}
+.compact-compare{min-width:780px;overflow:hidden;border:1px solid #dfe5dc;border-radius:18px;background:#fff;box-shadow:0 16px 44px rgba(22,27,22,.05)}
+.compact-compare-row{display:grid;grid-template-columns:158px repeat(3,minmax(0,1fr));border-top:1px solid #ecefe8}
+.compact-compare-row:first-child{border-top:0}
+.compact-compare-row>span{display:flex;align-items:center;padding:15px 18px;color:#4d554e;font-size:13px;line-height:1.6}
+.compact-compare-row>span+span{border-left:1px solid #f0f2ec}
+.compact-compare-row.is-head>span{align-items:flex-start;flex-direction:column;gap:5px;background:#fafbf6;color:#20261f;font-size:14px;font-weight:720}
+.compact-compare-row.is-head em{color:#8b9a3d;font-size:9px;font-style:normal;font-weight:820;letter-spacing:.16em}
+.compact-compare-row .compact-compare-label{background:#f7f9f1;color:#7f857c;font-size:12.5px;font-weight:650}
+.compact-compare-row>span.is-featured{background:#f7fbe4;color:#2b3423}
+.compact-compare-row.is-head>span.is-featured{background:#eff7cf;color:#20261f}
+.compact-compare-hint{display:none;margin:12px 0 0;color:#98a08f;font-size:11.5px}
+.compact-compare-foot{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;flex-wrap:wrap}
+.compact-compare-foot p{margin:0;color:#7d847c;font-size:13px;line-height:1.6}
+.compact-compare-actions{display:flex;gap:9px;flex-wrap:wrap}
+.compact-compare-actions button{display:inline-flex;align-items:center;gap:6px;height:38px;border:1px solid #d6dccb;border-radius:9px;background:#fff;color:#2c332b;padding:0 14px;font-size:13px;font-weight:680;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.compact-compare-actions button:hover{border-color:#a9b94a;background:#fbfdf1}
+.compact-compare-actions svg{width:14px;height:14px}
+
+@media(max-width:1180px){.compact-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){
+  .compact-decide-section{padding-bottom:72px}
+  .compact-compare-hint{display:block}
+  .compact-compare-foot{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:720px){
+  .compact-service-grid{grid-template-columns:1fr}
+  .compact-service-card{padding:23px}
+  .compact-service-card h3{font-size:22px}
+  .compact-orbit-node-card{right:7%;top:2%}
+}
+
+/* ==================================================================
+   未登录虚拟卡页：卡段可浏览，开卡走站内一键登录
+   ================================================================== */
+.public-card-page{display:grid;gap:16px}
+.public-card-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.32fr) minmax(320px,.68fr);gap:30px;overflow:hidden;border-radius:18px;background:radial-gradient(circle at 88% 6%,rgba(223,255,0,.16),transparent 34%),linear-gradient(120deg,#171c19 0%,#101512 58%,#0b110e 100%);padding:34px 38px;color:#f5f8f2;box-shadow:0 20px 50px rgba(17,22,18,.16)}
+.public-card-hero:after{content:"";position:absolute;right:-90px;top:-120px;width:360px;height:360px;border:1px solid rgba(223,255,0,.14);border-radius:50%;pointer-events:none}
+.public-card-hero-main{position:relative;z-index:1;min-width:0}
+.public-card-eyebrow{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(190,214,160,.24);border-radius:999px;background:rgba(255,255,255,.05);color:#cfe07a;padding:6px 11px;font-size:10px;font-weight:800;letter-spacing:.12em}
+.public-card-eyebrow svg{width:13px;height:13px}
+.public-card-hero h1{margin:15px 0 0;color:#f7fbf2;font-size:37px;line-height:1.12;font-weight:760;letter-spacing:-.035em}
+.public-card-hero-main>p{max-width:600px;margin:11px 0 0;color:#a9b3aa;font-size:13.5px;line-height:1.72}
+.public-card-points{display:grid;gap:7px;margin:18px 0 0;padding:0;list-style:none}
+.public-card-points li{display:flex;align-items:flex-start;gap:8px;color:#c4cec2;font-size:12.5px;line-height:1.6}
+.public-card-points svg{width:15px;height:15px;flex:none;margin-top:2px;border-radius:50%;background:rgba(223,255,0,.14);color:#dfff00;padding:3px;stroke-width:3}
+.public-card-actions{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap}
+.public-card-primary{height:42px;gap:7px;border-radius:10px;background:#dfff00;color:#171c14;padding-inline:18px;font-size:14px;font-weight:760}
+.public-card-primary:hover{background:#e9ff45}
+.public-card-primary svg{width:16px;height:16px}
+.public-card-register{border:0;background:none;color:#a4aea2;padding:0;font-size:12.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.public-card-register:hover{color:#e6efe1}
+.public-card-aside{position:relative;z-index:1;display:flex;flex-direction:column;gap:13px;border:1px solid rgba(198,220,168,.26);border-radius:14px;background:rgba(255,255,255,.055);padding:16px}
+.public-card-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;background:rgba(255,255,255,.09)}
+.public-card-stat-grid>div{display:grid;gap:4px;background:#151c17;padding:13px 14px 12px}
+.public-card-stat-grid span{color:#8d998e;font-size:11px}
+.public-card-stat-grid strong{color:#f3f8ee;font-size:21px;font-weight:680;letter-spacing:-.025em;line-height:1.15}
+.public-card-stat-grid strong small{margin-left:4px;color:#98a599;font-size:10.5px;font-weight:600;letter-spacing:0}
+.public-card-aside-note{display:flex;gap:8px;margin:0;color:#a6b0a4;font-size:12px;line-height:1.6}
+.public-card-aside-note svg{width:15px;height:15px;flex:none;margin-top:1px;color:#dfff00}
+.public-card-aside-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.public-card-aside-tags span{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(190,214,160,.18);border-radius:999px;padding:5px 9px;color:#c0cabd;font-size:11px}
+.public-card-aside-tags svg{width:12px;height:12px;color:#dfff00}
+.public-card-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.public-card-notes article{border:1px solid #e2e4dc;border-radius:14px;background:#fff;padding:17px 19px}
+.public-card-notes span{color:#a3ae3f;font-size:10.5px;font-weight:820;letter-spacing:.12em}
+.public-card-notes h3{margin:7px 0 6px;color:#22281f;font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.public-card-notes p{margin:0;color:#7b8279;font-size:12.5px;line-height:1.65}
+
+@media(max-width:980px){
+  .public-card-hero{grid-template-columns:1fr;padding:26px}
+  .public-card-aside{gap:11px}
+  .public-card-notes{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .public-card-hero{padding:20px 17px}
+  .public-card-hero h1{font-size:28px}
+  .public-card-aside{padding:13px}
+  .public-card-stat-grid>div{padding:11px 12px}
+  .public-card-stat-grid strong{font-size:19px}
+}
+
+

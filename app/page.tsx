@@ -31,6 +31,7 @@ import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
+import { PublicCardPage } from "@/components/public-card-page";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -506,6 +507,8 @@ export default function Home() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
+  // 虚拟卡页进入时落在哪个页签：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
+  const [cardInitialTab, setCardInitialTab] = useState<"cards" | "market" | "transactions">("cards");
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
   const [purchaseProduct, setPurchaseProduct] = useState<Product | null>(null);
   const [purchaseStage, setPurchaseStage] = useState<PurchaseStage>("confirm");
@@ -721,6 +724,7 @@ export default function Home() {
     setPurchaseIntent(null);
     // 默认切页签即作废挂起订单；只有「去充值」这一条路需要把它带到充值页。
     if (!options?.keepPendingOrder) setPendingOrder(null);
+    setCardInitialTab("cards");
     setSelectedMenu(destination);
   };
   const openWalletRecharge = () => {
@@ -753,6 +757,11 @@ export default function Home() {
     setSelectedMenu("home");
   };
   const handleDemoRegister = () => toast.info("注册为 Demo 交互");
+  // 未登录在虚拟卡页点「开卡」：沿用站内一键登录，登录后直接落到卡段市场继续。
+  const handlePublicOpenCard = () => {
+    signInDemo();
+    setCardInitialTab("market");
+  };
   const openBatchRecharge = () => {
     // 批量代充同样「下单即登录」，入口先过纯登录动作，不动向导内部的 5 步结构。
     if (!isLoggedIn) signInDemo();
@@ -916,12 +925,13 @@ export default function Home() {
     { id: "topup", key: "navTopup" },
     { id: "orders", key: "navOrders" },
   ];
-  const publicMenuItems: Array<{ id: "home" | "account" | "recharge"; label: string }> = [
-    { id: "home", label: "首页" },
-    { id: "account", label: "成品号" },
-    { id: "recharge", label: "代充" },
+  // 未登录只留三个入口：首页 / 虚拟卡 / 代充。成品号仍从首页服务卡与页脚进入。
+  const publicMenuItems: Array<{ id: "home" | "card" | "recharge"; label: string }> = [
+    { id: "home", label: content.navHome },
+    { id: "card", label: content.navCard },
+    { id: "recharge", label: content.navRecharge },
   ];
-  const handlePublicNavigation = (destination: "home" | "account" | "recharge") => {
+  const handlePublicNavigation = (destination: "home" | "card" | "recharge") => {
     navigateTo(destination);
     window.history.replaceState(null, "", window.location.pathname);
     if (destination === "home") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -961,7 +971,7 @@ export default function Home() {
                 onClick={() => handlePublicNavigation(item.id)}
                 key={item.id}
               >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
+                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "card" ? <CreditCard aria-hidden="true" /> : <Zap aria-hidden="true" />}
                 <span>{item.label}</span>
               </button>
             ))}
@@ -1088,20 +1098,30 @@ export default function Home() {
             ) : selectedMenu === "help" ? (
               <HelpCenter onNavigate={(destination) => { navigateTo(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "card" ? (
-              <CardModule
-                cards={virtualCards}
-                setCards={setVirtualCards}
-                flows={cardFlows}
-                setFlows={setCardFlows}
-                bins={defaultCardBins}
-                platformBalance={effectiveBalance}
-                setPlatformBalance={setWalletBalance}
-                content={content}
-                editMode={editMode}
-                updateContent={updateContent}
-                onGoTopup={() => navigateTo("topup")}
-                onPlatformFlow={pushPlatformFlow}
-              />
+              isLoggedIn ? (
+                <CardModule
+                  initialTab={cardInitialTab}
+                  cards={virtualCards}
+                  setCards={setVirtualCards}
+                  flows={cardFlows}
+                  setFlows={setCardFlows}
+                  bins={defaultCardBins}
+                  platformBalance={effectiveBalance}
+                  setPlatformBalance={setWalletBalance}
+                  content={content}
+                  editMode={editMode}
+                  updateContent={updateContent}
+                  onGoTopup={() => navigateTo("topup")}
+                  onPlatformFlow={pushPlatformFlow}
+                />
+              ) : (
+                <PublicCardPage
+                  bins={defaultCardBins}
+                  content={content}
+                  onRequireLogin={handlePublicOpenCard}
+                  onRegister={handleDemoRegister}
+                />
+              )
             ) : isProductsPage ? (
               <section className="commerce-panel">
                 {isLoggedIn ? (
