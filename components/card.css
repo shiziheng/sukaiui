@@ -195,55 +195,67 @@
 .vbin-select{height:40px;padding:0 34px 0 13px;border:1px solid var(--ds-border-default);border-radius:10px;background:var(--color-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6f6b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--color-text-primary);font-size:14px;cursor:pointer;appearance:none;-webkit-appearance:none}
 .vbin-select-wrap{display:inline-flex;flex-direction:column;gap:5px}
 .vbin-select-wrap>span{font-size:12px;color:var(--color-text-secondary)}
-.vbin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
-.vbin-card{position:relative;display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden;transition:box-shadow .18s ease,border-color .18s ease}
+.vbin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.vbin-card{position:relative;display:flex;flex-direction:column;gap:11px;padding:18px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle);overflow:hidden;transition:box-shadow .18s ease,border-color .18s ease}
 .vbin-card:hover{box-shadow:var(--ds-shadow-card);border-color:var(--ds-border-strong)}
-.vbin-card.is-recommended{border-color:var(--ds-border-selected)}
-.vbin-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.vbin-card-head h3{margin:0;font-size:16px;font-weight:650;color:var(--color-text-primary)}
-.vbin-card-badges{display:inline-flex;align-items:center;gap:7px;flex:none}
+.vbin-card.is-recommended{border-color:var(--ds-border-selected);box-shadow:0 0 0 1px rgba(200,212,61,.32),var(--ds-shadow-subtle)}
+.vbin-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.vbin-card-title{display:grid;gap:3px;min-width:0}
+.vbin-card-title h3{margin:0;font-size:16.5px;line-height:1.25;font-weight:700;letter-spacing:-.01em;color:var(--color-text-primary)}
+.vbin-card-title p{margin:0;font-size:11.5px;line-height:1.4;color:var(--color-text-tertiary);font-variant-numeric:tabular-nums}
+.vbin-card-badges{display:inline-flex;align-items:center;gap:6px;flex:none;padding-top:1px}
 .vbin-recommend{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--color-brand);color:#111214}
 .vbin-recommend svg{width:12px;height:12px}
-.vbin-tags{display:flex;flex-wrap:wrap;gap:7px}
-.vbin-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;background:var(--color-surface-soft);color:var(--color-text-secondary)}
-.vbin-tag.is-type{background:var(--color-dark);color:#fff}
-.vbin-tag.is-support{background:#edf5ef;color:#4e745d}
-.vbin-notices{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
-.vbin-notices li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.45;color:var(--color-text-secondary)}
-.vbin-notices svg{width:13px;height:13px;flex:none;margin-top:2px;color:#9a7320}
-/* 限制/规则：暖色警示块（对齐参考站，多条合并一块） */
-.vbin-notice-block{padding:9px 12px;border-radius:10px;background:#f9f3e2}
-.vbin-notice-block .vcard-notices li{color:#7a5a17}
-.vbin-notice-block .vcard-notices svg{color:#a9832c}
 
-/* 费用：价签式（开卡费大字，其他费用独立行） */
-.vbin-pricing{display:flex;flex-direction:column;gap:4px}
-.vbin-price-line{margin:0;display:flex;align-items:baseline;gap:8px}
-.vbin-price-label{font-size:13px;color:var(--color-text-secondary)}
-.vbin-price-value{font-size:22px;font-weight:650;color:var(--color-danger);font-variant-numeric:tabular-nums}
-.vbin-price-line small{font-size:12px;color:var(--color-text-tertiary)}
-.vbin-price-sub{margin:0;display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--color-text-secondary)}
-.vbin-price-sub strong{font-weight:650;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
-.vbin-fee-extra{margin:2px 0 0;font-size:12.5px;color:#a26415}
+/* 价格：用主文字色（红色只留给风险），右侧绿胶囊说明充值费 */
+.vbin-price-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:2px}
+.vbin-price-line{margin:0;display:flex;align-items:baseline;gap:6px}
+.vbin-price-value{font-size:27px;line-height:1;font-weight:700;letter-spacing:-.03em;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
+.vbin-price-unit{font-size:12px;color:var(--color-text-tertiary)}
+.vbin-price-note{padding-bottom:2px;color:#75906a;font-size:11px;font-weight:600;white-space:nowrap}
 
-/* 元数据行：地区·剩余 左，BIN 右，上细分隔线 */
-.vbin-meta-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid var(--color-border);font-size:12.5px;color:var(--color-text-tertiary)}
-.vbin-meta-sep{font-style:normal;margin:0 6px}
-.vbin-meta-row em{font-style:normal;color:var(--color-text-primary);font-weight:600}
-.vbin-meta-row em.is-low{color:var(--color-danger)}
-.vbin-meta-row code{font-size:12px;color:var(--color-text-tertiary)}
+/* 能力 / 限制 / 费率：都用一行文字说清，不再上色块 */
+.vbin-feature-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;padding:0;list-style:none}
+.vbin-feature-row li{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#5f645b}
+.vbin-feature-row li.is-support{color:#6d8a63}
+.vbin-feature-row svg{width:12px;height:12px;flex:none;color:#8fae6d}
+.vbin-limit-line{display:flex;align-items:flex-start;gap:6px;margin:0;font-size:11.5px;line-height:1.55;color:#8a6a33}
+.vbin-limit-line svg{width:12px;height:12px;flex:none;margin-top:2px;color:#b58a3a}
+.vbin-limit-line.is-clear{color:#7b8f72}
+.vbin-limit-line.is-clear svg{color:#8fae6d}
+.vbin-fee-note{display:flex;align-items:flex-start;gap:5px;margin:0;font-size:11.5px;line-height:1.5;color:#8f948a}
+.vbin-fee-note svg{width:12px;height:12px;flex:none;margin-top:2px}
+.vbin-sub-inline{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;margin:0;font-size:11.5px;color:#9aa095}
+.vbin-sub-inline>span{color:#b0b5ab}
+.vbin-sub-inline b{font-weight:600;color:#6f756c;font-variant-numeric:tabular-nums}
+.vbin-sub-inline time{font-size:11px;color:#bcc0b7}
 
-/* AI 订阅价格快照 */
-.vbin-sub{display:flex;flex-direction:column;gap:2px}
-.vbin-sub-head{margin:0 0 4px;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--color-text-primary)}
-.vbin-sub-dot{width:7px;height:7px;border-radius:50%;background:var(--color-success);flex:none}
-.vbin-sub-row{margin:0;display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;line-height:1.9;color:var(--color-text-secondary)}
-.vbin-sub-row em{font-style:normal;font-weight:600;color:var(--color-success);font-variant-numeric:tabular-nums;margin-left:4px}
-.vbin-sub-row time{font-size:11.5px;color:var(--color-text-tertiary)}
-.vbin-card-foot{margin-top:auto}
-.vbin-open-button{width:100%;border-radius:999px;background:var(--color-brand)!important;color:#111214!important;border:0!important}
-.vbin-open-button svg{width:15px;height:15px;margin-left:2px}
+/* 同参数卡段：先收成一行小 chip，要换卡段才点 */
+.vbin-bin-switch{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin-top:1px;padding-top:10px;border-top:1px dashed #e8eae2}
+.vbin-bin-switch>span{font-size:11px;color:#a8ada3}
+.vbin-bin-chips{display:inline-flex;flex-wrap:wrap;gap:5px}
+.vbin-bin-chips button{height:23px;padding:0 9px;border:1px solid #e3e5dd;border-radius:7px;background:#fbfcf8;color:#6f756c;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease}
+.vbin-bin-chips button:hover:not(:disabled){border-color:#c9cfab;background:#fff}
+.vbin-bin-chips button.is-active{border-color:#c8d43d;background:#f5f8dc;color:#565e0a}
+.vbin-bin-chips button:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+
+/* 底部：剩余在左、按钮在右；一屏只让主推卡用实心按钮 */
+.vbin-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:6px}
+.vbin-stock{font-size:11.5px;color:#a0a59b;white-space:nowrap}
+.vbin-stock strong{color:#5f645b;font-weight:650;font-variant-numeric:tabular-nums}
+.vbin-stock strong.is-low{color:#b4544a}
+.vbin-stock em{font-style:normal;color:#b6bab1}
+.vbin-open-button{width:auto;min-width:124px;height:36px;padding:0 16px;border-radius:999px;background:var(--color-brand)!important;color:#111214!important;border:1px solid transparent!important;font-size:13px;font-weight:650;box-shadow:none}
+.vbin-open-button svg{width:14px;height:14px;margin-left:3px}
 .vbin-open-button:disabled svg{display:none}
+.vbin-open-button.is-plain{background:#fff!important;color:#3f443b!important;border-color:#d9dcd2!important}
+.vbin-open-button.is-plain:hover{background:#f7f8f2!important;border-color:#c3c7ba!important}
+
+/* 限制提示块仍被「开卡确认弹窗」复用，样式保留 */
+.vbin-notice-block{padding:9px 12px;border-radius:10px;background:#f9f3e2}
+.vbin-notice-block .vcard-notices{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.vbin-notice-block .vcard-notices li{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.45;color:#7a5a17}
+.vbin-notice-block .vcard-notices svg{width:13px;height:13px;flex:none;margin-top:2px;color:#a9832c}
 
 /* ---------- 消费记录（全局流水） ---------- */
 .vtxn-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
@@ -421,3 +433,13 @@
 .card-export-fields>div{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:12px;background:#fff;padding:11px 14px}
 .card-export-fields dt{color:#2b302a;font-size:12.5px;font-weight:680}
 .card-export-fields dd{margin:0;color:#9aa095;font-size:11.5px;text-align:right}
+
+/* ---------- v0.16.0：卡段市场卡片改四层结构 ---------- */
+@media(max-width:560px){
+  .vbin-grid{grid-template-columns:1fr}
+  .vbin-card{padding:16px;gap:10px}
+  .vbin-price-value{font-size:25px}
+  .vbin-feature-row{gap:3px 12px}
+  .vbin-card-foot{flex-wrap:wrap;row-gap:10px}
+  .vbin-open-button{flex:1 1 100%;min-width:0}
+}
