@@ -68,14 +68,15 @@ export const cardHolderPool = [
 export const randomCardHolder = () => cardHolderPool[Math.floor(Math.random() * cardHolderPool.length)];
 
 /**
- * 开卡弹窗「完整费率标准」行——费项后台配置，前端按固定七项展示（顺序即展示顺序）。
- * 账单项（ARF/RTF/FTF/MTF/DIF）从卡内余额扣收；开卡费、卡片充值费从平台余额额外扣（费用外扣）。
+ * 开卡弹窗「完整费率标准」行——费项后台配置，前端按固定八项展示（顺序即展示顺序）。
+ * 账单项（AUF/ARF/RTF/FTF/MTF/DIF）从卡内余额扣收；开卡费、卡片充值费从平台余额额外扣（费用外扣）。
  * 小额管理费（MTF）与卡段自身的小额消费费规则联动。
  */
 export type CardFeeScheduleRow = { label: string; code?: string; value: string };
 
 export function cardFeeSchedule(bin: CardBin): CardFeeScheduleRow[] {
   return [
+    { label: "交易授权手续费", code: "AUF", value: "$0" },
     { label: "账单撤销费", code: "ARF", value: "1%" },
     { label: "账单退款手续费", code: "RTF", value: "1%" },
     { label: "跨境手续费", code: "FTF", value: "$0" },
