@@ -55,10 +55,10 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
     }, 600);
   };
 
-  const quickLinks: Array<{ id: string; icon: typeof Sparkles; label: DemoContent[keyof DemoContent] | string; editableKey?: keyof DemoContent; note: string; onClick: () => void }> = [
-    { id: "recharge", icon: Sparkles, label: content.startRechargeService, editableKey: "startRechargeService", note: "单账号 / 批量", onClick: () => onNavigate("recharge") },
+  const quickLinks: Array<{ id: string; icon: typeof Sparkles; label: string; editableKey?: keyof DemoContent; note: string; onClick: () => void }> = [
+    { id: "recharge", icon: Sparkles, label: "套餐代充", note: "单账号 / 批量", onClick: () => onNavigate("recharge") },
     { id: "wallet", icon: WalletCards, label: content.availableBalance, editableKey: "availableBalance", note: money2(availableBalance), onClick: () => onNavigate("wallet") },
-    { id: "orders", icon: ReceiptText, label: content.recentOrders, editableKey: "recentOrders", note: `${data.orders.length} 笔 · 待处理 ${pending}`, onClick: () => onNavigate("orders") },
+    { id: "orders", icon: ReceiptText, label: "交易记录", note: `${data.orders.length} 笔 · 待处理 ${pending}`, onClick: () => onNavigate("orders") },
     { id: "invite", icon: Gift, label: content.navInvite, editableKey: "navInvite", note: `已邀请 ${data.summary.invitedUsers} 人`, onClick: () => onNavigate("invite") },
     { id: "support", icon: Headphones, label: content.supportNav, editableKey: "supportNav", note: "3 分钟内响应", onClick: () => toast.info("在线客服为 Demo 入口") },
   ];
@@ -100,7 +100,7 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
             <em className="is-good"><ArrowUpRight aria-hidden="true" />{monthCap.delta}%</em>
             <span>{copy.kpi.monthSpend.note}</span>
           </div>
-          <p className="dash-kpi-hint">{copy.kpi.monthSpend.hint} · {monthCap.caption}</p>
+          <p className="dash-kpi-hint">{copy.kpi.monthSpend.hint}</p>
           <SparkLine values={sparkValues} />
         </article>
 

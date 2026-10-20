@@ -1345,7 +1345,7 @@ button{font:inherit}
 .dash-kpi-foot em svg{width:12px;height:12px}
 .dash-kpi-foot em.is-good{background:#eef4ef;color:#4f7a60}
 .dash-kpi-foot em.is-bad{background:#f8eeec;color:#a9635b}
-.dash-kpi-hint{margin:auto 0 0;padding-top:10px;color:#a2a69d;font-size:11px;line-height:1.45}
+.dash-kpi-hint{margin:9px 0 0;color:#a2a69d;font-size:11px;line-height:1.45}
 .dash-kpi.is-hero{border-color:#22252a;background:radial-gradient(125% 150% at 88% -25%,#353a2c 0%,#1b1d1f 52%,#111214 100%);box-shadow:0 14px 30px rgba(17,18,20,.2)}
 .dash-kpi.is-hero .dash-kpi-label{color:#b9beb4}
 .dash-kpi.is-hero .dash-kpi-value{color:#fff}

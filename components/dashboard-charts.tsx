@@ -38,7 +38,7 @@ function niceScale(peak: number, targetTicks = 4) {
   const raw = Math.max(peak, 1) / targetTicks;
   const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
   const normalized = raw / magnitude;
-  const factor = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  const factor = normalized <= 1 ? 1 : normalized <= 2.5 ? 2 : normalized <= 6 ? 5 : 10;
   const step = factor * magnitude;
   const max = Math.ceil(peak / step) * step;
   return { step, max };
