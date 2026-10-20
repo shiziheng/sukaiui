@@ -127,10 +127,11 @@ export function CardList({
     window.setTimeout(() => {
       downloadCsv(
         `cards-${new Date().toISOString().slice(0, 10)}.csv`,
-        ["卡号", "有效期", "CVV"],
+        ["卡号", "有效期（月/年）", "CVV"],
         exportable.map((card) => [
           formatCardNumber(card.cardNo),
-          `${String(card.expMonth).padStart(2, "0")}/${String(card.expYear).padStart(2, "0")}`,
+          // 月/年要写全四位年份：两位年份的 10/28 会被表格软件当成「10 月 28 日」
+          `${String(card.expMonth).padStart(2, "0")}/${card.expYear < 100 ? 2000 + card.expYear : card.expYear}`,
           card.cvv,
         ]),
       );
@@ -421,7 +422,7 @@ export function CardList({
           <div className="purchase-dialog-body">
             <dl className="card-export-fields">
               <div><dt>卡号</dt><dd>16 位，按 4 位分组</dd></div>
-              <div><dt>有效期</dt><dd>MM/YY</dd></div>
+              <div><dt>有效期</dt><dd>月/年，如 10/2028</dd></div>
               <div><dt>CVV</dt><dd>3–4 位安全码</dd></div>
             </dl>
             <div className="purchase-balance-warning">
