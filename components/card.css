@@ -395,3 +395,13 @@
 @media (max-width:520px){
   .card-open-amounts{grid-template-columns:1fr}
 }
+/* 开卡弹窗：桌面双栏（左填参数 / 右费用信息），避免费率块滚出视口 */
+.purchase-dialog-account.card-open-dialog{width:min(920px,calc(100vw - 32px))!important;max-width:920px!important}
+.card-open-cols{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:16px 22px;align-items:start}
+.card-open-col{display:grid;gap:13px;min-width:0;align-content:start}
+.card-open-col .card-open-amounts{grid-template-columns:1fr}
+@media (max-width:860px){
+  .card-open-cols{grid-template-columns:1fr}
+  .card-open-col .card-open-amounts{grid-template-columns:1fr 1fr}
+  .purchase-dialog-account.card-open-dialog{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}
+}

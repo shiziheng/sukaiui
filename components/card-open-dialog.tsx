@@ -76,7 +76,8 @@ export function CardOpenDialog({
   };
 
   const confirmView = bin ? (
-    <>
+    <div className="card-open-cols">
+      <div className="card-open-col is-form">
       <section className="card-open-bin">
         <span className="vcard-bin">{binTitle(bin)}</span>
         <SchemeBadge scheme={bin.scheme} />
@@ -133,12 +134,9 @@ export function CardOpenDialog({
         </div>
       </div>
 
-      {bin.restrictions.length ? (
-        <div className="vbin-notice-block card-open-restrictions">
-          <CardNotice items={bin.restrictions} />
-        </div>
-      ) : null}
+      </div>
 
+      <div className="card-open-col is-info">
       <dl className="payment-breakdown">
         <div><dt>{editable("cardOpenFee")}</dt><dd>{money(bin.openFee)} × {quantity}</dd></div>
         <div><dt>充值金额</dt><dd>{money(topupAmount)} × {quantity}</dd></div>
@@ -158,6 +156,12 @@ export function CardOpenDialog({
         </dl>
       </section>
 
+      {bin.restrictions.length ? (
+        <div className="vbin-notice-block card-open-restrictions">
+          <CardNotice items={bin.restrictions} />
+        </div>
+      ) : null}
+
       {sufficient ? (
         <div className="payment-balance-method"><span><Check />平台余额</span><small>开卡后剩余 {money(availableBalance - totalFee)}</small></div>
       ) : (
@@ -166,7 +170,8 @@ export function CardOpenDialog({
           <p>{editable("cardInsufficientHint")}</p>
         </div>
       )}
-    </>
+      </div>
+    </div>
   ) : null;
 
   const successView = bin ? (
