@@ -56,7 +56,7 @@ export function CardMarket({
           <span className="section-title-icon"><CreditCard aria-hidden="true" /></span>
           <div>
             <h2>{editable("cardMarketTitle")}</h2>
-            <p>{editable("cardMarketSubtitle")}</p>
+            <p>{editable("cardMarketSubtitle")}<span className="vbin-fee-inline">{editable("cardFeeExternal")}</span></p>
           </div>
         </div>
         <div className="vbin-head-stats">
@@ -64,8 +64,6 @@ export function CardMarket({
           <span className="vbin-count is-stock">{editable("cardOverallStock")} · <strong>{overallRest}</strong> 张</span>
         </div>
       </header>
-
-      <p className="vbin-fee-note">{editable("cardFeeExternal")}</p>
 
       <div className="vbin-filters">
         <label className="vbin-search">
