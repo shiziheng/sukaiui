@@ -385,7 +385,13 @@
 .card-open-topup-hint{margin:0;font-size:11.5px;color:var(--color-danger)}
 /* 完整费率标准块（demo 阶段常开展示） */
 .card-open-fees-fold{border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface-soft);overflow:hidden}
-.card-open-fees-head{margin:0;padding:11px 14px;font-size:13px;color:var(--color-text-primary);border-bottom:1px solid var(--color-border)}
+.card-open-fees-head{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:13px;color:var(--color-text-primary);cursor:pointer;list-style:none;user-select:none}
+.card-open-fees-head::-webkit-details-marker{display:none}
+.card-open-fees-head>span{flex:1;min-width:0}
+.card-open-fees-head small{flex:none;font-size:11.5px;font-weight:400;color:var(--color-text-tertiary)}
+.card-open-fees-head::after{content:"";flex:none;width:7px;height:7px;border-right:1.5px solid var(--color-text-tertiary);border-bottom:1.5px solid var(--color-text-tertiary);transform:rotate(45deg);transition:transform .15s ease;margin-left:2px;margin-top:-3px}
+.card-open-fees-fold[open] .card-open-fees-head{border-bottom:1px solid var(--color-border)}
+.card-open-fees-fold[open] .card-open-fees-head::after{transform:rotate(225deg);margin-top:2px}
 .card-open-fees-list{margin:0;padding:6px 14px;display:flex;flex-direction:column}
 .card-open-fees-list div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0}
 .card-open-fees-list div+div{border-top:1px dashed var(--color-border)}

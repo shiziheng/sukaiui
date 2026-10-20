@@ -144,8 +144,11 @@ export function CardOpenDialog({
         <div><dt>平台余额</dt><dd>{money(availableBalance)}</dd></div>
       </dl>
 
-      <section className="card-open-fees-fold">
-        <p className="card-open-fees-head">完整费率标准</p>
+      <details className="card-open-fees-fold">
+        <summary className="card-open-fees-head">
+          <span>完整费率标准</span>
+          <small>共 {cardFeeSchedule(bin).length} 项</small>
+        </summary>
         <dl className="card-open-fees-list">
           {cardFeeSchedule(bin).map((row) => (
             <div key={row.label}>
@@ -154,7 +157,7 @@ export function CardOpenDialog({
             </div>
           ))}
         </dl>
-      </section>
+      </details>
 
       {bin.restrictions.length ? (
         <div className="vbin-notice-block card-open-restrictions">
