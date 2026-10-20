@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
-  RotateCcw, Search, Snowflake, Sparkles, Table, Trash2,
+  RotateCcw, Search, Snowflake, Sparkles, Table, Trash2, TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ import {
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, money,
   regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardFlowType, type CardScheme,
@@ -62,6 +63,8 @@ export function CardList({
   const [maxBalance, setMaxBalance] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("default");
   const [view, setView] = useState<ViewMode>("cards");
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
@@ -104,16 +107,37 @@ export function CardList({
   const closedAtOf = (card: VirtualCard) =>
     closedRecords.find((record) => record.card.id === card.id)?.closedAt ?? "—";
 
-  const statusTextOf = (card: VirtualCard) =>
-    showClosed ? "已注销" : cardStatusMeta[card.status].label;
+  /**
+   * 导出口径：当前筛选结果里能正常使用的卡。
+   * 已注销卡（注销后敏感信息应失效）与开卡处理中的卡都不参与导出。
+   */
+  const exportable = useMemo(
+    () => (showClosed ? [] : filtered.filter((card) => card.status !== "processing")),
+    [filtered, showClosed],
+  );
 
-  const handleExport = () => {
-    downloadCsv(
-      `cards-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["卡号", "卡组织", "发行地", "状态", "余额(USD)", "开卡时间"],
-      filtered.map((card) => [card.cardNo, schemeLabel(card.scheme), regionLabel(card.region), statusTextOf(card), card.balance.toFixed(2), card.createdAt]),
-    );
-    toast.success(content.cardExportDone);
+  /**
+   * 导出当前筛选结果：只给支付要用的三个字段（卡号 / 有效期 / CVV）。
+   * 卡号按 4 位分组输出，Excel 打开不会把 16 位数字压成科学计数法丢位。
+   */
+  const runExport = () => {
+    if (exporting || !exportable.length) return;
+    setExporting(true);
+    // 模拟敏感字段解密 + 打包的耗时，避免一键就落盘
+    window.setTimeout(() => {
+      downloadCsv(
+        `cards-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["卡号", "有效期", "CVV"],
+        exportable.map((card) => [
+          formatCardNumber(card.cardNo),
+          `${String(card.expMonth).padStart(2, "0")}/${String(card.expYear).padStart(2, "0")}`,
+          card.cvv,
+        ]),
+      );
+      setExporting(false);
+      setExportOpen(false);
+      toast.success(content.cardExportDone);
+    }, 600);
   };
 
   const noFilterApplied =
@@ -130,7 +154,7 @@ export function CardList({
           </div>
         </div>
         <div className="vcard-head-tools">
-          <button className="uc-secondary-action" type="button" onClick={handleExport} disabled={!filtered.length}>
+          <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
             <Download aria-hidden="true" />{editable("cardExport")}
           </button>
           <div className="vcard-view-toggle" role="group" aria-label="展示方式">
@@ -378,6 +402,43 @@ export function CardList({
           })}
         </div>
       )}
+
+      <Dialog
+        open={exportOpen}
+        onOpenChange={(open) => {
+          if (exporting) return;
+          setExportOpen(open);
+        }}
+      >
+        <DialogContent className="purchase-dialog-account card-export-dialog">
+          <DialogHeader>
+            <DialogTitle>{content.cardExport}</DialogTitle>
+            <DialogDescription>
+              {`将导出当前筛选结果中的 ${exportable.length} 张卡片，文件包含完整卡号、有效期与 CVV。`}
+              {filtered.length > exportable.length ? " 开卡处理中的卡片暂不参与导出。" : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="purchase-dialog-body">
+            <dl className="card-export-fields">
+              <div><dt>卡号</dt><dd>16 位，按 4 位分组</dd></div>
+              <div><dt>有效期</dt><dd>MM/YY</dd></div>
+              <div><dt>CVV</dt><dd>3–4 位安全码</dd></div>
+            </dl>
+            <div className="purchase-balance-warning">
+              <div><TriangleAlert aria-hidden="true" /></div>
+              <p>这三项可以直接完成线上扣款。文件为明文，请只存在自己的设备上，不要转发或上传到公共网盘。</p>
+            </div>
+          </div>
+          <div className="purchase-dialog-actions">
+            <button className="page-back-button" type="button" onClick={() => setExportOpen(false)} disabled={exporting}>
+              {content.cancel}
+            </button>
+            <Button className="payment-primary-action" onClick={runExport} disabled={exporting || !exportable.length}>
+              {exporting ? "正在生成文件…" : "确认导出"}<span>{exportable.length} 张</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
