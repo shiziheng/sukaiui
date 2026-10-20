@@ -157,6 +157,7 @@ export function CardOpenDialog({
             </div>
           ))}
         </dl>
+        <p className="card-open-fees-note">开卡费、卡片充值费从平台余额额外扣除；账单撤销费、账单退款手续费、跨境手续费、小额管理费、拒付费从卡内余额扣收。</p>
       </details>
 
       {bin.restrictions.length ? (
