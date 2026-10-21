@@ -9,14 +9,14 @@ import { toast } from "sonner";
 
 import type { ClosedCardRecord } from "@/components/card-module";
 import {
-  CardVisual, copyText,
+  CardFace, CardVisual, copyText,
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
-  binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, money,
+  binTitle, binDisplayName, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, maskCardNumber, money,
   regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardFlowType, type CardScheme,
   type CardStatus, type VirtualCard,
 } from "@/data/card-business";
@@ -497,6 +497,7 @@ export function CardDetail({
   const [cvvState, setCvvState] = useState<"hidden" | "querying" | "shown">("hidden");
   const [flowType, setFlowType] = useState<"all" | CardFlowType>("all");
   const [copiedAll, setCopiedAll] = useState(false);
+  const flowRef = useRef<HTMLElement | null>(null);
   const editable = (key: keyof DemoContent) => (
     <EditableText active={editMode} value={content[key]} onChange={(value) => updateContent(key, value)} />
   );
@@ -586,58 +587,63 @@ export function CardDetail({
   };
 
   return (
-    <section className="vcard-detail">
-      <header className="vcard-detail-head">
-        <div className="vcard-detail-title">
+    <section className="cd">
+      <header className="cd-head">
+        <div className="cd-head-left">
           <button className="page-back-button" type="button" onClick={onBack}>
             <ArrowLeft aria-hidden="true" />{editable("cardBackCards")}
           </button>
-          <h2>{binTitle(card)}</h2>
-          <span className={`vcard-status is-${statusMeta.tone}`}>
-            {frozen ? <Snowflake aria-hidden="true" /> : null}
-            {card.status === "processing" ? <i aria-hidden="true" /> : null}
-            {statusMeta.label}
-          </span>
+          <div className="cd-title">
+            <h2>{bin ? binDisplayName(bin) : binTitle(card)}</h2>
+            <span className={`cd-status is-${statusMeta.tone}`}>
+              {frozen ? <Snowflake aria-hidden="true" /> : null}
+              {card.status === "processing" ? <i aria-hidden="true" /> : null}
+              {statusMeta.label}
+            </span>
+          </div>
         </div>
-        <div className="vcard-detail-actions">
-          <Button className="vcard-action-primary" onClick={() => onFund(card)} disabled={frozen}>
+        <div className="cd-head-actions">
+          <button className="cd-primary" type="button" onClick={() => onFund(card)} disabled={frozen}>
             <PlusCircle aria-hidden="true" />充值
-          </Button>
-          <button
-            className="uc-secondary-action"
-            type="button"
-            onClick={() => onRefund(card)}
-            disabled={frozen || card.balance <= 0}
-            title={card.balance <= 0 ? content.cardRefundEmpty : undefined}
-          >
-            <RotateCcw aria-hidden="true" />{content.cardRefund}
           </button>
-          <button
-            className="uc-secondary-action"
-            type="button"
-            onClick={() => onRequestFreeze(card)}
-            disabled={card.status === "processing" || card.status === "system_frozen"}
-            title={card.status === "system_frozen" ? "系统冻结需联系客服处理" : card.status === "processing" ? "开卡处理中，暂不可冻结" : undefined}
-          >
-            <Snowflake aria-hidden="true" />{card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
-          </button>
-          <button
-            className="uc-secondary-action is-danger"
-            type="button"
-            onClick={() => onRequestDelete(card)}
-            disabled={frozen}
-            title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
-          >
-            <Trash2 aria-hidden="true" />{editable("cardDeleteCard")}
-          </button>
-          <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
-            <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="cd-more" type="button" aria-label="更多操作">
+                <MoreHorizontal aria-hidden="true" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={6} className="vlc-more-menu">
+              <DropdownMenuItem
+                disabled={frozen || card.balance <= 0}
+                onSelect={() => onRefund(card)}
+              >
+                <RotateCcw aria-hidden="true" />{content.cardRefund}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={card.status === "processing" || card.status === "system_frozen"}
+                onSelect={() => onRequestFreeze(card)}
+              >
+                <Snowflake aria-hidden="true" />
+                {card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onNote(card)}>
+                <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="is-danger"
+                disabled={frozen}
+                onSelect={() => onRequestDelete(card)}
+              >
+                <Trash2 aria-hidden="true" />{content.cardDeleteCard}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
       {frozen ? (
-        <div className={`vcard-detail-alert ${card.status === "system_frozen" ? "is-system" : ""}`} role="status">
+        <div className={`cd-alert ${card.status === "system_frozen" ? "is-system" : ""}`} role="status">
           <Snowflake aria-hidden="true" />
           <p>
             {card.status === "system_frozen"
@@ -647,26 +653,46 @@ export function CardDetail({
         </div>
       ) : null}
 
-      <div className="vcard-detail-top">
-        <section className="vcard-info-panel">
-          <header className="vcard-info-head">
-            <h3>{editable("cardInfoTitle")}</h3>
-            <div className="vcard-info-bulk">
-              <button className="uc-secondary-action" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
-                {cvvState === "querying" ? <Search aria-hidden="true" /> : revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                {cvvState === "querying" ? "获取中…" : revealed ? "全部隐藏" : "全部显示"}
-              </button>
-              <button className="uc-secondary-action" type="button" onClick={copyAllCardInfo}>
-                {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
-              </button>
+      <div className="cd-grid">
+        <section className="cd-left">
+          <div className="cd-balance">
+            <div>
+              <span>{editable("cardBalanceLabel")}</span>
+              <strong>{money(finance.balance)}</strong>
             </div>
+            <button className="cd-link" type="button" onClick={handleRevealAll} disabled={cvvState === "querying"}>
+              {cvvState === "querying" ? "获取中…" : revealed ? "全部隐藏" : "全部显示"}
+            </button>
+          </div>
+          <CardFace card={card} revealed={revealed} />
+          <div className="cd-tools">
+            <button className="cd-btn" type="button" onClick={copyAllCardInfo}>
+              {copiedAll ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}一键复制
+            </button>
+            <button
+              className="cd-btn is-ghost"
+              type="button"
+              onClick={() => {
+                setFlowType("recharge");
+                flowRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              <ReceiptText aria-hidden="true" />充值记录
+            </button>
+          </div>
+        </section>
+
+        <section className="cd-panel cd-info-panel">
+          <header className="cd-panel-head">
+            <h3>{editable("cardInfoTitle")}</h3>
+            <span className="cd-stamp">卡 ID · {card.id}</span>
           </header>
-          <dl className="vcard-field-grid">
-            <div className="vcard-field is-wide">
+          <dl className="cd-fields">
+            <div className="cd-field is-wide">
               <dt>{content.cardNoLabel}</dt>
               <dd>
-                <span className="vcard-field-value is-mono">{revealed ? formatCardNumber(card.cardNo) : card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}</span>
-                <span className="vcard-info-tools">
+                <span className="cd-value is-mono">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</span>
+                <span className="cd-mini-group">
                   <button type="button" onClick={() => setRevealed((current) => !current)} aria-label={revealed ? "隐藏卡号" : "显示卡号"}>
                     {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
                   </button>
@@ -674,20 +700,20 @@ export function CardDetail({
                 </span>
               </dd>
             </div>
-            <div className="vcard-field">
+            <div className="cd-field">
               <dt>{editable("cardExpLabel")}</dt>
               <dd>
-                <span className="vcard-field-value is-mono">{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
-                <span className="vcard-info-tools">
+                <span className="cd-value is-mono">{String(card.expMonth).padStart(2, "0")} / {card.expYear}</span>
+                <span className="cd-mini-group">
                   <button type="button" onClick={() => copy(`${String(card.expMonth).padStart(2, "0")}/${card.expYear}`)} aria-label="复制有效期"><Copy aria-hidden="true" /></button>
                 </span>
               </dd>
             </div>
-            <div className="vcard-field">
+            <div className="cd-field">
               <dt>{editable("cardCvvLabel")}</dt>
               <dd>
-                <span className="vcard-field-value is-mono">{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
-                <span className="vcard-info-tools">
+                <span className="cd-value is-mono">{cvvState === "shown" ? card.cvv : cvvState === "querying" ? content.cardCvvQuerying : "•••"}</span>
+                <span className="cd-mini-group">
                   <button
                     type="button"
                     title="CVV 默认脱敏，点击后从上游实时获取"
@@ -703,113 +729,104 @@ export function CardDetail({
                 </span>
               </dd>
             </div>
-            <div className="vcard-field">
+            <div className="cd-field">
               <dt>{editable("cardHolderLabel")}</dt>
               <dd>
-                <span className="vcard-field-value">{card.holder}</span>
-                <span className="vcard-info-tools">
+                <span className="cd-value">{card.holder}</span>
+                <span className="cd-mini-group">
                   <button type="button" onClick={() => copy(card.holder)} aria-label="复制持卡人"><Copy aria-hidden="true" /></button>
                 </span>
               </dd>
             </div>
-            <div className="vcard-field is-wide">
+            <div className="cd-field">
+              <dt>卡组织 / 发行地</dt>
+              <dd><span className="cd-value">{schemeLabel(card.scheme)} · {regionLabel(card.region)}</span></dd>
+            </div>
+            <div className="cd-field is-wide">
               <dt>{editable("cardBillingLabel")}</dt>
               <dd>
-                <span className="vcard-field-value">{addressOneLine}</span>
-                <span className="vcard-info-tools">
+                <span className="cd-value">{addressOneLine}</span>
+                <span className="cd-mini-group">
                   <button type="button" onClick={() => copy(addressOneLine)} aria-label="复制账单地址"><Copy aria-hidden="true" /></button>
                 </span>
               </dd>
             </div>
           </dl>
-          <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
+          <div className="cd-divider" />
+          <p className="cd-notice"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
         </section>
-
-        <aside className="vcard-detail-side">
-          <section className="vcard-side-panel is-meta">
-            <div className="vcard-days-meter">
-              <div className="vcard-days-copy">
-                <span>距有效期还有</span>
-                <strong>{daysLeft} <small>天</small></strong>
-              </div>
-              <div className="vcard-days-track" role="img" aria-label={`剩余有效期 ${daysLeft} 天`}>
-                <i style={{ width: `${Math.min(100, Math.round((daysLeft / 730) * 100))}%` }} />
-              </div>
-              <small>{String(card.expMonth).padStart(2, "0")}/{card.expYear} 到期</small>
-            </div>
-            <dl className="vcard-meta-grid">
-              <div>
-                <dt>当前状态</dt>
-                <dd>
-                  <span className={`vcard-meta-status is-${statusMeta.tone}`}>
-                    {frozen ? <Snowflake aria-hidden="true" /> : null}
-                    {statusMeta.label}
-                  </span>
-                </dd>
-              </div>
-              <div><dt>卡ID</dt><dd><code>{card.id}</code></dd></div>
-              <div><dt>建卡时间</dt><dd>{card.createdAt}</dd></div>
-              <div><dt>卡组织 / 发行地</dt><dd>{schemeLabel(card.scheme)} · {regionLabel(card.region)}</dd></div>
-              <div>
-                <dt>备注</dt>
-                <dd className="is-note">
-                  <span>{card.remark || "—"}</span>
-                  <button type="button" className="vcard-note-edit" onClick={() => onNote(card)} aria-label="编辑备注"><NotebookPen aria-hidden="true" /></button>
-                </dd>
-              </div>
-              <div><dt>系统备注</dt><dd>{card.systemRemark || "—"}</dd></div>
-            </dl>
-            <div className="vcard-sub-block">
-              <h3><Sparkles aria-hidden="true" />订阅更新</h3>
-              {card.subscriptionUpdates?.length ? (
-                <ol className="vcard-subscribe-timeline">
-                  {card.subscriptionUpdates.map((item, index) => (
-                    <li key={`${item.plan}-${item.time}`}>
-                      <i aria-hidden="true" />
-                      <div>
-                        <strong>{item.brand} {item.plan}</strong>
-                        <b>{money(item.amount)}</b>
-                        <time>{item.time}</time>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <p className="vcard-subscribe-empty">暂无订阅更新</p>
-              )}
-            </div>
-          </section>
-        </aside>
       </div>
 
-      <section className="vcard-finance-panel">
-        <header className="vcard-finance-head">
-          <h3>{editable("cardFinanceTitle")}</h3>
-          <small>数据截至 {finance.asOf || "—"} · 余额 = 充值 + 消费退款 − 消费 − 转出 − 手续费</small>
+      <section className="cd-panel cd-meta-panel">
+        <header className="cd-panel-head">
+          <h3>卡片详情</h3>
         </header>
-        <dl className="vcard-finance">
-          <div className="is-brand"><dt>可用余额</dt><dd>{money(finance.balance)}</dd></div>
-          <div><dt>累计充值</dt><dd>{money(finance.rechargeTotal)}</dd></div>
-          <div><dt>累计消费</dt><dd>{money(finance.consumeTotal)}</dd></div>
-          <div><dt>消费退款</dt><dd>{money(finance.refundTotal)}</dd></div>
-          <div><dt>转出至平台</dt><dd>{money(finance.cashoutTotal)}</dd></div>
-          <div><dt>手续费</dt><dd>{finance.feeTotal ? money(finance.feeTotal) : "$0.00"}</dd></div>
-          <div><dt>交易笔数</dt><dd>{finance.consumeCount}</dd></div>
-          <div><dt>成功笔数</dt><dd>{finance.doneCount}</dd></div>
-          <div className="is-risk"><dt>失败笔数</dt><dd>{finance.failedCount}</dd></div>
-          <div className="is-risk"><dt>成功率</dt><dd>{finance.successRate}%</dd></div>
+        <dl className="cd-meta">
+          <div>
+            <dt>当前状态</dt>
+            <dd>
+              <span className={`cd-status is-${statusMeta.tone}`}>
+                {frozen ? <Snowflake aria-hidden="true" /> : null}
+                <i aria-hidden="true" />
+                {statusMeta.label}
+              </span>
+            </dd>
+          </div>
+          <div><dt>卡 ID · BIN</dt><dd><code>{card.id} · {card.bin}</code></dd></div>
+          <div><dt>建卡时间</dt><dd>{card.createdAt}</dd></div>
+          <div><dt>剩余有效期</dt><dd>{daysLeft} 天 · {String(card.expMonth).padStart(2, "0")}/{card.expYear} 到期</dd></div>
+          <div>
+            <dt>备注</dt>
+            <dd className="is-note">
+              <span>{card.remark || "—"}</span>
+              <button type="button" className="cd-note-edit" onClick={() => onNote(card)} aria-label="编辑备注"><NotebookPen aria-hidden="true" /></button>
+            </dd>
+          </div>
+          <div><dt>系统备注</dt><dd>{card.systemRemark || "—"}</dd></div>
         </dl>
+        <div className="cd-divider" />
+        <div className="cd-sub">
+          <h4><Sparkles aria-hidden="true" />订阅更新</h4>
+          {card.subscriptionUpdates?.length ? (
+            <ol className="cd-timeline">
+              {card.subscriptionUpdates.map((item) => (
+                <li key={`${item.plan}-${item.time}`}>
+                  <i aria-hidden="true" />
+                  <strong>{item.brand} {item.plan}</strong>
+                  <b>{money(item.amount)}</b>
+                  <time>{item.time}</time>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="cd-empty-line">暂无订阅更新</p>
+          )}
+        </div>
       </section>
 
-      <section className="vcard-flow-panel">
-        <header className="vcard-flow-head">
-          <div className="vcard-panel-copy">
-            <span className="section-title-icon"><ReceiptText aria-hidden="true" /></span>
-            <div>
-              <h3>{editable("cardFlowTitle")}</h3>
-            </div>
-          </div>
-          <div className="vcard-flow-tools">
+      <section className="cd-panel cd-finance">
+        <header className="cd-panel-head">
+          <h3>{editable("cardFinanceTitle")}</h3>
+          <span className="cd-stamp">数据截至 {finance.asOf || "—"}</span>
+        </header>
+        <div className="cd-stats">
+          <div><span>累计充值</span><strong>{money(finance.rechargeTotal)}</strong></div>
+          <div><span>累计消费</span><strong>{money(finance.consumeTotal)}</strong></div>
+          <div><span>消费退款</span><strong>{money(finance.refundTotal)}</strong></div>
+          <div><span>交易成功率</span><strong>{finance.successRate}%</strong></div>
+        </div>
+        <p className="cd-stats-note">
+          共 {finance.consumeCount} 笔交易，成功 {finance.doneCount} 笔、失败 {finance.failedCount} 笔
+          {" · "}转出至平台 {money(finance.cashoutTotal)}
+          {" · "}手续费 {finance.feeTotal ? money(finance.feeTotal) : "$0.00"}
+          {" · "}余额 = 充值 + 消费退款 − 消费 − 转出 − 手续费
+        </p>
+      </section>
+
+      <section className="cd-panel cd-flow" ref={flowRef}>
+        <header className="cd-panel-head">
+          <h3>{editable("cardFlowTitle")}</h3>
+          <div className="cd-flow-tools">
             <select className="vbin-select" value={flowType} onChange={(event) => setFlowType(event.target.value as typeof flowType)} aria-label="流水类型">
               <option value="all">{content.cardAllTypes}</option>
               <option value="recharge">{cardFlowTypeLabel.recharge}</option>
@@ -817,7 +834,7 @@ export function CardDetail({
               <option value="refund">{cardFlowTypeLabel.refund}</option>
               <option value="cashout">{cardFlowTypeLabel.cashout}</option>
             </select>
-            <button className="uc-secondary-action" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
+            <button className="cd-btn" type="button" onClick={handleExportFlows} disabled={!ownFlows.length}>
               <Download aria-hidden="true" />{editable("cardExport")}
             </button>
           </div>
