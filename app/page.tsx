@@ -11,7 +11,7 @@ import {
 } from "react";
 import {
   ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, CreditCard, Download, ExternalLink, Gift,
-  Headphones, House, LogOut, Minus, PackageOpen, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, WalletCards, Zap,
+  Headphones, House, LogOut, Minus, PackageOpen, PanelLeft, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, Wallet, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
 import { PublicCardPage } from "@/components/public-card-page";
+import { AppSidebar, type SidebarGroup, type SidebarLayout } from "@/components/app-sidebar";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -68,6 +69,10 @@ type DemoConfig = { content: DemoContent; brands: Brand[]; products: Product[]; 
 type FAQDraft = Omit<FAQItem, "id" | "sortOrder"> & { id?: string };
 
 const STORAGE_KEY = "sukai-demo-copy-config-v1";
+/** 侧栏版式偏好：展开 / 图标轨 / 可折叠，跟着浏览器走。 */
+const SIDEBAR_PREF_KEY = "sukai-sidebar-pref-v1";
+/** 首单引导只播一次，播完记住，别每次登录都放。 */
+const SIDEBAR_INTRO_KEY = "sukai-sidebar-intro-seen-v1";
 
 const tagStyle: Record<string, string> = {
   Plus: "tag-blue", Pro: "tag-violet", "Claude Pro": "tag-violet",
@@ -519,6 +524,19 @@ export default function Home() {
   const [pendingOrder, setPendingOrder] = useState<{ productId: string; quantity: number } | null>(null);
   // 在充值页内再次点击「充值」页签时自增，作为 key 强制充值页重挂载回到开始页重新发起订单。
   const [topupResetCount, setTopupResetCount] = useState(0);
+  /**
+   * 登录后的左侧菜单。
+   * - layout 三种：随手收起（默认，可手动折叠）/ 一直展开 / 只留图标
+   * - 窄屏不看 layout，统一变抽屉，用 mobileNavOpen 控制
+   */
+  const [sidebarLayout, setSidebarLayout] = useState<SidebarLayout>("collapsible");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarLayoutOpen, setSidebarLayoutOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  /** 侧栏首次出现播一次过渡 + 提示条，之后不再打扰。 */
+  const [sidebarIntro, setSidebarIntro] = useState(false);
+  /** 偏好从 localStorage 读回来之前先不写回，避免一进页面把用户设置覆盖成默认值。 */
+  const [sidebarHydrated, setSidebarHydrated] = useState(false);
   const [wizardProduct, setWizardProduct] = useState<Product | null>(null);
   const [wizardInitialMode, setWizardInitialMode] = useState<RechargeMode | null>(null);
   const [generatedOrders, setGeneratedOrders] = useState<ManagedOrder[]>([]);
@@ -543,6 +561,59 @@ export default function Home() {
   const pushPlatformFlow = (flow: PlatformFlowInput) => {
     setPlatformFlows((current) => [{ id: `PF-${Date.now()}`, time: new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-"), status: "success" as const, ...flow }, ...current]);
   };
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(SIDEBAR_PREF_KEY);
+      if (raw) {
+        const pref = JSON.parse(raw) as { layout?: SidebarLayout; collapsed?: boolean };
+        if (pref.layout === "collapsible" || pref.layout === "expanded" || pref.layout === "rail") setSidebarLayout(pref.layout);
+        if (typeof pref.collapsed === "boolean") setSidebarCollapsed(pref.collapsed);
+      }
+    } catch {
+      // 读不出来就用默认版式，不影响使用
+    }
+    setSidebarHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarHydrated) return;
+    try {
+      window.localStorage.setItem(SIDEBAR_PREF_KEY, JSON.stringify({ layout: sidebarLayout, collapsed: sidebarCollapsed }));
+    } catch {
+      // 无痕模式下写不了，忽略
+    }
+  }, [sidebarLayout, sidebarCollapsed, sidebarHydrated]);
+
+  // 登录后第一次看到侧栏：播一次过渡和「常用功能挪到左边了」提示。
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let seen = false;
+    try {
+      seen = window.localStorage.getItem(SIDEBAR_INTRO_KEY) === "1";
+    } catch {
+      seen = false;
+    }
+    if (seen) return;
+    const timer = window.setTimeout(() => setSidebarIntro(true), 220);
+    return () => window.clearTimeout(timer);
+  }, [isLoggedIn]);
+
+  const dismissSidebarIntro = () => {
+    setSidebarIntro(false);
+    try {
+      window.localStorage.setItem(SIDEBAR_INTRO_KEY, "1");
+    } catch {
+      // 忽略
+    }
+  };
+
+  // 提示条自己不撤就 8 秒后收掉，避免一直挂在侧栏上。
+  useEffect(() => {
+    if (!sidebarIntro) return;
+    const timer = window.setTimeout(dismissSidebarIntro, 8000);
+    return () => window.clearTimeout(timer);
+  }, [sidebarIntro]);
 
   useEffect(() => {
     const syncHelpHash = () => {
@@ -923,13 +994,87 @@ export default function Home() {
     setFaqDeleteTarget(null);
   };
 
-  const loggedInMenuItems: Array<{ id: MenuId; key: keyof DemoContent }> = [
-    { id: "home", key: "navHome" },
-    { id: "card", key: "navCard" },
-    { id: "recharge", key: "navRecharge" },
-    { id: "topup", key: "navTopup" },
-    { id: "orders", key: "navOrders" },
+  /**
+   * 登录后的左侧菜单。原来藏在头像下拉里的钱包 / 邀请 / 安全提到一级，
+   * 因为登录用户每天要用的是这几个，不该埋在二级。
+   */
+  const sidebarGroups: SidebarGroup[] = [
+    {
+      title: "业务",
+      items: [
+        { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
+        { id: "account", label: content.navAccount, icon: <PackageOpen aria-hidden="true" />, onLabelChange: (value) => updateContent("navAccount", value) },
+        { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
+        { id: "recharge", label: content.navRecharge, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
+        { id: "topup", label: content.navTopup, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
+      ],
+    },
+    {
+      title: "我的",
+      items: [
+        { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
+        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("walletMenu", value) },
+        { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("navInvite", value) },
+        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("securityMenu", value) },
+      ],
+    },
+    {
+      title: "更多",
+      items: [
+        { id: "profile", label: content.personalCenter, icon: <UserRound aria-hidden="true" />, onLabelChange: (value) => updateContent("personalCenter", value) },
+        { id: "help", label: "帮助中心", icon: <BookOpen aria-hidden="true" /> },
+      ],
+    },
   ];
+
+  const menuTitles: Record<MenuId, string> = {
+    home: content.navHome,
+    account: content.navAccount,
+    card: content.navCard,
+    recharge: content.navRecharge,
+    topup: content.navTopup,
+    orders: content.navOrders,
+    wallet: content.walletMenu,
+    invite: content.navInvite,
+    security: content.securityMenu,
+    profile: content.personalCenter,
+    help: "帮助中心",
+  };
+
+  // rail 强制收起、expanded 强制展开，collapsible 才听用户的。
+  const sidebarIsCollapsed = sidebarLayout === "rail" ? true : sidebarLayout === "expanded" ? false : sidebarCollapsed;
+
+  const handleSidebarNavigate = (id: string) => {
+    const destination = id as MenuId;
+    if (destination === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1);
+    navigateTo(destination);
+    if (destination === "help") window.history.replaceState(null, "", "#help");
+    if (sidebarIntro) dismissSidebarIntro();
+    setMobileNavOpen(false);
+    setSidebarLayoutOpen(false);
+  };
+
+  const pickSidebarLayout = (next: SidebarLayout) => {
+    setSidebarLayout(next);
+    setSidebarLayoutOpen(false);
+  };
+
+  /**
+   * 顶栏左边那个按钮在不同场景干不同事：
+   * 窄屏 = 打开抽屉；桌面 = 可折叠时折叠，固定版式时打开「版式」让用户改回来。
+   */
+  const handleSidebarToggleClick = () => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches) {
+      setMobileNavOpen((current) => !current);
+      return;
+    }
+    if (sidebarLayout === "collapsible") {
+      setSidebarCollapsed((current) => !current);
+      return;
+    }
+    setSidebarLayoutOpen((current) => !current);
+  };
+
   // 未登录只留三个入口：首页 / 虚拟卡 / 代充。成品号仍从首页服务卡与页脚进入。
   const publicMenuItems: Array<{ id: "home" | "card" | "recharge"; label: string }> = [
     { id: "home", label: content.navHome },
@@ -943,45 +1088,70 @@ export default function Home() {
   };
 
   return (
-    <div className={`app-shell ${editMode ? "edit-mode" : ""}`}>
+    <div className={`app-shell ${editMode ? "edit-mode" : ""} ${isLoggedIn ? "has-sidebar" : ""} ${isLoggedIn && sidebarIsCollapsed ? "sidebar-collapsed" : ""} ${isLoggedIn && sidebarIntro ? "sidebar-intro" : ""} ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
+      {isLoggedIn ? (
+        <>
+          <AppSidebar
+            groups={sidebarGroups}
+            activeId={selectedMenu}
+            collapsed={sidebarIsCollapsed}
+            layout={sidebarLayout}
+            layoutOpen={sidebarLayoutOpen}
+            editMode={editMode}
+            brandText={content.logoText}
+            onBrandChange={(value) => updateContent("logoText", value)}
+            userInitials={accountDashboardMock.user.initials}
+            userName={accountDashboardMock.user.name}
+            userMeta={accountDashboardMock.user.email}
+            introVisible={sidebarIntro}
+            onNavigate={handleSidebarNavigate}
+            onHome={() => handleSidebarNavigate("home")}
+            onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
+            onToggleLayout={() => setSidebarLayoutOpen((current) => !current)}
+            onPickLayout={pickSidebarLayout}
+            onDismissIntro={dismissSidebarIntro}
+          />
+          <button className="sb-backdrop" type="button" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} />
+        </>
+      ) : null}
       <header className="site-header">
-        <button className="header-left header-logo-button" type="button" onClick={() => isLoggedIn ? navigateTo("home") : handlePublicNavigation("home")} aria-label="返回首页">
-          <span className="logo-mark" aria-hidden="true">S</span>
-          <span className="brand-name">
-            <EditableText active={editMode} value={content.logoText} onChange={(value) => updateContent("logoText", value)} />
-          </span>
-        </button>
-        <nav className="business-nav" aria-label="业务导航">
-          <div className="business-menu">
-            {isLoggedIn ? loggedInMenuItems.map((item) => (
-              <button
-                className="business-nav-item"
-                data-active={selectedMenu === item.id}
-                type="button"
-                onClick={() => { if (item.id === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1); navigateTo(item.id); }}
-                key={item.id}
-              >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "account" ? <PackageOpen aria-hidden="true" /> : item.id === "recharge" ? <Zap aria-hidden="true" /> : item.id === "topup" ? <WalletCards aria-hidden="true" /> : item.id === "help" ? <BookOpen aria-hidden="true" /> : item.id === "card" ? <CreditCard aria-hidden="true" /> : <ClipboardList aria-hidden="true" />}
-                <EditableText
-                  active={editMode}
-                  value={content[item.key]}
-                  onChange={(value) => updateContent(item.key, value)}
-                />
-              </button>
-            )) : publicMenuItems.map((item) => (
-              <button
-                className="business-nav-item"
-                data-active={selectedMenu === item.id}
-                type="button"
-                onClick={() => handlePublicNavigation(item.id)}
-                key={item.id}
-              >
-                {item.id === "home" ? <House aria-hidden="true" /> : item.id === "card" ? <CreditCard aria-hidden="true" /> : <Zap aria-hidden="true" />}
-                <span>{item.label}</span>
-              </button>
-            ))}
+        {isLoggedIn ? (
+          <div className="header-left">
+            <button className="sidebar-toggle" type="button" onClick={handleSidebarToggleClick} aria-label="切换菜单">
+              <PanelLeft aria-hidden="true" />
+            </button>
+            <div className="header-crumb">
+              <span>工作台</span>
+              <i aria-hidden="true">/</i>
+              <strong>{menuTitles[selectedMenu]}</strong>
+            </div>
           </div>
-        </nav>
+        ) : (
+          <button className="header-left header-logo-button" type="button" onClick={() => handlePublicNavigation("home")} aria-label="返回首页">
+            <span className="logo-mark" aria-hidden="true">S</span>
+            <span className="brand-name">
+              <EditableText active={editMode} value={content.logoText} onChange={(value) => updateContent("logoText", value)} />
+            </span>
+          </button>
+        )}
+        {!isLoggedIn ? (
+          <nav className="business-nav" aria-label="业务导航">
+            <div className="business-menu">
+              {publicMenuItems.map((item) => (
+                <button
+                  className="business-nav-item"
+                  data-active={selectedMenu === item.id}
+                  type="button"
+                  onClick={() => handlePublicNavigation(item.id)}
+                  key={item.id}
+                >
+                  {item.id === "home" ? <House aria-hidden="true" /> : item.id === "card" ? <CreditCard aria-hidden="true" /> : <Zap aria-hidden="true" />}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </nav>
+        ) : null}
         <div className="header-actions">
           {isLoggedIn && editMode ? (
             <div className="editor-toolbar" aria-label="文案编辑工具">
