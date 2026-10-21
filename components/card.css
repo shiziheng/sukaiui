@@ -55,11 +55,11 @@
 @media(max-width:820px){.vcard-grid{grid-template-columns:1fr}}
 
 /* 卡片本体：浅色信息卡。数据项一个不少，只靠字号和颜色分层 */
-.vcard-list-card{display:flex;flex-direction:column;padding:18px;border:1px solid var(--ds-border-default);border-radius:14px;background:var(--color-surface);transition:border-color .18s ease,box-shadow .18s ease}
+.vcard-list-card{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--ds-border-default);border-radius:14px;background:var(--color-surface);transition:border-color .18s ease,box-shadow .18s ease}
 .vcard-list-card:hover{border-color:var(--ds-border-strong);box-shadow:0 8px 22px rgba(17,18,20,.07)}
 .vcard-list-card.is-frozen{background:#fbfbf9}
 .vcard-list-card.is-closed{background:#fafaf8}
-.vlc-face{display:flex;flex-direction:column;gap:10px;flex:1;cursor:pointer;border-radius:10px;outline:none}
+.vlc-face{display:flex;flex-direction:column;gap:12px;flex:1;cursor:pointer;border-radius:10px;outline:none}
 .vlc-face:focus-visible{box-shadow:0 0 0 2px rgba(17,18,20,.16)}
 .vlc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .vlc-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;line-height:1}
@@ -73,23 +73,33 @@
 .vlc-balance{display:flex;flex-direction:column;gap:3px}
 .vlc-balance>span{font-size:11px;color:var(--color-text-tertiary)}
 .vlc-balance strong{font-size:27px;font-weight:650;letter-spacing:-.02em;line-height:1.1;color:var(--color-text-primary);font-variant-numeric:tabular-nums}
-.vlc-no{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;letter-spacing:.06em;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vlc-no{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;letter-spacing:.045em;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vlc-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0;font-size:11.5px;color:var(--color-text-secondary)}
 .vlc-meta b{font-weight:500;color:var(--color-text-tertiary);margin-right:4px}
 .vlc-dot{width:1px;height:9px;background:var(--color-text-tertiary);opacity:.7;flex:none}
-.vlc-hint{display:flex;align-items:flex-start;gap:6px;margin:12px 0 0;font-size:11px;line-height:1.5;color:#8a4a42}
+.vlc-hint{display:flex;align-items:flex-start;gap:6px;margin:0;font-size:11px;line-height:1.5;color:#8a4a42}
 .vlc-hint svg{width:12px;height:12px;flex:none;margin-top:1px}
-.vlc-actions{display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:13px;border-top:1px solid var(--color-border)}
-.vlc-action-main{height:32px;min-height:0;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 14px;border:1px solid var(--color-dark);border-radius:9px;background:var(--color-dark);color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+/* 按钮区：主操 + 详情 + 更多。不做分割线，靠父级 12px 间距与上方信息分开 */
+.vlc-actions{display:flex;align-items:center;gap:4px;margin-top:0}
+.vlc-action-main{height:34px;min-height:0;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 18px;border:1px solid var(--color-dark);border-radius:9px;background:var(--color-dark);color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s ease,border-color .15s ease}
 .vlc-action-main:hover:not(:disabled){background:#2b2d32;border-color:#2b2d32}
 .vlc-action-main:disabled{background:#f1f1ed;border-color:#e7e7e3;color:#b0b0aa;cursor:not-allowed}
 .vlc-action-main svg{width:13px;height:13px;flex:none}
-.vlc-action{height:32px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border:0;border-radius:8px;background:transparent;color:var(--color-text-secondary);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease;white-space:nowrap}
+.vlc-action{height:34px;display:inline-flex;align-items:center;gap:5px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--color-text-secondary);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease;white-space:nowrap}
 .vlc-action:hover:not(:disabled){background:#f2f3ef;color:var(--color-text-primary)}
 .vlc-action:disabled{color:#c2c2bc;cursor:not-allowed}
-.vlc-action.is-danger{color:#b07a73}
-.vlc-action.is-danger:hover:not(:disabled){background:#fbeeed;color:var(--color-danger)}
 .vlc-action svg{width:13px;height:13px;flex:none}
+.vlc-more{width:34px;height:34px;margin-left:auto;flex:none;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:8px;background:transparent;color:var(--color-text-tertiary);cursor:pointer;transition:background .15s ease,color .15s ease}
+.vlc-more:hover{background:#f2f3ef;color:var(--color-text-primary)}
+.vlc-more svg{width:15px;height:15px;flex:none}
+.vlc-more-menu{min-width:148px;padding:4px}
+.vlc-more-menu [role="menuitem"]{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;font-size:12.5px;color:var(--color-text-secondary)}
+.vlc-more-menu [role="menuitem"] svg{width:13px;height:13px;flex:none;color:var(--color-text-tertiary)}
+.vlc-more-menu [role="menuitem"]:focus{background:#f2f3ef;color:var(--color-text-primary)}
+.vlc-more-menu [role="menuitem"].is-danger{color:var(--color-danger)}
+.vlc-more-menu [role="menuitem"].is-danger svg{color:var(--color-danger)}
+.vlc-more-menu [role="menuitem"].is-danger:focus{background:#fbeeed}
+.vlc-more-menu [role="menuitem"][data-disabled]{color:var(--color-text-tertiary);opacity:.45;cursor:not-allowed}
 .vcard-detail-actions .uc-secondary-action.is-danger:disabled{border-color:var(--ds-border-default)!important;background:var(--color-surface);color:var(--color-text-tertiary)!important;opacity:.5;cursor:not-allowed}
 .vcard-open-entry{background:#181a1d!important;color:#fff!important;border:1px solid #25282c!important}
 .vcard-open-entry:hover{background:#111214!important;border-color:#dfff00!important;color:#dfff00!important}

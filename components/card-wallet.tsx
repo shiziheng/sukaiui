@@ -2,8 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
-  RotateCcw, Search, Snowflake, Sparkles, Table, Trash2, TriangleAlert,
+  ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, MoreHorizontal,
+  NotebookPen, PlusCircle, ReceiptText, RotateCcw, Search, Snowflake, Sparkles, Table, Trash2, TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import {
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, money,
   regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardFlowType, type CardScheme,
@@ -380,27 +381,35 @@ export function CardList({
                   <button className="vlc-action-main" type="button" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
                   </button>
-                  <button
-                    className="vlc-action"
-                    type="button"
-                    onClick={() => onRequestFreeze(card)}
-                    disabled={processing || systemFrozen}
-                    title={systemFrozen ? "系统冻结需联系客服处理" : processing ? "开卡处理中，暂不可冻结" : undefined}
-                  >
-                    <Snowflake aria-hidden="true" />{systemFrozen ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
+                  <button className="vlc-action" type="button" onClick={() => onDetail(card)}>
+                    {content.cardDetailLabel}
                   </button>
-                  <button className="vlc-action" type="button" onClick={() => onNote(card)}>
-                    <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
-                  </button>
-                  <button
-                    className="vlc-action is-danger"
-                    type="button"
-                    onClick={() => onRequestDelete(card)}
-                    disabled={frozen}
-                    title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
-                  >
-                    <Trash2 aria-hidden="true" />{content.cardDeleteCard}
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="vlc-more" type="button" aria-label="更多操作">
+                        <MoreHorizontal aria-hidden="true" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" sideOffset={6} className="vlc-more-menu">
+                      <DropdownMenuItem
+                        disabled={processing || systemFrozen}
+                        onSelect={() => onRequestFreeze(card)}
+                      >
+                        <Snowflake aria-hidden="true" />
+                        {systemFrozen ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => onNote(card)}>
+                        <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="is-danger"
+                        disabled={frozen}
+                        onSelect={() => onRequestDelete(card)}
+                      >
+                        <Trash2 aria-hidden="true" />{content.cardDeleteCard}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </article>
             );
