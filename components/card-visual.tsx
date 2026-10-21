@@ -122,33 +122,3 @@ export function CardNotice({ items }: { items: string[] }) {
     </ul>
   );
 }
-
-/**
- * 详情页的深色卡面：全站唯一一处「实体会员卡」。
- * 列表页不用它——那里只需要信息卡。这里保留卡组织、芯片、卡号、有效期、持卡人、发卡地。
- */
-export function CardFace({ card, revealed = false }: { card: VirtualCard; revealed?: boolean }) {
-  return (
-    <div className="vcard-hero">
-      <div className="vh-top">
-        <span className="vh-org">{schemeLabel(card.scheme)}</span>
-        <span className="vh-chip" aria-hidden="true" />
-      </div>
-      <div className="vh-no">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</div>
-      <div className="vh-bottom">
-        <div>
-          <span>有效期</span>
-          <b>{String(card.expMonth).padStart(2, "0")}/{card.expYear}</b>
-        </div>
-        <div>
-          <span>持卡人</span>
-          <b>{card.holder}</b>
-        </div>
-        <div className="is-end">
-          <span>发卡地</span>
-          <b>{regionLabel(card.region)}</b>
-        </div>
-      </div>
-    </div>
-  );
-}
