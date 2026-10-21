@@ -661,6 +661,29 @@ export function CardDetail({
               </button>
             </div>
           </header>
+          <div className="vcard-info-body">
+            <div className="vcard-face">
+              <div className={`vcard is-detail${frozen ? " is-dimmed" : ""}`}>
+                <span className="vcard-accent" aria-hidden="true" />
+                <div className="vcard-head">
+                  <span className={`vcard-scheme is-${card.scheme}`}>{schemeLabel(card.scheme)}</span>
+                  <span className="vcard-chip" aria-hidden="true"><i /><i /><i /></span>
+                  <span className="vcard-face-status">{statusMeta.label}</span>
+                </div>
+                <div className="vcard-number-row">
+                  <span className="vcard-number">{revealed ? formatCardNumber(card.cardNo) : card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}</span>
+                </div>
+                <div className="vcard-foot">
+                  <span><b>有效期</b>{String(card.expMonth).padStart(2, "0")}/{card.expYear}</span>
+                  <span><b>持卡人</b>{card.holder}</span>
+                  <span className="vcard-region">{regionLabel(card.region)}</span>
+                </div>
+              </div>
+              <p className="vcard-face-note">
+                <CreditCard aria-hidden="true" />
+                <span>此卡专属 {card.holder} · 卡 ID {card.id}</span>
+              </p>
+            </div>
           <dl className="vcard-field-grid">
             <div className="vcard-field is-wide">
               <dt>{content.cardNoLabel}</dt>
@@ -722,6 +745,7 @@ export function CardDetail({
               </dd>
             </div>
           </dl>
+          </div>
           <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
         </section>
 

@@ -145,8 +145,12 @@
 .vcard-detail-actions .uc-secondary-action{height:36px;min-height:0;margin-left:0;padding:0 14px;font-size:13px;gap:5px;white-space:nowrap}
 .vcard-detail-actions .uc-secondary-action.is-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
 .vcard-detail-actions .vcard-action-primary{height:36px;padding:0 18px;font-size:13px}
-.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:12px}
+.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:12px;align-items:stretch}
 .vcard-info-panel,.vcard-side-panel,.vcard-finance-panel,.vcard-flow-panel{padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
+/* 左栏随右栏拉伸，卡面 + 卡信息在面板里垂直居中，底部不留一截空 */
+.vcard-info-panel{display:flex;flex-direction:column}
+.vcard-info-panel .vcard-info-body{flex:1;align-content:center}
+.vcard-info-panel .vcard-cvv-note{margin-top:auto;padding-top:10px}
 .vcard-info-panel h3,.vcard-side-panel h3,.vcard-finance-panel h3,.vcard-flow-panel h3{margin:0 0 10px;font-size:15px;font-weight:650;color:var(--color-text-primary)}
 .vcard-finance-panel,.vcard-flow-panel{margin-top:12px}
 /* 卡信息字段网格：label 在上、值+行内图标在下，替代旧「表格行」样式 */
@@ -161,6 +165,24 @@
 .vcard-info-tools button{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--ds-border-default);border-radius:8px;background:var(--color-surface);color:var(--color-text-secondary);cursor:pointer}
 .vcard-info-tools button:hover{background:var(--color-surface-soft);color:var(--color-text-primary)}
 .vcard-info-tools svg{width:14px;height:14px}
+/* 左上角专属卡面：详情页唯一一张实体卡，装饰集中在这里，做出「这张卡是我的」的感觉 */
+.vcard-info-body{display:grid;grid-template-columns:minmax(0,332px) minmax(0,1fr);gap:20px;align-items:start}
+.vcard-face{display:flex;flex-direction:column;gap:8px;min-width:0}
+.vcard-face .vcard{width:100%;aspect-ratio:1.586;padding:16px 18px;gap:0;justify-content:space-between;border-radius:14px}
+.vcard-face .vcard-head{gap:8px}
+.vcard-face .vcard-chip{width:34px;height:24px;border-radius:5px}
+.vcard-face .vcard-number{font-size:15px;letter-spacing:.05em}
+.vcard-face .vcard-foot{gap:6px 12px;font-size:11.5px;line-height:1.4}
+.vcard-face-status{position:absolute;top:14px;right:14px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:10.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.vcard-face-note{display:flex;align-items:center;gap:5px;margin:0;min-width:0;font-size:11px;color:var(--color-text-tertiary)}
+.vcard-face-note svg{width:12px;height:12px;flex:none}
+.vcard-face-note span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 卡片右侧的字段改成逐行 KV 表：宽面板里两列大格子会把 CVV、持卡人甩到中间空白处 */
+.vcard-info-body .vcard-field-grid{grid-template-columns:1fr;gap:0}
+.vcard-info-body .vcard-field{flex-direction:row;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f1ec}
+.vcard-info-body .vcard-field:last-child{border-bottom:0;padding-bottom:0}
+.vcard-info-body .vcard-field dt{flex:none;width:84px;font-size:12px}
+.vcard-info-body .vcard-field dd{flex:1;min-width:0;flex-wrap:nowrap}
 /* 右栏单面板：天数条 + 元数据 + 订阅更新 三节，随左栏高度拉伸铺满（两栏等高） */
 .vcard-detail-side{display:block}
 .vcard-side-panel.is-meta{display:flex;flex-direction:column;justify-content:space-between;gap:14px;height:100%}
@@ -340,6 +362,8 @@
 @media(max-width:1200px){.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:980px){
   .vcard-detail-top{grid-template-columns:1fr}
+  .vcard-info-body{grid-template-columns:1fr;gap:14px}
+  .vcard-face{max-width:360px;margin-inline:auto}
   .vcard-side-panel.is-meta{height:auto;justify-content:flex-start}
   .vcard-finance{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
