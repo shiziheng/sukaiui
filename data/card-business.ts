@@ -34,6 +34,8 @@ export type CardBinSubscriptionPrice = {
 export type CardBin = {
   id: string;
   bin: string;
+  /** 面向用户的场景名（卡段市场标题用）；缺省时回落到 BIN 标题。 */
+  displayName?: string;
   scheme: CardScheme;
   region: CardRegion;
   cardType: string;
@@ -65,23 +67,29 @@ export const cardHolderPool = [
 
 export const randomCardHolder = () => cardHolderPool[Math.floor(Math.random() * cardHolderPool.length)];
 
-/** 开卡弹窗「完整费率标准」行——费项后台配置，前端按固定六项展示；小额费（MTF）与卡段自身的小额消费费规则联动。 */
+/**
+ * 开卡弹窗「完整费率标准」行——费项后台配置，前端按固定八项展示（顺序即展示顺序）。
+ * 账单项（AUF/ARF/RTF/FTF/MTF/DIF）从卡内余额扣收；开卡费、卡片充值费从平台余额额外扣（费用外扣）。
+ * 小额管理费（MTF）与卡段自身的小额消费费规则联动。
+ */
 export type CardFeeScheduleRow = { label: string; code?: string; value: string };
 
 export function cardFeeSchedule(bin: CardBin): CardFeeScheduleRow[] {
   return [
-    { label: "交易授权手续费", value: "$0" },
-    { label: "拒付手续费", code: "DIF", value: "$0.30" },
-    { label: "授权撤销手续费", code: "ARF", value: "1%" },
+    { label: "交易授权手续费", code: "AUF", value: "$0" },
+    { label: "账单撤销费", code: "ARF", value: "1%" },
+    { label: "账单退款手续费", code: "RTF", value: "1%" },
+    { label: "跨境手续费", code: "FTF", value: "$0" },
     {
-      label: "小额交易手续费",
+      label: "小额管理费",
       code: "MTF",
       value: bin.consumeFee.fixed > 0
         ? `$${bin.consumeFee.fixed.toFixed(2)}/笔${bin.smallAmountFeeThreshold ? `（低于 $${bin.smallAmountFeeThreshold.toFixed(2)}）` : ""}`
         : "$0",
     },
-    { label: "跨境交易手续费", code: "FTF", value: "$0" },
-    { label: "消费退款手续费", code: "RTF", value: "1%" },
+    { label: "拒付费", code: "DIF", value: "$0.30" },
+    { label: "开卡费", value: `$${bin.openFee.toFixed(2)}/张` },
+    { label: "卡片充值费", value: `${bin.rechargeFeePercent}%` },
   ];
 }
 
@@ -169,6 +177,11 @@ export function binTitle(bin: { bin: string }) {
   return `卡BIN-${bin.bin}`;
 }
 
+/** 卡段市场的标题：优先用场景名，缺省才退回 BIN 编号。 */
+export function binDisplayName(bin: CardBin) {
+  return bin.displayName ?? `BIN ${bin.bin}`;
+}
+
 export function money(value: number, digits = 2) {
   return `$${value.toFixed(digits)}`;
 }
@@ -243,7 +256,7 @@ export function downloadCsv(filename: string, header: string[], rows: Array<Arra
 
 export const defaultCardBins: CardBin[] = [
   {
-    id: "bin-537872", bin: "537872", scheme: "mastercard", region: "us", cardType: "通用卡",
+    id: "bin-537872", bin: "537872", displayName: "ChatGPT 订阅卡", scheme: "mastercard", region: "us", cardType: "通用卡",
     scenes: ["OpenAI · ChatGPT 订阅", "常规线上消费"], restrictions: [],
     openFee: 0.1, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 500, recommended: true,
     upstreamProduct: "HNMQPO",
@@ -254,7 +267,7 @@ export const defaultCardBins: CardBin[] = [
     ],
   },
   {
-    id: "bin-486555", bin: "486555", scheme: "visa", region: "us", cardType: "常规卡",
+    id: "bin-486555", bin: "486555", displayName: "ChatGPT 专用卡", scheme: "visa", region: "us", cardType: "常规卡",
     scenes: ["OpenAI · ChatGPT 订阅"], restrictions: ["禁止 Claude 相关消费"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 300,
     upstreamProduct: "VQ8T2K",
@@ -264,38 +277,38 @@ export const defaultCardBins: CardBin[] = [
     ],
   },
   {
-    id: "bin-446602", bin: "446602", scheme: "visa", region: "us", cardType: "常规卡",
+    id: "bin-446602", bin: "446602", displayName: "ChatGPT 专用卡", scheme: "visa", region: "us", cardType: "常规卡",
     scenes: ["OpenAI · ChatGPT 订阅"], restrictions: ["禁止 Claude 相关消费"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 260,
     upstreamProduct: "VQ3M7D",
   },
   {
-    id: "bin-428852", bin: "428852", scheme: "visa", region: "us", cardType: "常规卡",
+    id: "bin-428852", bin: "428852", displayName: "AI 多场景卡", scheme: "visa", region: "us", cardType: "常规卡",
     scenes: ["AI 订阅", "广告投放", "通用消费"], restrictions: [],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 120,
     upstreamProduct: "VQ9X4L",
   },
   {
-    id: "bin-474613", bin: "474613", scheme: "visa", region: "us", cardType: "申请制专用卡",
+    id: "bin-474613", bin: "474613", displayName: "通用消费卡", scheme: "visa", region: "us", cardType: "申请制专用卡",
     scenes: ["通用消费"], restrictions: ["可充 Claude，但不建议开通 GPT Pro", "退款将封卡，请谨慎操作"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0.4, percent: 0 }, stock: 80,
     upstreamProduct: "VQ5C8N",
     smallAmountFeeThreshold: 50,
   },
   {
-    id: "bin-4416405", bin: "4416405", scheme: "visa", region: "us", cardType: "申请制专用卡",
+    id: "bin-4416405", bin: "4416405", displayName: "AI 多场景卡 · 申请制", scheme: "visa", region: "us", cardType: "申请制专用卡",
     scenes: ["AI 订阅", "广告投放", "通用消费"], restrictions: ["禁止 Claude 相关消费"],
     openFee: 0.4, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 60,
     upstreamProduct: "VQ2K6P",
   },
   {
-    id: "bin-545020", bin: "545020", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
+    id: "bin-545020", bin: "545020", displayName: "香港通用卡", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
     scenes: ["谷歌等线上消费", "广告投放"], restrictions: ["取消订阅可能触发冻结，请按需充值"],
     openFee: 0.2, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 400,
     upstreamProduct: "MC7R3S",
   },
   {
-    id: "bin-558325", bin: "558325", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
+    id: "bin-558325", bin: "558325", displayName: "香港通用卡", scheme: "mastercard", region: "hk", cardType: "香港常规卡",
     scenes: ["谷歌等线上消费", "广告投放"], restrictions: ["取消订阅可能触发冻结，请按需充值"],
     openFee: 0.2, rechargeFeePercent: 0, consumeFee: { fixed: 0, percent: 0 }, stock: 350,
     upstreamProduct: "MC4W9T",

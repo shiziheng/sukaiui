@@ -509,6 +509,8 @@ export default function Home() {
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
   // 虚拟卡页进入时落在哪个页签：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
   const [cardInitialTab, setCardInitialTab] = useState<"cards" | "market" | "transactions">("cards");
+  // 再点一次顶栏「我的卡片」：详情页是模块内子视图，靠 key 自增强制回到列表首页签。
+  const [cardResetCount, setCardResetCount] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
   const [purchaseProduct, setPurchaseProduct] = useState<Product | null>(null);
   const [purchaseStage, setPurchaseStage] = useState<PurchaseStage>("confirm");
@@ -725,6 +727,9 @@ export default function Home() {
     // 默认切页签即作废挂起订单；只有「去充值」这一条路需要把它带到充值页。
     if (!options?.keepPendingOrder) setPendingOrder(null);
     setCardInitialTab("cards");
+    // 已经在虚拟卡页再点顶栏入口时，selectedMenu 不变、模块不会重挂载，
+    // 这里自增一次 key 让模块回到列表（否则停在卡片详情页，看着像点击没生效）。
+    if (destination === "card") setCardResetCount((count) => count + 1);
     setSelectedMenu(destination);
   };
   const openWalletRecharge = () => {
@@ -1100,6 +1105,7 @@ export default function Home() {
             ) : selectedMenu === "card" ? (
               isLoggedIn ? (
                 <CardModule
+                  key={`card-${cardResetCount}`}
                   initialTab={cardInitialTab}
                   cards={virtualCards}
                   setCards={setVirtualCards}

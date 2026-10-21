@@ -2,8 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, NotebookPen, PlusCircle, ReceiptText,
-  RotateCcw, Search, Snowflake, Sparkles, Table, Trash2, TriangleAlert,
+  ArrowLeft, ArrowRight, Check, Copy, CreditCard, Download, Eye, EyeOff, LayoutGrid, LockKeyhole, MoreHorizontal,
+  NotebookPen, PlusCircle, ReceiptText, RotateCcw, Search, Snowflake, Sparkles, Table, Trash2, TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import {
 import { EditableText } from "@/components/editable-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   binTitle, buildCardFinance, cardFlowStatusLabel, cardFlowTypeLabel, cardStatusMeta, cardTail, downloadCsv, formatCardNumber, money,
   regionLabel, schemeLabel, type CardBin, type CardFlowItem, type CardFlowType, type CardScheme,
@@ -326,8 +327,8 @@ export function CardList({
       ) : showClosed ? (
         <div className="vcard-grid">
           {filtered.map((card) => (
-            <article className="vcard-item is-closed" key={card.id}>
-              <div className="vcard-item-face">
+            <article className="vcard-list-card is-closed" key={card.id}>
+              <div className="vlc-face">
                 <CardVisual
                   card={card}
                   content={content}
@@ -335,7 +336,7 @@ export function CardList({
                   updateContent={updateContent}
                 />
               </div>
-              <div className="vcard-closed-meta">
+              <div className="vlc-closed-meta">
                 <span>{content.cardClosedAt}</span>
                 <strong>{closedAtOf(card)}</strong>
               </div>
@@ -346,10 +347,15 @@ export function CardList({
         <div className="vcard-grid">
           {filtered.map((card) => {
             const frozen = card.status === "frozen" || card.status === "system_frozen";
+            const processing = card.status === "processing";
+            const systemFrozen = card.status === "system_frozen";
             return (
-              <article className="vcard-item" key={card.id}>
+              <article
+                className={`vcard-list-card${frozen ? " is-frozen" : ""}${processing ? " is-processing" : ""}`}
+                key={card.id}
+              >
                 <div
-                  className="vcard-item-face"
+                  className="vlc-face"
                   role="button"
                   tabIndex={0}
                   onClick={() => onDetail(card)}
@@ -363,41 +369,48 @@ export function CardList({
                     updateContent={updateContent}
                   />
                 </div>
-                <div className="vcard-item-actions">
-                  <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
-                    <PlusCircle aria-hidden="true" />充值
-                  </Button>
-                  <button
-                    className="uc-secondary-action"
-                    type="button"
-                    onClick={() => onRequestFreeze(card)}
-                    disabled={card.status === "processing" || card.status === "system_frozen"}
-                    title={card.status === "system_frozen" ? "系统冻结需联系客服处理" : card.status === "processing" ? "开卡处理中，暂不可冻结" : undefined}
-                  >
-                    <Snowflake aria-hidden="true" />{card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
-                  </button>
-                  <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
-                    <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
-                  </button>
-                  <button
-                    className="vcard-item-danger"
-                    type="button"
-                    onClick={() => onRequestDelete(card)}
-                    disabled={frozen}
-                    title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
-                    aria-label={content.cardDeleteCard}
-                  >
-                    <Trash2 aria-hidden="true" />{content.cardDeleteCard}
-                  </button>
-                </div>
                 {frozen ? (
-                  <p className="vcard-frozen-hint">
+                  <p className="vlc-hint">
                     <Snowflake aria-hidden="true" />
-                    {card.status === "system_frozen"
-                      ? "系统冻结：需联系客服处理，期间不支持充值、退款与删卡"
-                      : "卡片已冻结：期间不支持充值、退款与删卡，仅可解冻"}
+                    {systemFrozen
+                      ? "系统冻结 · 需联系客服处理，期间不支持充值、退款与删卡"
+                      : "冻结中 · 期间不支持充值、退款与删卡，仅可解冻"}
                   </p>
                 ) : null}
+                <div className="vlc-actions">
+                  <button className="vlc-action-main" type="button" onClick={() => onFund(card)} disabled={frozen}>
+                    <PlusCircle aria-hidden="true" />充值
+                  </button>
+                  <button className="vlc-action" type="button" onClick={() => onDetail(card)}>
+                    {content.cardDetailLabel}
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="vlc-more" type="button" aria-label="更多操作">
+                        <MoreHorizontal aria-hidden="true" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" sideOffset={6} className="vlc-more-menu">
+                      <DropdownMenuItem
+                        disabled={processing || systemFrozen}
+                        onSelect={() => onRequestFreeze(card)}
+                      >
+                        <Snowflake aria-hidden="true" />
+                        {systemFrozen ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => onNote(card)}>
+                        <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="is-danger"
+                        disabled={frozen}
+                        onSelect={() => onRequestDelete(card)}
+                      >
+                        <Trash2 aria-hidden="true" />{content.cardDeleteCard}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </article>
             );
           })}
@@ -648,6 +661,29 @@ export function CardDetail({
               </button>
             </div>
           </header>
+          <div className="vcard-info-body">
+            <div className="vcard-face">
+              <div className={`vcard is-detail${frozen ? " is-dimmed" : ""}`}>
+                <span className="vcard-accent" aria-hidden="true" />
+                <div className="vcard-head">
+                  <span className={`vcard-scheme is-${card.scheme}`}>{schemeLabel(card.scheme)}</span>
+                  <span className="vcard-chip" aria-hidden="true"><i /><i /><i /></span>
+                  <span className="vcard-face-status">{statusMeta.label}</span>
+                </div>
+                <div className="vcard-number-row">
+                  <span className="vcard-number">{revealed ? formatCardNumber(card.cardNo) : card.cardNo.replace(/^(.{4}).*(.{4})$/, "$1 •••• •••• $2")}</span>
+                </div>
+                <div className="vcard-foot">
+                  <span><b>有效期</b>{String(card.expMonth).padStart(2, "0")}/{card.expYear}</span>
+                  <span><b>持卡人</b>{card.holder}</span>
+                  <span className="vcard-region">{regionLabel(card.region)}</span>
+                </div>
+              </div>
+              <p className="vcard-face-note">
+                <CreditCard aria-hidden="true" />
+                <span>此卡专属 {card.holder} · 卡 ID {card.id}</span>
+              </p>
+            </div>
           <dl className="vcard-field-grid">
             <div className="vcard-field is-wide">
               <dt>{content.cardNoLabel}</dt>
@@ -709,6 +745,7 @@ export function CardDetail({
               </dd>
             </div>
           </dl>
+          </div>
           <p className="vcard-cvv-note"><LockKeyhole aria-hidden="true" />{content.cardCvvNote}</p>
         </section>
 

@@ -53,12 +53,12 @@ export function CardStatusTag({ status }: { status: CardStatus }) {
 }
 
 /**
- * 卡片视觉：默认脱敏，显示 / 隐藏由父级控制。
- * list 用于卡片列表，detail 用于卡详情的大卡。
+ * 列表里的卡片：浅色信息卡，只靠字号和颜色分层，不再画一整块深色卡面。
+ * 数据项：状态、卡组织、发行地、余额、卡号（前 4 后 4）、BIN、有效期（持卡人不是选卡的关键信息，列表不展示）。
+ * 完整卡面留给详情页，列表这里只需要"扫一眼找到卡"。
  */
 export function CardVisual({
   card,
-  variant = "list",
   revealed = false,
   content,
   editMode,
@@ -72,36 +72,38 @@ export function CardVisual({
   editMode: boolean;
   updateContent: (key: keyof DemoContent, value: string) => void;
 }) {
-  const dim = card.status === "frozen" || card.status === "system_frozen";
+  const meta = cardStatusMeta[card.status];
+  const frozen = card.status === "frozen" || card.status === "system_frozen";
 
   return (
-    <div className={`vcard is-${variant} ${dim ? "is-dimmed" : ""}`} data-scheme={card.scheme}>
-      <span className="vcard-accent" aria-hidden="true" />
-
-      <header className="vcard-head">
-        <span className="vcard-bin">{binTitle(card)}</span>
-        <SchemeBadge scheme={card.scheme} />
+    <>
+      <header className="vlc-top">
+        <span className={`vlc-status is-${meta.tone}`}>
+          {frozen ? <Snowflake aria-hidden="true" /> : null}
+          <i aria-hidden="true" />
+          {meta.label}
+        </span>
+        <span className="vlc-org">{schemeLabel(card.scheme)} · {regionLabel(card.region)}</span>
       </header>
 
-      <span className="vcard-chip" aria-hidden="true"><i /><i /><i /></span>
-
-      <div className="vcard-number-row">
-        <span className="vcard-number">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</span>
-      </div>
-
-      <div className="vcard-balance">
-        <span><EditableText active={editMode} value={content.cardBalanceLabel} onChange={(value) => updateContent("cardBalanceLabel", value)} /></span>
+      <div className="vlc-balance">
+        <span>
+          <EditableText active={editMode} value={content.cardBalanceLabel} onChange={(value) => updateContent("cardBalanceLabel", value)} />
+        </span>
         <strong>${card.balance.toFixed(2)}</strong>
       </div>
 
-      <footer className="vcard-foot">
-        <span><b><EditableText active={editMode} value={content.cardExpLabel} onChange={(value) => updateContent("cardExpLabel", value)} /></b>{String(card.expMonth).padStart(2, "0")}/{card.expYear}</span>
-        <span><b><EditableText active={editMode} value={content.cardHolderLabel} onChange={(value) => updateContent("cardHolderLabel", value)} /></b>{card.holder}</span>
-        <span className="vcard-region">{regionLabel(card.region)}</span>
-      </footer>
+      <div className="vlc-no">{revealed ? formatCardNumber(card.cardNo) : maskCardNumber(card.cardNo)}</div>
 
-      <CardStatusTag status={card.status} />
-    </div>
+      <p className="vlc-meta">
+        <span className="vlc-bin">{binTitle(card)}</span>
+        <span className="vlc-dot" aria-hidden="true" />
+        <span>
+          <b><EditableText active={editMode} value={content.cardExpLabel} onChange={(value) => updateContent("cardExpLabel", value)} /></b>
+          {String(card.expMonth).padStart(2, "0")}/{card.expYear}
+        </span>
+      </p>
+    </>
   );
 }
 

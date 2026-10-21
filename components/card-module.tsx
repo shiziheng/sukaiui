@@ -255,7 +255,12 @@ export function CardModule({
 
   return (
     <section className="card-module">
-      <Tabs value={tab} onValueChange={(value) => setTab(value as CardTab)} className="uc-tabs-list card-tabs">
+      <Tabs
+        value={tab}
+        // 卡片详情是模块内的子视图，切页签要先退出详情，不然点了像没反应。
+        onValueChange={(value) => { setTab(value as CardTab); setDetailCard(null); }}
+        className="uc-tabs-list card-tabs"
+      >
         <TabsList>
           <TabsTrigger value="cards"><Layers aria-hidden="true" />{editable("cardTabCards")}</TabsTrigger>
           <TabsTrigger value="market"><Sparkles aria-hidden="true" />{editable("cardTabMarket")}</TabsTrigger>
