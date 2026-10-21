@@ -326,8 +326,8 @@ export function CardList({
       ) : showClosed ? (
         <div className="vcard-grid">
           {filtered.map((card) => (
-            <article className="vcard-item is-closed" key={card.id}>
-              <div className="vcard-item-face">
+            <article className="vcard-list-card is-closed" key={card.id}>
+              <div className="vlc-face">
                 <CardVisual
                   card={card}
                   content={content}
@@ -335,7 +335,7 @@ export function CardList({
                   updateContent={updateContent}
                 />
               </div>
-              <div className="vcard-closed-meta">
+              <div className="vlc-closed-meta">
                 <span>{content.cardClosedAt}</span>
                 <strong>{closedAtOf(card)}</strong>
               </div>
@@ -346,10 +346,15 @@ export function CardList({
         <div className="vcard-grid">
           {filtered.map((card) => {
             const frozen = card.status === "frozen" || card.status === "system_frozen";
+            const processing = card.status === "processing";
+            const systemFrozen = card.status === "system_frozen";
             return (
-              <article className="vcard-item" key={card.id}>
+              <article
+                className={`vcard-list-card${frozen ? " is-frozen" : ""}${processing ? " is-processing" : ""}`}
+                key={card.id}
+              >
                 <div
-                  className="vcard-item-face"
+                  className="vlc-face"
                   role="button"
                   tabIndex={0}
                   onClick={() => onDetail(card)}
@@ -363,41 +368,40 @@ export function CardList({
                     updateContent={updateContent}
                   />
                 </div>
-                <div className="vcard-item-actions">
-                  <Button variant="outline" className="vcard-item-action" onClick={() => onFund(card)} disabled={frozen}>
+                {frozen ? (
+                  <p className="vlc-hint">
+                    <Snowflake aria-hidden="true" />
+                    {systemFrozen
+                      ? "系统冻结 · 需联系客服处理，期间不支持充值、退款与删卡"
+                      : "冻结中 · 期间不支持充值、退款与删卡，仅可解冻"}
+                  </p>
+                ) : null}
+                <div className="vlc-actions">
+                  <button className="vlc-action-main" type="button" onClick={() => onFund(card)} disabled={frozen}>
                     <PlusCircle aria-hidden="true" />充值
-                  </Button>
+                  </button>
                   <button
-                    className="uc-secondary-action"
+                    className="vlc-action"
                     type="button"
                     onClick={() => onRequestFreeze(card)}
-                    disabled={card.status === "processing" || card.status === "system_frozen"}
-                    title={card.status === "system_frozen" ? "系统冻结需联系客服处理" : card.status === "processing" ? "开卡处理中，暂不可冻结" : undefined}
+                    disabled={processing || systemFrozen}
+                    title={systemFrozen ? "系统冻结需联系客服处理" : processing ? "开卡处理中，暂不可冻结" : undefined}
                   >
-                    <Snowflake aria-hidden="true" />{card.status === "system_frozen" ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
+                    <Snowflake aria-hidden="true" />{systemFrozen ? "联系客服" : frozen ? content.cardUnfreeze : content.cardFreeze}
                   </button>
-                  <button className="uc-secondary-action" type="button" onClick={() => onNote(card)}>
+                  <button className="vlc-action" type="button" onClick={() => onNote(card)}>
                     <NotebookPen aria-hidden="true" />{content.cardRemarkLabel}
                   </button>
                   <button
-                    className="vcard-item-danger"
+                    className="vlc-action is-danger"
                     type="button"
                     onClick={() => onRequestDelete(card)}
                     disabled={frozen}
                     title={frozen ? "冻结期间不可删卡，请先解冻" : undefined}
-                    aria-label={content.cardDeleteCard}
                   >
                     <Trash2 aria-hidden="true" />{content.cardDeleteCard}
                   </button>
                 </div>
-                {frozen ? (
-                  <p className="vcard-frozen-hint">
-                    <Snowflake aria-hidden="true" />
-                    {card.status === "system_frozen"
-                      ? "系统冻结：需联系客服处理，期间不支持充值、退款与删卡"
-                      : "卡片已冻结：期间不支持充值、退款与删卡，仅可解冻"}
-                  </p>
-                ) : null}
               </article>
             );
           })}
