@@ -54,7 +54,7 @@ export function CardStatusTag({ status }: { status: CardStatus }) {
 
 /**
  * 列表里的卡片：浅色信息卡，只靠字号和颜色分层，不再画一整块深色卡面。
- * 数据项一个不少：状态、卡组织、发行地、余额、卡号（前 4 后 4）、BIN、有效期、持卡人。
+ * 数据项：状态、卡组织、发行地、余额、卡号（前 4 后 4）、BIN、有效期（持卡人不是选卡的关键信息，列表不展示）。
  * 完整卡面留给详情页，列表这里只需要"扫一眼找到卡"。
  */
 export function CardVisual({
@@ -101,11 +101,6 @@ export function CardVisual({
         <span>
           <b><EditableText active={editMode} value={content.cardExpLabel} onChange={(value) => updateContent("cardExpLabel", value)} /></b>
           {String(card.expMonth).padStart(2, "0")}/{card.expYear}
-        </span>
-        <span className="vlc-dot" aria-hidden="true" />
-        <span>
-          <b><EditableText active={editMode} value={content.cardHolderLabel} onChange={(value) => updateContent("cardHolderLabel", value)} /></b>
-          {card.holder}
         </span>
       </p>
     </>
