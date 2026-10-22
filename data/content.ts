@@ -670,7 +670,7 @@ export const defaultContent: DemoContent = {
   cardPageSubtitle: "开通虚拟卡用平台余额充值，卡内余额按需划转，支付订阅与线上消费更灵活。",
   cardTabCards: "我的卡片",
   cardTabMarket: "开卡中心",
-  cardTabTransactions: "消费记录",
+  cardTabTransactions: "卡流水",
   cardModuleSubtitle: "开卡、充值与消费记录，由平台余额统一管理。",
   cardRefund: "退款",
   cardRefundConfirmTitle: "卡内余额退款",

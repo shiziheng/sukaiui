@@ -1617,3 +1617,186 @@ button{font:inherit}
 }
 
 
+
+/* ===== 登录后左侧菜单（v0.20.0） =====
+   桌面：固定侧栏 244px / 图标轨 72px，顶栏让出左侧并瘦到 60px。
+   窄屏：侧栏变抽屉，内容区不再让位。
+   新样式统一走 .app-sidebar / .sb-* 前缀，不动上面的共享 @media 块。 */
+.app-shell{--sb-w:244px;--sb-head:60px;--sb-ease:cubic-bezier(.3,.9,.25,1)}
+.app-shell.has-sidebar.sidebar-collapsed{--sb-w:72px}
+
+.app-sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;width:var(--sb-w);display:flex;flex-direction:column;overflow:hidden;background:#111214;color:#e9ede3;padding:0 12px 14px;transition:width .34s var(--sb-ease)}
+.app-sidebar::after{content:"";position:absolute;inset:0 0 0 auto;width:1px;background:#232528}
+
+.sb-brand{height:var(--sb-head);flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sb-brand-button{display:flex;align-items:center;gap:10px;min-width:0;border:0;background:transparent;color:#fff;padding:0;cursor:pointer}
+.sb-brand-name{overflow:hidden;font-size:16px;font-weight:660;letter-spacing:.02em;white-space:nowrap;text-overflow:ellipsis}
+.sb-collapse{width:26px;height:26px;flex:none;display:grid;place-items:center;border:1px solid #2c2f33;border-radius:7px;background:transparent;color:#9aa0a7;cursor:pointer;transition:color .16s ease,border-color .16s ease,background-color .16s ease}
+.sb-collapse:hover{border-color:#41444a;background:#1d1f22;color:#eef1e8}
+.sb-collapse svg{width:14px;height:14px}
+
+.sb-intro{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:9px;margin:2px 0 12px;border:1px solid rgba(207,255,26,.26);border-radius:10px;background:rgba(207,255,26,.07);padding:11px 10px;animation:sb-intro-in .42s cubic-bezier(.22,1,.36,1) both}
+.sb-intro>svg{width:15px;height:15px;margin-top:1px;flex:none;color:var(--color-brand)}
+.sb-intro strong{display:block;color:#f1f5e6;font-size:12.5px;font-weight:680;line-height:1.35}
+.sb-intro p{margin:4px 0 0;color:#a9b0a4;font-size:11.5px;line-height:1.6}
+.sb-intro>button{width:20px;height:20px;display:grid;place-items:center;border:0;border-radius:5px;background:transparent;color:#8d938a;cursor:pointer}
+.sb-intro>button:hover{background:rgba(255,255,255,.08);color:#e6eadf}
+.sb-intro>button svg{width:12px;height:12px}
+@keyframes sb-intro-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+.sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 0 8px;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{width:0}
+.sb-group+.sb-group{margin-top:14px}
+.sb-group-title{margin:0 0 6px;padding:0 10px;color:#666c72;font-size:10.5px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
+.sb-item{position:relative;width:100%;height:38px;display:flex;align-items:center;gap:10px;border:0;border-radius:9px;background:transparent;color:#c3c8ce;padding:0 10px;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.sb-item:hover{background:rgba(255,255,255,.045);color:#eef1e8}
+.sb-item[data-active=true]{background:rgba(255,255,255,.075);color:#fff;font-weight:660}
+.sb-item[data-active=true]::before{content:"";position:absolute;left:-6px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--color-brand)}
+.sb-item-icon{width:17px;height:17px;flex:none;display:grid;place-items:center;color:inherit;opacity:.92}
+.sb-item[data-active=true] .sb-item-icon{color:var(--color-brand);opacity:1}
+.sb-item-icon svg{width:17px;height:17px}
+.sb-item-label{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sb-item-new{flex:none;border-radius:999px;background:rgba(207,255,26,.15);color:#d8f27a;padding:2px 6px;font-size:10px;font-weight:720;letter-spacing:.02em}
+.sb-item[data-active=true] .sb-item-new{background:rgba(207,255,26,.24);color:#eaffa8}
+
+.sb-foot{flex:none;display:grid;gap:8px;border-top:1px solid #232528;padding-top:12px}
+.sb-user{display:flex;align-items:center;gap:9px;min-width:0;padding:2px 4px}
+.sb-user-avatar{width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--color-brand);color:#111214;font-size:11px;font-weight:800}
+.sb-user-text{display:grid;gap:1px;min-width:0}
+.sb-user-text strong{overflow:hidden;color:#eef1e8;font-size:12.5px;font-weight:650;white-space:nowrap;text-overflow:ellipsis}
+.sb-user-text small{overflow:hidden;color:#7d838a;font-size:10.5px;white-space:nowrap;text-overflow:ellipsis}
+.sb-layout-wrap{position:relative}
+.sb-layout-button{width:100%;height:32px;display:flex;align-items:center;gap:8px;border:1px solid #26282c;border-radius:8px;background:transparent;color:#8f959c;padding:0 10px;font-size:12px;font-weight:620;cursor:pointer;transition:border-color .15s ease,color .15s ease,background-color .15s ease}
+.sb-layout-button:hover{border-color:#3a3d42;background:#191b1e;color:#d8dcd4}
+.sb-layout-button svg{width:14px;height:14px}
+.sb-layout-pop{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:70;border:1px solid #2e3136;border-radius:11px;background:#1a1c1f;padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.5);animation:sb-pop-in .16s ease both}
+.sb-layout-pop>p{margin:4px 8px 7px;color:#757b82;font-size:10px;font-weight:700;letter-spacing:.12em}
+.sb-layout-pop>button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;border-radius:8px;background:transparent;color:#c9ced3;padding:8px;text-align:left;cursor:pointer}
+.sb-layout-pop>button:hover{background:#24272b}
+.sb-layout-pop>button[data-on=true]{background:rgba(207,255,26,.09);color:#eef1e8}
+.sb-layout-pop>button>span{display:grid;gap:2px;font-size:12px;font-weight:650}
+.sb-layout-pop>button small{color:#868c93;font-size:10.5px;font-weight:450}
+.sb-layout-pop>button svg{width:14px;height:14px;flex:none;color:var(--color-brand)}
+@keyframes sb-pop-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* 收起成图标轨 */
+.app-sidebar[data-collapsed=true]{padding-inline:8px;overflow:visible}
+.app-sidebar[data-collapsed=true] .sb-brand{flex-direction:column;height:88px;gap:4px;justify-content:center}
+.app-sidebar[data-collapsed=true] .sb-brand-button{justify-content:center}
+.app-sidebar[data-collapsed=true] .sb-brand-name{display:none}
+.app-sidebar[data-collapsed=true] .sb-collapse{width:100%;height:20px;border-radius:6px}
+.app-sidebar[data-collapsed=true] .sb-group-title{display:none}
+.app-sidebar[data-collapsed=true] .sb-group+.sb-group{margin-top:10px;border-top:1px solid #232528;padding-top:10px}
+.app-sidebar[data-collapsed=true] .sb-item{justify-content:center;padding:0;gap:0}
+.app-sidebar[data-collapsed=true] .sb-item[data-active=true]::before{left:-8px}
+.app-sidebar[data-collapsed=true] .sb-item-label,.app-sidebar[data-collapsed=true] .sb-item-new{display:none}
+.app-sidebar[data-collapsed=true] .sb-item[data-new=true]::after{content:"";position:absolute;top:9px;right:13px;width:5px;height:5px;border-radius:50%;background:var(--color-brand)}
+.app-sidebar[data-collapsed=true] .sb-user{justify-content:center;padding:0}
+.app-sidebar[data-collapsed=true] .sb-user-text{display:none}
+.app-sidebar[data-collapsed=true] .sb-layout-button{justify-content:center;padding:0}
+.app-sidebar[data-collapsed=true] .sb-layout-button span{display:none}
+/* 图标轨下版式弹层浮到侧栏右侧，否则选完「只留图标」就再也切不回来 */
+.app-sidebar[data-collapsed=true] .sb-layout-pop{left:calc(100% + 10px);right:auto;bottom:0;width:214px}
+
+/* 顶栏：让出侧栏、瘦到 60px，左侧改成面包屑 */
+.app-shell.has-sidebar .site-header{left:var(--sb-w);height:var(--sb-head);display:flex;justify-content:space-between;gap:24px;padding-inline:24px;border-bottom:1px solid #232528;box-shadow:none;transition:left .34s var(--sb-ease)}
+.header-crumb{display:flex;align-items:center;gap:8px;min-width:0;color:#6f757c;font-size:12.5px;white-space:nowrap}
+.header-crumb i{font-style:normal;color:#3d4147}
+.header-crumb strong{overflow:hidden;color:#f2f4ef;font-size:14px;font-weight:650;text-overflow:ellipsis}
+.sidebar-toggle{width:32px;height:32px;flex:none;display:grid;place-items:center;border:1px solid #2c2f33;border-radius:8px;background:transparent;color:#c4c9cf;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,color .15s ease}
+.sidebar-toggle:hover{border-color:#41444a;background:#1d1f22;color:#fff}
+.sidebar-toggle svg{width:16px;height:16px}
+.app-shell.has-sidebar .header-actions{gap:6px}
+
+/* 内容区让出侧栏 */
+.app-shell.has-sidebar .content-inset{padding-top:var(--sb-head);padding-left:var(--sb-w);transition:padding-left .34s var(--sb-ease),padding-top .34s var(--sb-ease)}
+
+/* 首次进入的动作：侧栏滑入 + 菜单项依次浮现 */
+.app-shell.sidebar-intro .app-sidebar{animation:sb-shell-in .6s cubic-bezier(.22,1,.36,1) both}
+.app-shell.sidebar-intro .sb-item{animation:sb-item-in .46s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i) * 34ms + 130ms)}
+@keyframes sb-shell-in{from{opacity:.25;transform:translateX(-22px)}to{opacity:1;transform:none}}
+@keyframes sb-item-in{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+
+.sb-backdrop{display:none}
+
+/* 窄屏：侧栏变抽屉，内容区不再让位 */
+@media(max-width:1024px){
+  .app-shell.has-sidebar,.app-shell.has-sidebar.sidebar-collapsed{--sb-w:0px}
+  .app-shell.has-sidebar .app-sidebar{width:268px;padding:0 12px 14px;transform:translateX(-100%);box-shadow:22px 0 60px rgba(8,10,12,.28);transition:transform .3s var(--sb-ease)}
+  .app-shell.has-sidebar.mobile-nav-open .app-sidebar{transform:none}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-brand{flex-direction:row;height:var(--sb-head);justify-content:space-between}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-brand-name,
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-group-title,
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-item-label,
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-user-text,
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-layout-button span{display:block}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-item{justify-content:flex-start;padding:0 10px;gap:10px}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-user{justify-content:flex-start;padding:2px 4px}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-layout-button{justify-content:flex-start;padding:0 10px}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-item[data-active=true]::before{left:-6px}
+  .app-shell.has-sidebar.mobile-nav-open .sb-backdrop{display:block;position:fixed;inset:0;z-index:45;border:0;background:rgba(8,9,11,.46);cursor:pointer}
+  .app-shell.has-sidebar .site-header{left:0;padding-inline:16px;gap:12px}
+  .header-crumb>span,.header-crumb>i{display:none}
+  .app-shell.has-sidebar .app-sidebar .sb-layout-pop{left:0;right:0;bottom:calc(100% + 8px);width:auto}
+  .app-shell.has-sidebar .app-sidebar .sb-collapse{display:none}
+}
+@media(max-width:760px){
+  .app-shell.has-sidebar{--sb-head:56px}
+  .app-shell.has-sidebar .site-header{height:56px}
+  .app-shell.has-sidebar .content-inset{padding-top:56px}
+  .app-shell.has-sidebar .header-crumb{display:none}
+}
+
+/* 侧栏下的卡片网格断点：宽度少了 244px，4 列门槛按可用宽重算 */
+.app-shell.has-sidebar .vcard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1404px){.app-shell.has-sidebar .vcard-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1104px){.app-shell.has-sidebar .vcard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:804px){.app-shell.has-sidebar .vcard-grid{grid-template-columns:minmax(0,1fr)}}
+/* 侧栏下全宽页面（帮助中心）用 100vw 算居中会多算 244px，这里按内容宽重算 */
+.app-shell.has-sidebar .help-hero{padding-inline:max(var(--ds-page-gutter),calc((100% - 1320px)/2))}
+.app-shell.has-sidebar .help-center{min-height:calc(100svh - var(--sb-head))}
+
+/* ===== 侧栏二级菜单（v0.20.1） =====
+   虚拟卡的三个页签、代充下的套餐代充/成品号收进左侧，默认展开。
+   二级项用左侧小圆点做视觉层级，选中时点亮成荧光绿。 */
+.sb-item-row{display:flex;align-items:center;gap:2px}
+.sb-item-row .sb-item{flex:1;min-width:0}
+.sb-caret{width:26px;height:26px;flex:none;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#6d737a;cursor:pointer;transition:color .15s ease,background-color .15s ease}
+.sb-caret:hover{background:rgba(255,255,255,.06);color:#dfe3da}
+.sb-caret svg{width:13px;height:13px;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
+.sb-caret[aria-expanded=true] svg{transform:rotate(0deg)}
+.sb-item[data-child-active=true]{color:#eef1e8}
+.sb-item[data-child-active=true] .sb-item-icon{color:var(--color-brand);opacity:1}
+
+.sb-sub{display:grid;gap:1px;padding:2px 0 5px;animation:sb-sub-in .2s ease both}
+.sb-subitem{position:relative;width:100%;height:31px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#969ca3;padding:0 10px 0 34px;font-size:12.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
+.sb-subitem::before{content:"";position:absolute;left:17px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#4b5057;transition:background-color .14s ease,box-shadow .14s ease}
+.sb-subitem:hover{background:rgba(255,255,255,.045);color:#e7ebe2}
+.sb-subitem:hover::before{background:#8b9299}
+.sb-subitem[data-active=true]{background:rgba(207,255,26,.09);color:#f4f8ea;font-weight:660}
+.sb-subitem[data-active=true]::before{background:var(--color-brand);box-shadow:0 0 0 3px rgba(207,255,26,.14)}
+.sb-subitem-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@keyframes sb-sub-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* 收起成 72px 图标轨时，二级菜单整体让位 */
+.app-sidebar[data-collapsed=true] .sb-caret,
+.app-sidebar[data-collapsed=true] .sb-sub{display:none}
+
+/* 左侧已经有二级菜单，页面里原来的页签只在窄屏抽屉模式露出 */
+.has-sidebar .card-module .card-tabs,
+.has-sidebar .commerce-panel .biz-tabs{display:none}
+
+@media(max-width:1024px){
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-caret{display:grid}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-sub{display:grid}
+  .has-sidebar .card-module .card-tabs,
+  .has-sidebar .commerce-panel .biz-tabs{display:block}
+}
+
+/* ---------- v0.21.1：我的账单流水表窄宽优化（侧栏占宽后 1280 左右说明列与金额列挤在一起） ---------- */
+/* 说明列限宽省略，金额列左侧留出呼吸空隙；1240 以下藏掉单号列（单号在订单详情抽屉里仍可查） */
+.bill-flow-table .flow-desc{display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.bill-flow-table td.is-amount{padding-left:28px}
+@media(max-width:1240px){
+  .bill-flow-table th:nth-child(6),.bill-flow-table td:nth-child(6){display:none}
+}
