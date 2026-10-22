@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import {
-  ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, CreditCard, Download, ExternalLink, Gift,
+  ArrowDown, ArrowUp, Bell, BookOpen, Check, ChevronDown, ClipboardList, CreditCard, Download, ExternalLink, Gift,
   Headphones, House, LogOut, Minus, PackageOpen, PanelLeft, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, Wallet, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -545,6 +545,7 @@ export default function Home() {
   const [faqDeleteTarget, setFaqDeleteTarget] = useState<FAQItem | null>(null);
   const [openFaqId, setOpenFaqId] = useState<string | undefined>();
   const [supportSurface, setSupportSurface] = useState<"top" | "floating" | null>(null);
+  const [messageOpen, setMessageOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [walletBalance, setWalletBalance] = useState(accountDashboardMock.summary.availableBalance);
   const [virtualCards, setVirtualCards] = useState<VirtualCard[]>(() => defaultVirtualCards.map((card) => ({ ...card })));
@@ -646,6 +647,11 @@ export default function Home() {
         // 五页签改版：菜单更名（链式迁移，只匹配已知旧值）；2026-10-17 拍板「钱包/充值」定名「充值」
         if (["钱包充值", "钱包/充值"].includes(config.content.navTopup)) config.content.navTopup = "充值";
         if (["我的订单", "订单中心"].includes(config.content.navOrders)) config.content.navOrders = "我的账单";
+        // 左侧菜单改版：顺序与命名更新（2026-10-22 拍板，链式迁移，只匹配已知旧值）
+        if (config.content.navOrders === "我的账单") config.content.navOrders = "账单";
+        if (config.content.navCard === "虚拟卡") config.content.navCard = "卡片";
+        if (config.content.navRecharge === "代充") config.content.navRecharge = "商城";
+        if (config.content.navInvite === "我的邀请") config.content.navInvite = "推广";
         // 账单词选「我的账单」：页内标题与菜单统一
         if (config.content.ordersPageTitle === "我的订单") config.content.ordersPageTitle = "我的账单";
         // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）
@@ -999,15 +1005,16 @@ export default function Home() {
   };
 
   /**
-   * 登录后的左侧菜单。一级只留四条主线：首页 / 虚拟卡 / 代充 / 充值。
-   * 虚拟卡的三个页签、代充下的套餐代充与成品号都收到二级菜单里，默认展开。
-   * 钱包 / 邀请 / 安全这些仍然放在「我的」分组，不占主线位置。
+   * 登录后的左侧菜单。主线：首页 / 钱包 / 卡片 / 商城 / 账单 / 推广。
+   * 卡片（原虚拟卡）三个页签、商城（原代充）下套餐代充与成品号收进二级菜单，默认展开。
+   * 在线客服 / 站内信 / 账户与安全 / 个人中心收进「更多」。
    */
   const sidebarGroups: SidebarGroup[] = [
     {
       title: "主菜单",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
+        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
         {
           id: "card-parent",
           label: content.navCard,
@@ -1031,21 +1038,17 @@ export default function Home() {
             { id: "biz-account", label: content.navAccount, onLabelChange: (value) => updateContent("navAccount", value) },
           ],
         },
-        { id: "topup", label: content.navTopup, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
-      ],
-    },
-    {
-      title: "我的",
-      items: [
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
-        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
         { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
-        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, onLabelChange: (value) => updateContent("securityMenu", value) },
       ],
     },
     {
       title: "更多",
       items: [
+        // 在线客服 / 站内信不是独立页面，点开各自唤起顶部浮层 / 铃铛面板。
+        { id: "support", label: content.supportNav, icon: <Headphones aria-hidden="true" />, onLabelChange: (value) => updateContent("supportNav", value) },
+        { id: "messages", label: content.messagesNav, icon: <Bell aria-hidden="true" /> },
+        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, onLabelChange: (value) => updateContent("securityMenu", value) },
         { id: "profile", label: content.personalCenter, icon: <UserRound aria-hidden="true" />, onLabelChange: (value) => updateContent("personalCenter", value) },
         // 帮助中心入口先屏蔽（用户要求），页面保留，仍可从客服卡的「帮助中心」链接或 #help 深链进入。
       ],
@@ -1086,6 +1089,21 @@ export default function Home() {
   };
 
   const handleSidebarNavigate = (id: string) => {
+    // 在线客服 / 站内信不是独立页面，各自唤起顶部客服浮层 / 铃铛面板。
+    if (id === "support") {
+      setSupportSurface("top");
+      if (sidebarIntro) dismissSidebarIntro();
+      setMobileNavOpen(false);
+      setSidebarLayoutOpen(false);
+      return;
+    }
+    if (id === "messages") {
+      setMessageOpen(true);
+      if (sidebarIntro) dismissSidebarIntro();
+      setMobileNavOpen(false);
+      setSidebarLayoutOpen(false);
+      return;
+    }
     if (id.startsWith("card-")) {
       const nextTab = id.slice(5) as "cards" | "market" | "transactions";
       // 先进页面（navigateTo 会清掉卡片详情并重置为「我的卡片」），再落到点的那个页签。
@@ -1226,7 +1244,7 @@ export default function Home() {
           ) : null}
           {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包/充值" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
           {isLoggedIn ? <button className="header-balance" type="button" title="卡内总余额 · 点击前往虚拟卡" onClick={() => navigateTo("card")}><CreditCard aria-hidden="true" /><span className="header-balance-tag">卡内</span>${cardBalanceTotal.toFixed(2)}</button> : null}
-          {isLoggedIn ? <SiteMessages /> : null}
+          {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"
             onMouseEnter={() => setSupportSurface("top")}

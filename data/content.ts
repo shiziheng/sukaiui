@@ -28,6 +28,7 @@ export type DemoContent = {
   personalCenter: string;
   logout: string;
   supportNav: string;
+  messagesNav: string;
   supportTitle: string;
   supportAccount: string;
   supportHelper: string;
@@ -402,10 +403,10 @@ export const defaultContent: DemoContent = {
   importConfig: "导入配置",
   navHome: "首页",
   navAccount: "成品号",
-  navRecharge: "代充",
-  navCard: "虚拟卡",
+  navRecharge: "商城",
+  navCard: "卡片",
   navTopup: "充值",
-  navOrders: "我的账单",
+  navOrders: "账单",
   bizTabRecharge: "套餐代充",
   bizTabAccount: "成品号",
   billTabFlows: "平台流水",
@@ -417,10 +418,11 @@ export const defaultContent: DemoContent = {
   billTypeCard: "卡流水",
   walletFlowTitle: "余额流水",
   walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
-  navInvite: "我的邀请",
+  navInvite: "推广",
   personalCenter: "个人中心",
   logout: "退出登录",
   supportNav: "在线客服",
+  messagesNav: "站内信",
   supportTitle: "官方客服",
   supportAccount: "@sukaiai_support1",
   supportHelper: "Telegram",
