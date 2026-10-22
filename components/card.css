@@ -296,21 +296,11 @@
 .vbin-sub-inline b{font-weight:600;color:#6f756c;font-variant-numeric:tabular-nums}
 .vbin-sub-inline time{font-size:11px;color:#bcc0b7}
 
-/* 同参数卡段：先收成一行小 chip，要换卡段才点 */
-.vbin-bin-switch{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin-top:1px;padding-top:10px;border-top:1px dashed #e8eae2}
-.vbin-bin-switch>span{font-size:11px;color:#a8ada3}
-.vbin-bin-chips{display:inline-flex;flex-wrap:wrap;gap:5px}
-.vbin-bin-chips button{height:23px;padding:0 9px;border:1px solid #e3e5dd;border-radius:7px;background:#fbfcf8;color:#6f756c;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease}
-.vbin-bin-chips button:hover:not(:disabled){border-color:#c9cfab;background:#fff}
-.vbin-bin-chips button.is-active{border-color:#c8d43d;background:#f5f8dc;color:#565e0a}
-.vbin-bin-chips button:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
-
 /* 底部：剩余在左、按钮在右；一屏只让主推卡用实心按钮 */
 .vbin-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:6px}
 .vbin-stock{font-size:11.5px;color:#a0a59b;white-space:nowrap}
 .vbin-stock strong{color:#5f645b;font-weight:650;font-variant-numeric:tabular-nums}
 .vbin-stock strong.is-low{color:#b4544a}
-.vbin-stock em{font-style:normal;color:#b6bab1}
 .vbin-open-button{width:auto;min-width:124px;height:36px;padding:0 16px;border-radius:999px;background:var(--color-brand)!important;color:#111214!important;border:1px solid transparent!important;font-size:13px;font-weight:650;box-shadow:none}
 .vbin-open-button svg{width:14px;height:14px;margin-left:3px}
 .vbin-open-button:disabled svg{display:none}

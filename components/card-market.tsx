@@ -41,18 +41,6 @@ function matchesPurpose(bin: CardBin, purpose: PurposeFilter) {
   return scenes.includes("通用消费") || scenes.includes("常规线上消费") || scenes.includes("谷歌");
 }
 
-/**
- * 同参数分组：卡组织 / 地区 / 卡种 / 费率 / 场景 / 限制完全一致的卡段，
- * 对用户就是同一个选择，合成一张卡展示（卡号在卡片内切换）。
- */
-function groupKeyOf(bin: CardBin) {
-  return [
-    bin.scheme, bin.region, bin.cardType, bin.openFee, bin.rechargeFeePercent,
-    bin.consumeFee.fixed, bin.consumeFee.percent, bin.smallAmountFeeThreshold ?? 0,
-    bin.scenes.join("|"), bin.restrictions.join("|"),
-  ].join("//");
-}
-
 export function CardMarket({
   bins,
   ownedCounts,
@@ -73,8 +61,6 @@ export function CardMarket({
   const [region, setRegion] = useState<RegionFilter>("all");
   const [purpose, setPurpose] = useState<PurposeFilter>("all");
   const [sort, setSort] = useState<SortMode>("recommended");
-  /** 同组内用户手动切换过的卡段，key 是分组键。 */
-  const [pickedBins, setPickedBins] = useState<Record<string, string>>({});
 
   const visibleBins = useMemo(() => {
     const query = keyword.trim().toLowerCase();
@@ -87,28 +73,15 @@ export function CardMarket({
     });
   }, [bins, keyword, purpose, region, scheme]);
 
+  /** 一个卡段一张卡，不做同参数聚合（用户确认过同参数卡也分开铺）。 */
   const groups = useMemo(() => {
-    const map = new Map<string, CardBin[]>();
-    visibleBins.forEach((bin) => {
-      const key = groupKeyOf(bin);
-      map.set(key, [...(map.get(key) ?? []), bin]);
-    });
-
-    const list = Array.from(map.entries()).map(([key, members]) => {
-      const pickedId = pickedBins[key];
-      const active = members.find((bin) => bin.id === pickedId)
-        ?? [...members].sort((a, b) => remainingStock(b, ownedCounts[b.id] ?? 0) - remainingStock(a, ownedCounts[a.id] ?? 0))[0];
-      const subscription = members.find((bin) => bin.subscriptionPrices?.length)?.subscriptionPrices;
-      const rest = members.reduce((sum, bin) => sum + remainingStock(bin, ownedCounts[bin.id] ?? 0), 0);
-      return {
-        key,
-        members,
-        active,
-        subscription,
-        rest,
-        recommended: members.some((bin) => bin.recommended),
-      };
-    });
+    const list = visibleBins.map((bin) => ({
+      key: bin.id,
+      active: bin,
+      subscription: bin.subscriptionPrices,
+      rest: remainingStock(bin, ownedCounts[bin.id] ?? 0),
+      recommended: bin.recommended,
+    }));
 
     if (sort === "fee") {
       list.sort((a, b) => a.active.openFee - b.active.openFee || b.rest - a.rest);
@@ -118,7 +91,7 @@ export function CardMarket({
       list.sort((a, b) => Number(b.recommended) - Number(a.recommended) || a.active.openFee - b.active.openFee || b.rest - a.rest);
     }
     return list;
-  }, [visibleBins, ownedCounts, pickedBins, sort]);
+  }, [visibleBins, ownedCounts, sort]);
 
   /** 一屏只留一个实心按钮：推荐卡优先，没有推荐卡就第一张。 */
   const primaryKey = (groups.find((group) => group.recommended) ?? groups[0])?.key;
@@ -140,7 +113,7 @@ export function CardMarket({
           </div>
         </div>
         <div className="vbin-head-stats">
-          <span className="vbin-count">共 {groups.length} 种 · {visibleBins.length} 个卡段</span>
+          <span className="vbin-count">共 {visibleBins.length} 个卡段</span>
           <span className="vbin-count is-stock">{editable("cardOverallStock")} · <strong>{overallRest}</strong> 张</span>
         </div>
       </header>
@@ -235,32 +208,9 @@ export function CardMarket({
                   </p>
                 ) : null}
 
-                {group.members.length > 1 ? (
-                  <div className="vbin-bin-switch">
-                    <span>同参数 {group.members.length} 个卡段</span>
-                    <div className="vbin-bin-chips">
-                      {group.members.map((member) => {
-                        const memberRest = remainingStock(member, ownedCounts[member.id] ?? 0);
-                        return (
-                          <button
-                            key={member.id}
-                            type="button"
-                            className={member.id === bin.id ? "is-active" : ""}
-                            disabled={memberRest <= 0}
-                            onClick={() => setPickedBins((prev) => ({ ...prev, [group.key]: member.id }))}
-                          >
-                            {member.bin}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
-
                 <div className="vbin-card-foot">
                   <span className="vbin-stock">
                     剩余 <strong className={group.rest <= 20 ? "is-low" : ""}>{group.rest}</strong> 张
-                    {group.members.length > 1 ? <em>（本卡段 {rest}）</em> : null}
                   </span>
                   <Button
                     className={`vbin-open-button ${isPrimary ? "" : "is-plain"}`}
