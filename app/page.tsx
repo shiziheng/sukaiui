@@ -789,6 +789,8 @@ export default function Home() {
     }
   };
   const navigateTo = (destination: DashboardDestination, options?: { keepPendingOrder?: boolean }) => {
+    // 切页时清掉 URL 上的 #help 等锚点，否则刷新会被 syncHelpHash 强制拉回帮助中心。
+    if (typeof window !== "undefined") window.history.replaceState(null, "", window.location.pathname + window.location.search);
     setWizardProduct(null);
     setWizardInitialMode(null);
     setPaymentRequest(null);
@@ -1043,7 +1045,7 @@ export default function Home() {
       title: "更多",
       items: [
         { id: "profile", label: content.personalCenter, icon: <UserRound aria-hidden="true" />, onLabelChange: (value) => updateContent("personalCenter", value) },
-        { id: "help", label: "帮助中心", icon: <BookOpen aria-hidden="true" /> },
+        // 帮助中心入口先屏蔽（用户要求），页面保留，仍可从客服卡的「帮助中心」链接或 #help 深链进入。
       ],
     },
   ];
