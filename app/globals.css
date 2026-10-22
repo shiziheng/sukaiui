@@ -1647,8 +1647,8 @@ button{font:inherit}
 .sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 0 8px;scrollbar-width:none}
 .sb-nav::-webkit-scrollbar{width:0}
 .sb-group+.sb-group{margin-top:14px}
-.sb-group-title{margin:0 0 6px;padding:0 10px;color:#666c72;font-size:10.5px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
-.sb-item{position:relative;width:100%;height:38px;display:flex;align-items:center;gap:10px;border:0;border-radius:9px;background:transparent;color:#c3c8ce;padding:0 10px;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.sb-group-title{margin:0 0 6px;padding:0 10px;color:#666c72;font-size:11px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
+.sb-item{position:relative;width:100%;height:40px;display:flex;align-items:center;gap:10px;border:0;border-radius:9px;background:transparent;color:#c3c8ce;padding:0 10px;font-size:14.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s ease,color .15s ease}
 .sb-item:hover{background:rgba(255,255,255,.045);color:#eef1e8}
 .sb-item[data-active=true]{background:rgba(255,255,255,.075);color:#fff;font-weight:660}
 .sb-item[data-active=true]::before{content:"";position:absolute;left:-6px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--color-brand)}
@@ -1761,15 +1761,15 @@ button{font:inherit}
    二级项用左侧小圆点做视觉层级，选中时点亮成荧光绿。 */
 .sb-item-row{display:flex;align-items:center;gap:2px}
 .sb-item-row .sb-item{flex:1;min-width:0}
-.sb-caret{width:26px;height:26px;flex:none;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#6d737a;cursor:pointer;transition:color .15s ease,background-color .15s ease}
-.sb-caret:hover{background:rgba(255,255,255,.06);color:#dfe3da}
-.sb-caret svg{width:13px;height:13px;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
+.sb-caret{width:28px;height:28px;flex:none;display:grid;place-items:center;border:0;border-radius:7px;background:transparent;color:#b7bdc4;cursor:pointer;transition:color .15s ease,background-color .15s ease}
+.sb-caret:hover{background:rgba(255,255,255,.08);color:#f0f3ec}
+.sb-caret svg{width:15px;height:15px;stroke-width:2.4;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
 .sb-caret[aria-expanded=true] svg{transform:rotate(0deg)}
 .sb-item[data-child-active=true]{color:#eef1e8}
 .sb-item[data-child-active=true] .sb-item-icon{color:var(--color-brand);opacity:1}
 
 .sb-sub{display:grid;gap:1px;padding:2px 0 5px;animation:sb-sub-in .2s ease both}
-.sb-subitem{position:relative;width:100%;height:31px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#969ca3;padding:0 10px 0 34px;font-size:12.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
+.sb-subitem{position:relative;width:100%;height:33px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#9ba1a8;padding:0 10px 0 34px;font-size:13.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
 .sb-subitem::before{content:"";position:absolute;left:17px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#4b5057;transition:background-color .14s ease,box-shadow .14s ease}
 .sb-subitem:hover{background:rgba(255,255,255,.045);color:#e7ebe2}
 .sb-subitem:hover::before{background:#8b9299}

@@ -80,6 +80,8 @@ export function AppSidebar({
   // 二级菜单默认全展开，用户手动收起才记成 closed。
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
   const toggleGroup = (id: string) => setClosedGroups((current) => ({ ...current, [id]: !current[id] }));
+  // 点带二级菜单的主菜单时，除了跳转还要把二级菜单展开。
+  const expandGroup = (id: string) => setClosedGroups((current) => (current[id] ? { ...current, [id]: false } : current));
 
   let index = 0;
 
@@ -130,7 +132,10 @@ export function AppSidebar({
                       data-child-active={childActive || undefined}
                       data-new={item.isNew || undefined}
                       type="button"
-                      onClick={() => onNavigate(destination)}
+                      onClick={() => {
+                        if (hasChildren) expandGroup(item.id);
+                        onNavigate(destination);
+                      }}
                       title={collapsed ? item.label : undefined}
                       style={{ ["--i" as string]: order }}
                     >

@@ -1038,9 +1038,9 @@ export default function Home() {
       title: "我的",
       items: [
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
-        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("walletMenu", value) },
-        { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("navInvite", value) },
-        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, isNew: true, onLabelChange: (value) => updateContent("securityMenu", value) },
+        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
+        { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
+        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, onLabelChange: (value) => updateContent("securityMenu", value) },
       ],
     },
     {
