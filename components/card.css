@@ -149,7 +149,7 @@
 .vcard-detail-actions .uc-secondary-action{height:36px;min-height:0;margin-left:0;padding:0 14px;font-size:13px;gap:5px;white-space:nowrap}
 .vcard-detail-actions .uc-secondary-action.is-danger{color:var(--color-danger)!important;border-color:var(--color-danger)!important}
 .vcard-detail-actions .vcard-action-primary{height:36px;padding:0 18px;font-size:13px}
-.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:12px;align-items:stretch}
+.vcard-detail-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(352px,430px);gap:12px;align-items:stretch}
 .vcard-info-panel,.vcard-side-panel,.vcard-finance-panel,.vcard-flow-panel{padding:14px 16px;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);box-shadow:var(--ds-shadow-subtle)}
 /* 左栏随右栏拉伸，卡面 + 卡信息在面板里垂直居中，底部不留一截空 */
 .vcard-info-panel{display:flex;flex-direction:column}
@@ -170,7 +170,7 @@
 .vcard-info-tools button:hover{background:var(--color-surface-soft);color:var(--color-text-primary)}
 .vcard-info-tools svg{width:14px;height:14px}
 /* 左上角专属卡面：详情页唯一一张实体卡，装饰集中在这里，做出「这张卡是我的」的感觉 */
-.vcard-info-body{display:grid;grid-template-columns:minmax(0,332px) minmax(0,1fr);gap:20px;align-items:start}
+.vcard-info-body{display:grid;grid-template-columns:minmax(240px,332px) minmax(260px,1fr);gap:20px;align-items:start}
 .vcard-face{display:flex;flex-direction:column;gap:8px;min-width:0}
 .vcard-face .vcard{width:100%;aspect-ratio:1.586;padding:16px 18px;gap:0;justify-content:space-between;border-radius:14px}
 .vcard-face .vcard-head{gap:8px}
@@ -364,7 +364,8 @@
 /* ---------- 虚拟卡模块响应式（新增独立媒体块，不改动既有窄屏共享块） ---------- */
 /* 注：一级/二级菜单间距维持全局默认（桌面 72px / 手机 118px 配两行顶栏），卡片页不做覆盖 */
 @media(max-width:1200px){.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:980px){
+/* v0.21.1：侧栏占 244px 后详情页两栏在 1280 视口会挤爆，降级点从 980 提到 1240（按内容宽 996 校验过最小列宽） */
+@media(max-width:1240px){
   .vcard-detail-top{grid-template-columns:1fr}
   .vcard-info-body{grid-template-columns:1fr;gap:14px}
   .vcard-face{max-width:360px;margin-inline:auto}

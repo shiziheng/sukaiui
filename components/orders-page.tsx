@@ -213,7 +213,7 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
                     <tr key={row.key}>
                       <td><time>{row.time}</time></td>
                       <td><span className={`uc-kind-tag vcard-flow-type is-${row.typeClass}`}>{row.typeLabel}</span></td>
-                      <td>{row.title}</td>
+                      <td><span className="flow-desc">{row.title}</span></td>
                       <td className={`is-amount vcard-flow-amount ${row.amount > 0 ? "is-income" : "is-expense"}`}>{row.amount > 0 ? "+" : "−"}{money(Math.abs(row.amount))}</td>
                       <td>{money(row.balanceAfter)}</td>
                       <td><code>{row.orderNo}</code></td>

@@ -1792,3 +1792,11 @@ button{font:inherit}
   .has-sidebar .card-module .card-tabs,
   .has-sidebar .commerce-panel .biz-tabs{display:block}
 }
+
+/* ---------- v0.21.1：我的账单流水表窄宽优化（侧栏占宽后 1280 左右说明列与金额列挤在一起） ---------- */
+/* 说明列限宽省略，金额列左侧留出呼吸空隙；1240 以下藏掉单号列（单号在订单详情抽屉里仍可查） */
+.bill-flow-table .flow-desc{display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.bill-flow-table td.is-amount{padding-left:28px}
+@media(max-width:1240px){
+  .bill-flow-table th:nth-child(6),.bill-flow-table td:nth-child(6){display:none}
+}
