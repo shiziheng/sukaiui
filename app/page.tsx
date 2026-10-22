@@ -650,6 +650,8 @@ export default function Home() {
         if (config.content.ordersPageTitle === "我的订单") config.content.ordersPageTitle = "我的账单";
         // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）
         if (config.content.cardDeleteCard === "注销卡片") config.content.cardDeleteCard = "删卡";
+        // 虚拟卡页签更名：消费记录 → 卡流水（2026-10-22 拍板，链式迁移）
+        if (config.content.cardTabTransactions === "消费记录") config.content.cardTabTransactions = "卡流水";
         if (config.content.cardDeleteConfirmTitle === "注销这张卡？") config.content.cardDeleteConfirmTitle = "删掉这张卡？";
         if (config.content.cardDeleteConfirmDescription === "注销后卡片不可恢复，卡内余额将退回平台余额。") config.content.cardDeleteConfirmDescription = "删卡后卡片不可恢复，卡内余额将退回平台余额。";
         if (config.content.viewDetails === "详情") config.content.viewDetails = "查看详情";
