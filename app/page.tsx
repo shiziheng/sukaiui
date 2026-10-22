@@ -512,8 +512,8 @@ export default function Home() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
-  // 虚拟卡页进入时落在哪个页签：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
-  const [cardInitialTab, setCardInitialTab] = useState<"cards" | "market" | "transactions">("cards");
+  // 虚拟卡的页签由左侧二级菜单驱动：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
+  const [cardTab, setCardTab] = useState<"cards" | "market" | "transactions">("cards");
   // 再点一次顶栏「我的卡片」：详情页是模块内子视图，靠 key 自增强制回到列表首页签。
   const [cardResetCount, setCardResetCount] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
@@ -797,7 +797,7 @@ export default function Home() {
     setPurchaseIntent(null);
     // 默认切页签即作废挂起订单；只有「去充值」这一条路需要把它带到充值页。
     if (!options?.keepPendingOrder) setPendingOrder(null);
-    setCardInitialTab("cards");
+    setCardTab("cards");
     // 已经在虚拟卡页再点顶栏入口时，selectedMenu 不变、模块不会重挂载，
     // 这里自增一次 key 让模块回到列表（否则停在卡片详情页，看着像点击没生效）。
     if (destination === "card") setCardResetCount((count) => count + 1);
@@ -836,7 +836,7 @@ export default function Home() {
   // 未登录在虚拟卡页点「开卡」：沿用站内一键登录，登录后直接落到卡段市场继续。
   const handlePublicOpenCard = () => {
     signInDemo();
-    setCardInitialTab("market");
+    setCardTab("market");
   };
   const openBatchRecharge = () => {
     // 批量代充同样「下单即登录」，入口先过纯登录动作，不动向导内部的 5 步结构。
@@ -995,17 +995,38 @@ export default function Home() {
   };
 
   /**
-   * 登录后的左侧菜单。原来藏在头像下拉里的钱包 / 邀请 / 安全提到一级，
-   * 因为登录用户每天要用的是这几个，不该埋在二级。
+   * 登录后的左侧菜单。一级只留四条主线：首页 / 虚拟卡 / 代充 / 充值。
+   * 虚拟卡的三个页签、代充下的套餐代充与成品号都收到二级菜单里，默认展开。
+   * 钱包 / 邀请 / 安全这些仍然放在「我的」分组，不占主线位置。
    */
   const sidebarGroups: SidebarGroup[] = [
     {
-      title: "业务",
+      title: "主菜单",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
-        { id: "account", label: content.navAccount, icon: <PackageOpen aria-hidden="true" />, onLabelChange: (value) => updateContent("navAccount", value) },
-        { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
-        { id: "recharge", label: content.navRecharge, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
+        {
+          id: "card-parent",
+          label: content.navCard,
+          icon: <CreditCard aria-hidden="true" />,
+          targetId: "card",
+          onLabelChange: (value) => updateContent("navCard", value),
+          children: [
+            { id: "card-cards", label: content.cardTabCards, onLabelChange: (value) => updateContent("cardTabCards", value) },
+            { id: "card-market", label: content.cardTabMarket, onLabelChange: (value) => updateContent("cardTabMarket", value) },
+            { id: "card-transactions", label: content.cardTabTransactions, onLabelChange: (value) => updateContent("cardTabTransactions", value) },
+          ],
+        },
+        {
+          id: "biz-parent",
+          label: content.navRecharge,
+          icon: <Zap aria-hidden="true" />,
+          targetId: "biz-recharge",
+          onLabelChange: (value) => updateContent("navRecharge", value),
+          children: [
+            { id: "biz-recharge", label: content.bizTabRecharge, onLabelChange: (value) => updateContent("bizTabRecharge", value) },
+            { id: "biz-account", label: content.navAccount, onLabelChange: (value) => updateContent("navAccount", value) },
+          ],
+        },
         { id: "topup", label: content.navTopup, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
       ],
     },
@@ -1044,11 +1065,37 @@ export default function Home() {
   // rail 强制收起、expanded 强制展开，collapsible 才听用户的。
   const sidebarIsCollapsed = sidebarLayout === "rail" ? true : sidebarLayout === "expanded" ? false : sidebarCollapsed;
 
+  // 侧栏高亮：虚拟卡看当前页签，代充看当前业务线，其余看页面本身。
+  const sidebarActiveId = selectedMenu === "card"
+    ? `card-${cardTab}`
+    : isProductsPage
+      ? `biz-${productsBiz}`
+      : selectedMenu;
+
+  // 面包屑的第二段：二级菜单进来时补上具体页签名。
+  const sidebarSubTitle: Partial<Record<string, string>> = {
+    "card-cards": content.cardTabCards,
+    "card-market": content.cardTabMarket,
+    "card-transactions": content.cardTabTransactions,
+    "biz-recharge": content.bizTabRecharge,
+    "biz-account": content.navAccount,
+  };
+
   const handleSidebarNavigate = (id: string) => {
-    const destination = id as MenuId;
-    if (destination === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1);
-    navigateTo(destination);
-    if (destination === "help") window.history.replaceState(null, "", "#help");
+    if (id.startsWith("card-")) {
+      const nextTab = id.slice(5) as "cards" | "market" | "transactions";
+      // 先进页面（navigateTo 会清掉卡片详情并重置为「我的卡片」），再落到点的那个页签。
+      navigateTo("card");
+      setCardTab(nextTab);
+    } else if (id === "biz-recharge" || id === "biz-account") {
+      setBizTab(id === "biz-account" ? "account" : "recharge");
+      navigateTo("recharge");
+    } else {
+      const destination = id as MenuId;
+      if (destination === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1);
+      navigateTo(destination);
+      if (destination === "help") window.history.replaceState(null, "", "#help");
+    }
     if (sidebarIntro) dismissSidebarIntro();
     setMobileNavOpen(false);
     setSidebarLayoutOpen(false);
@@ -1093,7 +1140,7 @@ export default function Home() {
         <>
           <AppSidebar
             groups={sidebarGroups}
-            activeId={selectedMenu}
+            activeId={sidebarActiveId}
             collapsed={sidebarIsCollapsed}
             layout={sidebarLayout}
             layoutOpen={sidebarLayoutOpen}
@@ -1124,6 +1171,12 @@ export default function Home() {
               <span>工作台</span>
               <i aria-hidden="true">/</i>
               <strong>{menuTitles[selectedMenu]}</strong>
+              {sidebarSubTitle[sidebarActiveId] ? (
+                <>
+                  <i aria-hidden="true">/</i>
+                  <strong>{sidebarSubTitle[sidebarActiveId]}</strong>
+                </>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -1276,7 +1329,8 @@ export default function Home() {
               isLoggedIn ? (
                 <CardModule
                   key={`card-${cardResetCount}`}
-                  initialTab={cardInitialTab}
+                  tab={cardTab}
+                  onTabChange={setCardTab}
                   cards={virtualCards}
                   setCards={setVirtualCards}
                   flows={cardFlows}

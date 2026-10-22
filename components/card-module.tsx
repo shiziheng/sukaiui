@@ -30,12 +30,13 @@ export type ClosedCardRecord = { card: VirtualCard; closedAt: string };
 export type PlatformFlowInput = { type: PlatformFlowType; amount: number; balanceAfter: number; note: string };
 
 export function CardModule({
-  initialTab = "cards",
+  tab, onTabChange,
   cards, setCards, flows, setFlows, bins, platformBalance, setPlatformBalance,
   content, editMode, updateContent, onGoTopup, onPlatformFlow,
 }: {
-  /** 进入模块时默认展示的页签；未登录点「开卡」登录后可直达卡段市场。 */
-  initialTab?: CardTab;
+  /** 页签由父级（左侧二级菜单）控制，模块内不再自持状态。 */
+  tab: CardTab;
+  onTabChange: (tab: CardTab) => void;
   cards: VirtualCard[];
   setCards: Dispatch<SetStateAction<VirtualCard[]>>;
   flows: CardFlowItem[];
@@ -49,7 +50,7 @@ export function CardModule({
   onGoTopup: () => void;
   onPlatformFlow: (flow: PlatformFlowInput) => void;
 }) {
-  const [tab, setTab] = useState<CardTab>(initialTab);
+  const setTab = (next: CardTab) => onTabChange(next);
   const [detailCard, setDetailCard] = useState<VirtualCard | null>(null);
   const [openBin, setOpenBin] = useState<CardBin | null>(null);
   const [fundCard, setFundCard] = useState<VirtualCard | null>(null);

@@ -1755,3 +1755,40 @@ button{font:inherit}
 /* 侧栏下全宽页面（帮助中心）用 100vw 算居中会多算 244px，这里按内容宽重算 */
 .app-shell.has-sidebar .help-hero{padding-inline:max(var(--ds-page-gutter),calc((100% - 1320px)/2))}
 .app-shell.has-sidebar .help-center{min-height:calc(100svh - var(--sb-head))}
+
+/* ===== 侧栏二级菜单（v0.20.1） =====
+   虚拟卡的三个页签、代充下的套餐代充/成品号收进左侧，默认展开。
+   二级项用左侧小圆点做视觉层级，选中时点亮成荧光绿。 */
+.sb-item-row{display:flex;align-items:center;gap:2px}
+.sb-item-row .sb-item{flex:1;min-width:0}
+.sb-caret{width:26px;height:26px;flex:none;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#6d737a;cursor:pointer;transition:color .15s ease,background-color .15s ease}
+.sb-caret:hover{background:rgba(255,255,255,.06);color:#dfe3da}
+.sb-caret svg{width:13px;height:13px;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
+.sb-caret[aria-expanded=true] svg{transform:rotate(0deg)}
+.sb-item[data-child-active=true]{color:#eef1e8}
+.sb-item[data-child-active=true] .sb-item-icon{color:var(--color-brand);opacity:1}
+
+.sb-sub{display:grid;gap:1px;padding:2px 0 5px;animation:sb-sub-in .2s ease both}
+.sb-subitem{position:relative;width:100%;height:31px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#969ca3;padding:0 10px 0 34px;font-size:12.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
+.sb-subitem::before{content:"";position:absolute;left:17px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#4b5057;transition:background-color .14s ease,box-shadow .14s ease}
+.sb-subitem:hover{background:rgba(255,255,255,.045);color:#e7ebe2}
+.sb-subitem:hover::before{background:#8b9299}
+.sb-subitem[data-active=true]{background:rgba(207,255,26,.09);color:#f4f8ea;font-weight:660}
+.sb-subitem[data-active=true]::before{background:var(--color-brand);box-shadow:0 0 0 3px rgba(207,255,26,.14)}
+.sb-subitem-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@keyframes sb-sub-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* 收起成 72px 图标轨时，二级菜单整体让位 */
+.app-sidebar[data-collapsed=true] .sb-caret,
+.app-sidebar[data-collapsed=true] .sb-sub{display:none}
+
+/* 左侧已经有二级菜单，页面里原来的页签只在窄屏抽屉模式露出 */
+.has-sidebar .card-module .card-tabs,
+.has-sidebar .commerce-panel .biz-tabs{display:none}
+
+@media(max-width:1024px){
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-caret{display:grid}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-sub{display:grid}
+  .has-sidebar .card-module .card-tabs,
+  .has-sidebar .commerce-panel .biz-tabs{display:block}
+}
