@@ -200,6 +200,16 @@ export type DemoContent = {
   exchangeToBalance: string;
   walletMenu: string;
   securityMenu: string;
+  myTitle: string;
+  mySubtitle: string;
+  myAccountGroup: string;
+  myMoreGroup: string;
+  myTabProfile: string;
+  myTabSecurity: string;
+  myTabInvite: string;
+  myTabTools: string;
+  demoToolsTitle: string;
+  demoToolsHint: string;
   homeActionTitle: string;
   homeActionSubtitle: string;
   accountServiceTitle: string;
@@ -406,11 +416,11 @@ export const defaultContent: DemoContent = {
   navRecharge: "商城",
   navCard: "卡片",
   navTopup: "充值",
-  navOrders: "账单",
+  navOrders: "订单",
   bizTabRecharge: "套餐代充",
   bizTabAccount: "成品号",
-  billTabFlows: "平台流水",
-  billTabOrders: "我的订单",
+  billTabFlows: "资金流水",
+  billTabOrders: "订单",
   billAllTypes: "全部类型",
   billTypeRecharge: "代充流水",
   billTypeAccount: "成品号流水",
@@ -418,8 +428,8 @@ export const defaultContent: DemoContent = {
   billTypeCard: "卡流水",
   walletFlowTitle: "余额流水",
   walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
-  navInvite: "推广",
-  personalCenter: "个人中心",
+  navInvite: "推广奖励",
+  personalCenter: "我的",
   logout: "退出登录",
   supportNav: "在线客服",
   messagesNav: "站内信",
@@ -537,8 +547,8 @@ export const defaultContent: DemoContent = {
   recentOrders: "最近消费订单",
   viewAllOrders: "查看全部订单",
   goBrowse: "去逛逛",
-  ordersPageTitle: "我的账单",
-  ordersPageSubtitle: "查看和管理你的成品号与代充服务订单。",
+  ordersPageTitle: "订单",
+  ordersPageSubtitle: "查看和管理你的成品号、代充订单与资金流水。",
   allOrdersTab: "全部订单",
   accountOrdersTab: "成品号订单",
   rechargeOrdersTab: "代充订单",
@@ -578,7 +588,7 @@ export const defaultContent: DemoContent = {
   cancelOrder: "取消订单",
   viewCredentials: "查看凭据",
   downloadAction: "下载凭据",
-  invitePageTitle: "我的邀请",
+  invitePageTitle: "推广奖励",
   invitePageSubtitle: "邀请好友使用 SUKAI，查看你的邀请奖励与记录。",
   downloadQr: "下载二维码",
   currentPoints: "当前积分",
@@ -592,8 +602,18 @@ export const defaultContent: DemoContent = {
   exchangeInput: "兑换积分",
   expectedCredit: "预计到账",
   exchangeToBalance: "兑换到余额",
-  walletMenu: "我的钱包",
-  securityMenu: "账户与安全",
+  walletMenu: "钱包",
+  securityMenu: "账户安全",
+  myTitle: "我的",
+  mySubtitle: "管理账户资料、账户安全与推广奖励。",
+  myAccountGroup: "账户设置",
+  myMoreGroup: "更多",
+  myTabProfile: "个人资料",
+  myTabSecurity: "账户安全",
+  myTabInvite: "推广奖励",
+  myTabTools: "演示工具",
+  demoToolsTitle: "演示工具",
+  demoToolsHint: "仅用于演示文案与配置，客户视图默认不显示这些入口。",
   homeActionTitle: "今天需要办理什么？",
   homeActionSubtitle: "根据是否已有账号，快速选择购买账号或升级套餐。",
   accountServiceTitle: "购买 ChatGPT / Claude 账号",
@@ -607,7 +627,7 @@ export const defaultContent: DemoContent = {
   recentOrderCount: "最近订单",
   inviteLightTitle: "邀请好友",
   viewInviteActivity: "查看邀请活动",
-  profileTitle: "个人中心",
+  profileTitle: "个人资料",
   profileSubtitle: "查看账户基本信息与当前状态。",
   editProfile: "编辑资料",
   registeredAt: "注册时间",
@@ -617,7 +637,7 @@ export const defaultContent: DemoContent = {
   accountFlowTab: "账户流水",
   rechargeRecordTab: "充值记录",
   frozenDetailTab: "冻结明细",
-  securityTitle: "账户与安全",
+  securityTitle: "账户安全",
   securitySubtitle: "管理登录邮箱与账户密码。",
   loginEmail: "登录邮箱",
   loginPassword: "登录密码",

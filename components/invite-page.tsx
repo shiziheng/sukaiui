@@ -21,7 +21,7 @@ function InviteEmpty({ icon, title }: { icon: ReactNode; title: string }) {
   return <div className="uc-empty invite-empty">{icon}<strong>{title}</strong><p>相关邀请与奖励记录会显示在这里。</p></div>;
 }
 
-export function InvitePage({ content, editMode, updateContent }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater }) {
+export function InvitePage({ content, editMode, updateContent, embedded = false }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; embedded?: boolean }) {
   const data = accountDashboardMock;
   const [tab, setTab] = useState<DetailTab>("invites");
   const [points, setPoints] = useState("100");
@@ -33,8 +33,8 @@ export function InvitePage({ content, editMode, updateContent }: { content: Demo
   const count = tab === "invites" ? data.invitedUserRecords.length : tab === "rewards" ? data.inviteRecords.length : data.exchangeRecords.length;
 
   return (
-    <section className="user-center-page invite-page">
-      <PageHeading titleKey="invitePageTitle" subtitleKey="invitePageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<Gift />} aside={<span className="uc-rate-badge">{data.invite.rate}</span>} />
+    <section className={embedded ? "my-embedded invite-page" : "user-center-page invite-page"}>
+      {embedded ? null : <PageHeading titleKey="invitePageTitle" subtitleKey="invitePageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<Gift />} aside={<span className="uc-rate-badge">{data.invite.rate}</span>} />}
 
       <section className="uc-card invite-core-card">
         <div className="invite-core-copy">

@@ -16,23 +16,21 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { AccountDashboard } from "@/components/account-dashboard";
+import { AccountHome } from "@/components/account-home";
 import { AccountPurchaseDialog, type PurchaseStage } from "@/components/account-purchase-dialog";
 import { SiteMessages } from "@/components/site-messages";
 import { EditableText } from "@/components/editable-text";
-import { InvitePage } from "@/components/invite-page";
 import { HelpCenter } from "@/components/help-center";
 import { OrdersPage } from "@/components/orders-page";
 import { type PaymentRequest } from "@/components/payment-experience";
-import { ProfilePage } from "@/components/profile-page";
 import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
-import { SecurityPage } from "@/components/security-page";
 import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
 import { PublicCardPage } from "@/components/public-card-page";
-import { AppSidebar, type SidebarGroup, type SidebarLayout } from "@/components/app-sidebar";
+import { AppSidebar, type SidebarGroup } from "@/components/app-sidebar";
+import { MyPage, type MyTab } from "@/components/my-page";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -69,10 +67,6 @@ type DemoConfig = { content: DemoContent; brands: Brand[]; products: Product[]; 
 type FAQDraft = Omit<FAQItem, "id" | "sortOrder"> & { id?: string };
 
 const STORAGE_KEY = "sukai-demo-copy-config-v1";
-/** 侧栏版式偏好：展开 / 图标轨 / 可折叠，跟着浏览器走。 */
-const SIDEBAR_PREF_KEY = "sukai-sidebar-pref-v1";
-/** 首单引导只播一次，播完记住，别每次登录都放。 */
-const SIDEBAR_INTRO_KEY = "sukai-sidebar-intro-seen-v1";
 
 const tagStyle: Record<string, string> = {
   Plus: "tag-blue", Pro: "tag-violet", "Claude Pro": "tag-violet",
@@ -529,14 +523,10 @@ export default function Home() {
    * - layout 三种：随手收起（默认，可手动折叠）/ 一直展开 / 只留图标
    * - 窄屏不看 layout，统一变抽屉，用 mobileNavOpen 控制
    */
-  const [sidebarLayout, setSidebarLayout] = useState<SidebarLayout>("collapsible");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [sidebarLayoutOpen, setSidebarLayoutOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  /** 侧栏首次出现播一次过渡 + 提示条，之后不再打扰。 */
-  const [sidebarIntro, setSidebarIntro] = useState(false);
-  /** 偏好从 localStorage 读回来之前先不写回，避免一进页面把用户设置覆盖成默认值。 */
-  const [sidebarHydrated, setSidebarHydrated] = useState(false);
+  /** 我的：个人资料 / 账户安全 / 推广奖励 / 演示工具 四个页签。 */
+  const [myTab, setMyTab] = useState<MyTab>("profile");
   const [wizardProduct, setWizardProduct] = useState<Product | null>(null);
   const [wizardInitialMode, setWizardInitialMode] = useState<RechargeMode | null>(null);
   const [generatedOrders, setGeneratedOrders] = useState<ManagedOrder[]>([]);
@@ -562,59 +552,6 @@ export default function Home() {
   const pushPlatformFlow = (flow: PlatformFlowInput) => {
     setPlatformFlows((current) => [{ id: `PF-${Date.now()}`, time: new Date().toLocaleString("zh-CN", { hour12: false }).replaceAll("/", "-"), status: "success" as const, ...flow }, ...current]);
   };
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(SIDEBAR_PREF_KEY);
-      if (raw) {
-        const pref = JSON.parse(raw) as { layout?: SidebarLayout; collapsed?: boolean };
-        if (pref.layout === "collapsible" || pref.layout === "expanded" || pref.layout === "rail") setSidebarLayout(pref.layout);
-        if (typeof pref.collapsed === "boolean") setSidebarCollapsed(pref.collapsed);
-      }
-    } catch {
-      // 读不出来就用默认版式，不影响使用
-    }
-    setSidebarHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!sidebarHydrated) return;
-    try {
-      window.localStorage.setItem(SIDEBAR_PREF_KEY, JSON.stringify({ layout: sidebarLayout, collapsed: sidebarCollapsed }));
-    } catch {
-      // 无痕模式下写不了，忽略
-    }
-  }, [sidebarLayout, sidebarCollapsed, sidebarHydrated]);
-
-  // 登录后第一次看到侧栏：播一次过渡和「常用功能挪到左边了」提示。
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    let seen = false;
-    try {
-      seen = window.localStorage.getItem(SIDEBAR_INTRO_KEY) === "1";
-    } catch {
-      seen = false;
-    }
-    if (seen) return;
-    const timer = window.setTimeout(() => setSidebarIntro(true), 220);
-    return () => window.clearTimeout(timer);
-  }, [isLoggedIn]);
-
-  const dismissSidebarIntro = () => {
-    setSidebarIntro(false);
-    try {
-      window.localStorage.setItem(SIDEBAR_INTRO_KEY, "1");
-    } catch {
-      // 忽略
-    }
-  };
-
-  // 提示条自己不撤就 8 秒后收掉，避免一直挂在侧栏上。
-  useEffect(() => {
-    if (!sidebarIntro) return;
-    const timer = window.setTimeout(dismissSidebarIntro, 8000);
-    return () => window.clearTimeout(timer);
-  }, [sidebarIntro]);
 
   useEffect(() => {
     const syncHelpHash = () => {
@@ -706,8 +643,6 @@ export default function Home() {
   }, [isProductsPage, products, selectedBrand, productsBiz]);
   const currentBrand = brands.find((brand) => brand.id === selectedBrand) ?? brands[0];
   const effectiveBalance = isLoggedIn ? walletBalance : 0;
-  /** 右上角展示的卡内总余额：当前持有卡片余额合计（注销卡不含，已从列表移除）。 */
-  const cardBalanceTotal = virtualCards.reduce((sum, card) => sum + card.balance, 0);
   // 挂起订单对应的余额缺口（向上取整、最小 1），用于预填充值页金额。
   const pendingOrderGapAmount = (() => {
     if (!pendingOrder) return undefined;
@@ -1005,52 +940,19 @@ export default function Home() {
   };
 
   /**
-   * 登录后的左侧菜单。主线：首页 / 钱包 / 卡片 / 商城 / 账单 / 推广。
-   * 卡片（原虚拟卡）三个页签、商城（原代充）下套餐代充与成品号收进二级菜单，默认展开。
-   * 在线客服 / 站内信 / 账户与安全 / 个人中心收进「更多」。
+   * 登录后的左侧菜单：扁平 5 个一级入口 + 底部「我的」。
+   * 卡片/商城/订单的二级全部收进页内页签，侧栏不再展开任何树。
+   * 在线客服 / 站内信走顶栏；账户与安全 / 个人中心 / 推广奖励收进「我的」。
    */
   const sidebarGroups: SidebarGroup[] = [
     {
-      title: "主菜单",
+      title: "",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
+        { id: "recharge", label: content.navRecharge, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
+        { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
         { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
-        {
-          id: "card-parent",
-          label: content.navCard,
-          icon: <CreditCard aria-hidden="true" />,
-          targetId: "card",
-          onLabelChange: (value) => updateContent("navCard", value),
-          children: [
-            { id: "card-cards", label: content.cardTabCards, onLabelChange: (value) => updateContent("cardTabCards", value) },
-            { id: "card-market", label: content.cardTabMarket, onLabelChange: (value) => updateContent("cardTabMarket", value) },
-            { id: "card-transactions", label: content.cardTabTransactions, onLabelChange: (value) => updateContent("cardTabTransactions", value) },
-          ],
-        },
-        {
-          id: "biz-parent",
-          label: content.navRecharge,
-          icon: <Zap aria-hidden="true" />,
-          targetId: "biz-recharge",
-          onLabelChange: (value) => updateContent("navRecharge", value),
-          children: [
-            { id: "biz-recharge", label: content.bizTabRecharge, onLabelChange: (value) => updateContent("bizTabRecharge", value) },
-            { id: "biz-account", label: content.navAccount, onLabelChange: (value) => updateContent("navAccount", value) },
-          ],
-        },
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
-        { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
-      ],
-    },
-    {
-      title: "更多",
-      items: [
-        // 在线客服 / 站内信不是独立页面，点开各自唤起顶部浮层 / 铃铛面板。
-        { id: "support", label: content.supportNav, icon: <Headphones aria-hidden="true" />, onLabelChange: (value) => updateContent("supportNav", value) },
-        { id: "messages", label: content.messagesNav, icon: <Bell aria-hidden="true" /> },
-        { id: "security", label: content.securityMenu, icon: <ShieldCheck aria-hidden="true" />, onLabelChange: (value) => updateContent("securityMenu", value) },
-        { id: "profile", label: content.personalCenter, icon: <UserRound aria-hidden="true" />, onLabelChange: (value) => updateContent("personalCenter", value) },
-        // 帮助中心入口先屏蔽（用户要求），页面保留，仍可从客服卡的「帮助中心」链接或 #help 深链进入。
       ],
     },
   ];
@@ -1066,51 +968,19 @@ export default function Home() {
     invite: content.navInvite,
     security: content.securityMenu,
     profile: content.personalCenter,
+    my: content.myTitle,
     help: "帮助中心",
   };
 
-  // rail 强制收起、expanded 强制展开，collapsible 才听用户的。
-  const sidebarIsCollapsed = sidebarLayout === "rail" ? true : sidebarLayout === "expanded" ? false : sidebarCollapsed;
+  const sidebarIsCollapsed = sidebarCollapsed;
 
-  // 侧栏高亮：虚拟卡看当前页签，代充看当前业务线，其余看页面本身。
-  const sidebarActiveId = selectedMenu === "card"
-    ? `card-${cardTab}`
-    : isProductsPage
-      ? `biz-${productsBiz}`
-      : selectedMenu;
-
-  // 面包屑的第二段：二级菜单进来时补上具体页签名。
-  const sidebarSubTitle: Partial<Record<string, string>> = {
-    "card-cards": content.cardTabCards,
-    "card-market": content.cardTabMarket,
-    "card-transactions": content.cardTabTransactions,
-    "biz-recharge": content.bizTabRecharge,
-    "biz-account": content.navAccount,
-  };
+  // 侧栏高亮：成品号是商城的子页签，归到 recharge；「我的」单独走底部按钮。
+  const sidebarActiveId = selectedMenu === "my" ? "my" : selectedMenu === "account" ? "recharge" : selectedMenu;
 
   const handleSidebarNavigate = (id: string) => {
-    // 在线客服 / 站内信不是独立页面，各自唤起顶部客服浮层 / 铃铛面板。
-    if (id === "support") {
-      setSupportSurface("top");
-      if (sidebarIntro) dismissSidebarIntro();
-      setMobileNavOpen(false);
-      setSidebarLayoutOpen(false);
-      return;
-    }
-    if (id === "messages") {
-      setMessageOpen(true);
-      if (sidebarIntro) dismissSidebarIntro();
-      setMobileNavOpen(false);
-      setSidebarLayoutOpen(false);
-      return;
-    }
-    if (id.startsWith("card-")) {
-      const nextTab = id.slice(5) as "cards" | "market" | "transactions";
-      // 先进页面（navigateTo 会清掉卡片详情并重置为「我的卡片」），再落到点的那个页签。
-      navigateTo("card");
-      setCardTab(nextTab);
-    } else if (id === "biz-recharge" || id === "biz-account") {
-      setBizTab(id === "biz-account" ? "account" : "recharge");
+    if (id === "recharge" || id === "account") {
+      // 商城页内两个页签：套餐代充 / 成品号。
+      setBizTab(id === "account" ? "account" : "recharge");
       navigateTo("recharge");
     } else {
       const destination = id as MenuId;
@@ -1118,30 +988,18 @@ export default function Home() {
       navigateTo(destination);
       if (destination === "help") window.history.replaceState(null, "", "#help");
     }
-    if (sidebarIntro) dismissSidebarIntro();
     setMobileNavOpen(false);
-    setSidebarLayoutOpen(false);
-  };
-
-  const pickSidebarLayout = (next: SidebarLayout) => {
-    setSidebarLayout(next);
-    setSidebarLayoutOpen(false);
   };
 
   /**
-   * 顶栏左边那个按钮在不同场景干不同事：
-   * 窄屏 = 打开抽屉；桌面 = 可折叠时折叠，固定版式时打开「版式」让用户改回来。
+   * 顶栏左边那个按钮：窄屏开抽屉，桌面折叠 / 展开侧栏。
    */
   const handleSidebarToggleClick = () => {
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches) {
       setMobileNavOpen((current) => !current);
       return;
     }
-    if (sidebarLayout === "collapsible") {
-      setSidebarCollapsed((current) => !current);
-      return;
-    }
-    setSidebarLayoutOpen((current) => !current);
+    setSidebarCollapsed((current) => !current);
   };
 
   // 未登录只留三个入口：首页 / 虚拟卡 / 代充。成品号仍从首页服务卡与页脚进入。
@@ -1157,28 +1015,22 @@ export default function Home() {
   };
 
   return (
-    <div className={`app-shell ${editMode ? "edit-mode" : ""} ${isLoggedIn ? "has-sidebar" : ""} ${isLoggedIn && sidebarIsCollapsed ? "sidebar-collapsed" : ""} ${isLoggedIn && sidebarIntro ? "sidebar-intro" : ""} ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
+    <div className={`app-shell ${editMode ? "edit-mode" : ""} ${isLoggedIn ? "has-sidebar" : ""} ${isLoggedIn && sidebarIsCollapsed ? "sidebar-collapsed" : ""} ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
       {isLoggedIn ? (
         <>
           <AppSidebar
             groups={sidebarGroups}
             activeId={sidebarActiveId}
             collapsed={sidebarIsCollapsed}
-            layout={sidebarLayout}
-            layoutOpen={sidebarLayoutOpen}
             editMode={editMode}
             brandText={content.logoText}
             onBrandChange={(value) => updateContent("logoText", value)}
             userInitials={accountDashboardMock.user.initials}
             userName={accountDashboardMock.user.name}
             userMeta={accountDashboardMock.user.email}
-            introVisible={sidebarIntro}
             onNavigate={handleSidebarNavigate}
             onHome={() => handleSidebarNavigate("home")}
             onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
-            onToggleLayout={() => setSidebarLayoutOpen((current) => !current)}
-            onPickLayout={pickSidebarLayout}
-            onDismissIntro={dismissSidebarIntro}
           />
           <button className="sb-backdrop" type="button" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} />
         </>
@@ -1193,12 +1045,6 @@ export default function Home() {
               <span>工作台</span>
               <i aria-hidden="true">/</i>
               <strong>{menuTitles[selectedMenu]}</strong>
-              {sidebarSubTitle[sidebarActiveId] ? (
-                <>
-                  <i aria-hidden="true">/</i>
-                  <strong>{sidebarSubTitle[sidebarActiveId]}</strong>
-                </>
-              ) : null}
             </div>
           </div>
         ) : (
@@ -1237,13 +1083,8 @@ export default function Home() {
               <button className="exit-edit-button" type="button" onClick={() => setEditMode(false)}>{content.exitEdit}</button>
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
-          ) : isLoggedIn ? (
-            <button className="edit-copy-button" type="button" onClick={() => setEditMode(true)}>
-              <Pencil aria-hidden="true" />{content.editCopy}
-            </button>
           ) : null}
           {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包/充值" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
-          {isLoggedIn ? <button className="header-balance" type="button" title="卡内总余额 · 点击前往虚拟卡" onClick={() => navigateTo("card")}><CreditCard aria-hidden="true" /><span className="header-balance-tag">卡内</span>${cardBalanceTotal.toFixed(2)}</button> : null}
           {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"
@@ -1280,10 +1121,7 @@ export default function Home() {
                 <strong>{accountDashboardMock.user.name}</strong><span>{accountDashboardMock.user.email}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem data-active={selectedMenu === "profile"} onSelect={() => navigateTo("profile")}><UserRound />{content.personalCenter}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "wallet"} onSelect={() => navigateTo("wallet")}><WalletCards />{content.walletMenu}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "invite"} onSelect={() => navigateTo("invite")}><Gift />{content.navInvite}</DropdownMenuItem>
-              <DropdownMenuItem data-active={selectedMenu === "security"} onSelect={() => navigateTo("security")}><ShieldCheck />{content.securityMenu}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigateTo("my")}><UserRound />{content.myTitle}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={() => setLogoutOpen(true)}><LogOut />{content.logout}</DropdownMenuItem>
             </DropdownMenuContent>
@@ -1291,7 +1129,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card", "my"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <WalletRechargePage
@@ -1325,11 +1163,22 @@ export default function Home() {
                 onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountHome onNavigate={(destination) => { if (destination === "invite" || destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} cardFlows={cardFlows} />
-            ) : selectedMenu === "invite" ? (
-              <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
+            ) : (selectedMenu === "my" || selectedMenu === "invite" || selectedMenu === "profile" || selectedMenu === "security") ? (
+              <MyPage
+                content={content}
+                editMode={editMode}
+                updateContent={updateContent}
+                tab={selectedMenu === "invite" ? "invite" : selectedMenu === "profile" ? "profile" : selectedMenu === "security" ? "security" : myTab}
+                onTabChange={(tab) => { setMyTab(tab); if (selectedMenu !== "my") navigateTo("my"); }}
+                onLogout={() => setLogoutOpen(true)}
+                onEnterEdit={() => setEditMode(true)}
+                onReset={() => setResetOpen(true)}
+                onExport={exportConfig}
+                onImport={importConfig}
+              />
             ) : selectedMenu === "wallet" ? (
               <WalletPage
                 content={content}
@@ -1341,10 +1190,6 @@ export default function Home() {
                 walletRecords={walletRecords}
                 topUpRecords={topUpRecords}
               />
-            ) : selectedMenu === "profile" ? (
-              <ProfilePage content={content} editMode={editMode} updateContent={updateContent} />
-            ) : selectedMenu === "security" ? (
-              <SecurityPage content={content} editMode={editMode} updateContent={updateContent} />
             ) : selectedMenu === "help" ? (
               <HelpCenter onNavigate={(destination) => { navigateTo(destination); if (destination !== "help") window.history.replaceState(null, "", window.location.pathname); }} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "card" ? (

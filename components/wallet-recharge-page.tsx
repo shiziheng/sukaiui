@@ -329,6 +329,8 @@ export function WalletRechargePage({
       </section> : null}
     </>}
 
+    {/* 充值进行中只保留当前步骤，说明、记录、流水和 FAQ 在到账后再展开，避免首屏过长。 */}
+    {completion ? <>
     <section className="topup-card topup-process">
       <header className="topup-supplement-heading">
         <div><h2>{editable("topupProcessTitle")}</h2><p>从选择金额到到账共 4 步，通常 {content.topupArrivalEta}完成。</p></div>
@@ -423,5 +425,6 @@ export function WalletRechargePage({
       </div>
       <Button variant="outline" className="topup-secondary-button" onClick={onSupport}>{editable("topupSupportAction")}</Button>
     </section>
+    </> : null}
   </section>;
 }

@@ -58,7 +58,7 @@ function withinTimeRange(order: ManagedOrder, range: TimeFilter, customFrom: str
 export function OrdersPage({ content, editMode, updateContent, extraOrders = [], cardFlows = [] }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; extraOrders?: ManagedOrder[]; cardFlows?: CardFlowItem[] }) {
   const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
   const [billFlows] = useState<BillFlowItem[]>(() => defaultBillFlows.map((flow) => ({ ...flow })));
-  const [view, setView] = useState<BillView>("flows");
+  const [view, setView] = useState<BillView>("orders");
   const [flowFilter, setFlowFilter] = useState<FlowFilter>("all");
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
@@ -182,8 +182,8 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
 
       <Tabs value={view} onValueChange={(value) => setView(value as BillView)}>
         <TabsList className="uc-tabs-list orders-view-tabs">
-          <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
           <TabsTrigger value="orders"><EditableText active={editMode} value={content.billTabOrders} onChange={(value) => updateContent("billTabOrders", value)} /></TabsTrigger>
+          <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
         </TabsList>
       </Tabs>
 

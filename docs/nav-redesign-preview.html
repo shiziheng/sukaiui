@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SUKAI 导航改版 · 方案预览</title>
+<style>
+  :root{
+    --ink:#17191c; --muted:#6b7268; --line:#e3e5dc; --page:#f6f7f2; --card:#fff;
+    --side:#111214; --side-line:#24262a; --side-text:#c3c8ce; --side-muted:#7d838a;
+    --lime:#dfff00; --lime-ink:#1a1d00; --soft:#f1f4db;
+    --r:14px; --r-sm:10px; --pad:20px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--page);color:var(--ink);font:14px/1.55 "PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  svg{display:block}
+  .shell{display:flex;min-height:100vh}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{position:fixed;inset:0 auto 0 0;z-index:20;width:232px;display:flex;flex-direction:column;background:var(--side);color:#e9ede3;padding:0 12px 14px}
+  .sidebar:after{content:"";position:absolute;inset:0 0 0 auto;width:1px;background:var(--side-line)}
+  .brand{height:60px;display:flex;align-items:center;gap:10px;padding:0 6px}
+  .brand-mark{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--lime);color:#111;font-weight:800;font-size:15px;box-shadow:0 0 0 3px rgba(223,255,0,.08)}
+  .brand-name{font-size:15px;font-weight:680;letter-spacing:.02em}
+  .nav{display:grid;gap:2px;padding-top:8px}
+  .nav-item{position:relative;height:42px;display:flex;align-items:center;gap:10px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--side-text);padding:0 10px;font-size:14px;font-weight:600;text-align:left;transition:background .15s,color .15s}
+  .nav-item svg{width:17px;height:17px;flex:none;opacity:.9}
+  .nav-item:hover{background:rgba(255,255,255,.045);color:#fff}
+  .nav-item[aria-current="page"]{background:rgba(255,255,255,.075);color:#fff;font-weight:660}
+  .nav-item[aria-current="page"]:before{content:"";position:absolute;left:-6px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--lime)}
+  .nav-item[aria-current="page"] svg{color:var(--lime);opacity:1}
+  .sb-spacer{flex:1}
+  .user-card{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--side-line);border-radius:11px;background:#17181b;padding:10px;text-align:left;transition:border-color .15s,background .15s}
+  .user-card:hover{border-color:#3a3d42;background:#1b1d20}
+  .avatar{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--lime);color:#111;font-size:11px;font-weight:800}
+  .user-copy{min-width:0;display:grid;gap:1px}
+  .user-copy strong{font-size:12.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-copy small{font-size:10.5px;color:var(--side-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-chev{margin-left:auto;color:#6f757c}
+
+  /* ---------- main / topbar ---------- */
+  .main{flex:1;min-width:0;margin-left:232px}
+  .topbar{position:sticky;top:0;z-index:15;height:60px;display:flex;align-items:center;gap:12px;padding:0 28px;background:#101113;color:#fff;border-bottom:1px solid #282a2e}
+  .icon-btn{width:32px;height:32px;display:grid;place-items:center;border:1px solid #2c2f33;border-radius:8px;background:transparent;color:#c4c9cf;transition:background .15s,border-color .15s,color .15s}
+  .icon-btn:hover{border-color:#41444a;background:#1d1f22;color:#fff}
+  .icon-btn svg{width:16px;height:16px}
+  .crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#8b9098;white-space:nowrap;overflow:hidden}
+  .crumb strong{color:#f2f4ef;font-size:13.5px;font-weight:650}
+  .crumb .sep{color:#3d4147}
+  .top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .balance{height:34px;display:flex;align-items:center;gap:7px;border:1px solid #34373c;border-radius:9px;background:#1b1d20;color:#f4f5f1;padding:0 8px 0 10px;font-size:13px;font-weight:650}
+  .balance svg{width:14px;color:var(--lime)}
+  .balance .plus{width:22px;height:22px;display:grid;place-items:center;border:0;border-radius:6px;background:rgba(223,255,0,.12);color:var(--lime);margin-left:3px}
+  .balance .plus:hover{background:rgba(223,255,0,.2)}
+  .bell{position:relative;width:34px;height:34px;display:grid;place-items:center;border:1px solid #34373c;border-radius:9px;background:#1b1d20;color:#c3c6ca}
+  .bell:hover{background:#24262a}
+  .bell svg{width:16px;height:16px}
+  .badge{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;display:grid;place-items:center;border-radius:999px;background:var(--lime);color:#111;font-size:9px;font-weight:800;padding:0 3px;border:1.5px solid #101113}
+  .avatar-btn{width:34px;height:34px;border:0;border-radius:50%;display:grid;place-items:center;background:var(--lime);color:#111;font-size:11px;font-weight:800}
+
+  /* ---------- content ---------- */
+  .content{max-width:1280px;margin:0 auto;padding:26px 28px 56px}
+  .preview-note{display:flex;align-items:center;gap:10px;margin-bottom:18px;border:1px dashed #cfd3c4;border-radius:10px;background:#fbfcf6;padding:9px 12px;color:#6b7268;font-size:12px}
+  .preview-note strong{color:#3f453a;font-weight:650}
+  .preview-note button{margin-left:auto;border:1px solid #d7dbcc;border-radius:8px;background:#fff;padding:4px 9px;font-size:11.5px;color:#4d5448}
+  .preview-note button:hover{border-color:#b9bfa8;background:#f5f7ee}
+
+  .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:4px 2px 18px}
+  .eyebrow{display:block;margin-bottom:6px;color:#7c8377;font-size:11px;font-weight:700;letter-spacing:.08em}
+  .pagehead h1{margin:0;font-size:30px;line-height:1.2;font-weight:720;letter-spacing:-.03em}
+  .pagehead p{margin:7px 0 0;color:var(--muted);font-size:13.5px}
+  .quiet-link{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#5f6659;padding:4px 0;font-size:12.5px;font-weight:600}
+  .quiet-link:hover{color:#17191c}
+  .quiet-link svg{width:14px;height:14px}
+
+  .segmented{display:inline-flex;gap:3px;border:1px solid var(--line);border-radius:11px;background:#eceee6;padding:3px;margin-bottom:16px}
+  .segmented button{height:34px;border:0;border-radius:8px;background:transparent;color:#687064;padding:0 16px;font-size:13px;font-weight:650}
+  .segmented button[aria-selected="true"]{background:#fff;color:#17191c;box-shadow:0 1px 2px rgba(20,24,15,.08)}
+  .segmented button:hover:not([aria-selected="true"]){color:#3b4236}
+
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{height:32px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#5f6659;padding:0 12px;font-size:12.5px;font-weight:600}
+  .chip:hover{border-color:#c9cdbf;color:#252a21}
+  .chip[aria-pressed="true"]{border-color:#1c201c;background:#1c201c;color:#fff}
+  .chip svg{width:13px;height:13px}
+  .toolbar-spacer{flex:1}
+  .sort{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#6b7268;font-size:12.5px;padding:0 4px}
+  .sort:hover{color:#17191c}
+
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .product{position:relative;display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:18px;box-shadow:0 4px 14px rgba(24,27,32,.035);transition:border-color .16s,box-shadow .16s,transform .16s}
+  .product:hover{border-color:#c9cbc3;box-shadow:0 12px 28px rgba(24,27,32,.075);transform:translateY(-1px)}
+  .product-top{display:flex;align-items:flex-start;gap:11px}
+  .brand-dot{width:38px;height:38px;flex:none;border-radius:11px;display:grid;place-items:center;background:#17191c;color:var(--lime);font-size:11px;font-weight:800;letter-spacing:.02em}
+  .product-title{min-width:0;flex:1}
+  .product-title h3{margin:1px 0 3px;font-size:15px;font-weight:690;line-height:1.3}
+  .product-title p{margin:0;color:#8a9184;font-size:11.5px}
+  .tag{flex:none;border-radius:999px;background:var(--soft);color:#596300;padding:3px 8px;font-size:10px;font-weight:750}
+  .features{display:grid;gap:7px;margin:16px 0 18px;padding:0;list-style:none}
+  .features li{display:flex;align-items:center;gap:7px;color:#4e5549;font-size:12.5px}
+  .features svg{width:13px;height:13px;flex:none;color:#7b8a1c}
+  .product-foot{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;border-top:1px solid #eef0e8;padding-top:14px}
+  .price{display:flex;align-items:baseline;gap:4px;color:#17191c;font-size:22px;font-weight:760;letter-spacing:-.03em}
+  .price small{color:#8a9184;font-size:11px;font-weight:500;letter-spacing:0}
+  .stock{display:block;margin-top:2px;color:#9aa092;font-size:10.5px}
+  .buy{height:34px;border:0;border-radius:9px;background:#17191c;color:#fff;padding:0 14px;font-size:12.5px;font-weight:650;transition:background .15s}
+  .buy:hover{background:#2a2e24}
+  .buy.accent{background:var(--lime);color:var(--lime-ink)}
+  .buy.accent:hover{background:#d3f000}
+
+  .hint{margin-top:22px;display:flex;align-items:center;gap:8px;color:#8a9184;font-size:11.5px}
+  .hint i{width:5px;height:5px;border-radius:50%;background:#c2c7b5}
+
+  /* ---------- annotations ---------- */
+  [data-note]{position:relative}
+  .annotated [data-note]{outline:1.5px dashed #e39a00;outline-offset:3px;border-radius:10px}
+  .annotated [data-note]:after{content:attr(data-note);position:absolute;z-index:30;top:-11px;right:8px;transform:translateY(-100%);white-space:nowrap;border-radius:6px;background:#e39a00;color:#231700;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:.02em;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+  .annotated .nav[data-note]:after{top:8px;right:-2px;transform:none}
+  .annotated .top-actions[data-note]:after{top:44px;right:0;transform:none}
+  .annotated .segmented[data-note]:after{top:-12px;left:0;right:auto}
+  .annotated .user-card[data-note]:after{top:-12px;right:0}
+  .annotated .balance[data-note]:after{top:44px;right:0;transform:none}
+
+  /* ---------- mobile ---------- */
+  .tabbar{display:none}
+  @media(max-width:1080px){
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0;padding-bottom:66px}
+    .topbar{height:52px;padding:0 14px;gap:10px}
+    .topbar .icon-btn{display:none}
+    .top-actions{gap:6px}
+    .balance,.support{display:none}
+    .content{padding:18px 14px 40px}
+    .pagehead{align-items:flex-start;flex-direction:column;gap:4px;padding-bottom:14px}
+    .pagehead h1{font-size:27px}
+    .grid{grid-template-columns:1fr;gap:11px}
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid #e3e5dc;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
+    .tabbar button{height:50px;display:grid;place-items:center;gap:2px;border:0;background:transparent;color:#8a9184;font-size:10px;font-weight:600}
+    .tabbar button svg{width:19px;height:19px}
+    .tabbar button[aria-current="page"]{color:#17191c}
+    .tabbar button[aria-current="page"] svg{color:#6f7d00}
+    .preview-note{margin-bottom:12px}
+    .preview-note .long{display:none}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 21v-7h6v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 7h16l-1 13H5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/><path d="M7 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H19v14H5.5A2.5 2.5 0 0 1 3 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 12h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16.6" cy="12" r="1.1" fill="currentColor"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="12" width="4" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="17" y="12" width="4" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19 18a3 3 0 0 1-3 3h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 4v16" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M8 19l-3-3M8 19l3-3M16 19V5M16 5l-3 3M16 5l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="建议方案侧栏">
+    <div class="brand">
+      <span class="brand-mark">S</span>
+      <span class="brand-name">Sukai 速开</span>
+    </div>
+
+    <nav class="nav" data-note="5 个一级入口">
+      <button class="nav-item"><svg><use href="#i-home"/></svg>首页</button>
+      <button class="nav-item" aria-current="page"><svg><use href="#i-store"/></svg>商城</button>
+      <button class="nav-item"><svg><use href="#i-card"/></svg>卡片</button>
+      <button class="nav-item"><svg><use href="#i-wallet"/></svg>钱包</button>
+      <button class="nav-item"><svg><use href="#i-receipt"/></svg>订单</button>
+    </nav>
+
+    <div class="sb-spacer"></div>
+
+    <button class="user-card" data-note="「我的」收拢资料 / 安全 / 推广 / 演示工具">
+      <span class="avatar">H</span>
+      <span class="user-copy"><strong>Heman123</strong><small>shizheng134@gmail.com</small></span>
+      <svg class="user-chev" width="14" height="14"><use href="#i-chev"/></svg>
+    </button>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" aria-label="收起侧栏"><svg><use href="#i-panel"/></svg></button>
+      <div class="crumb"><span>商城</span><span class="sep">/</span><strong>成品号</strong></div>
+
+      <div class="top-actions" data-note="顶栏只留 4 组">
+        <button class="balance" data-note="只保留一个可用余额">
+          <svg><use href="#i-wallet"/></svg>
+          <span>$359.96</span>
+          <span class="plus" aria-label="充值"><svg width="12" height="12"><use href="#i-plus"/></svg></span>
+        </button>
+        <button class="bell" aria-label="站内信（2 条未读）">
+          <svg><use href="#i-bell"/></svg><span class="badge">2</span>
+        </button>
+        <button class="bell support" aria-label="在线客服"><svg><use href="#i-headset"/></svg></button>
+        <button class="avatar-btn" aria-label="我的">H</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="preview-note">
+        <strong>方案预览</strong>
+        <span class="long">商城 / 成品号 · 侧栏 5 项 · 页内页签 · 单一余额</span>
+        <button id="noteToggle" type="button">显示标注</button>
+      </div>
+
+      <header class="pagehead">
+        <div>
+          <span class="eyebrow">商城 / 成品号</span>
+          <h1>成品号</h1>
+          <p>购买已经配置完成的 AI 账号，即买即用。</p>
+        </div>
+        <button class="quiet-link">购买说明<svg><use href="#i-arrow"/></svg></button>
+      </header>
+
+      <div class="segmented" role="tablist" aria-label="商城类型" data-note="页内页签替代侧栏二级">
+        <button role="tab" aria-selected="false">套餐代充</button>
+        <button role="tab" aria-selected="true">成品号</button>
+      </div>
+
+      <div class="toolbar">
+        <button class="chip" aria-pressed="true">ChatGPT</button>
+        <button class="chip" aria-pressed="false">Claude</button>
+        <button class="chip">全部地区</button>
+        <button class="chip"><svg><use href="#i-filter"/></svg>筛选</button>
+        <span class="toolbar-spacer"></span>
+        <button class="sort"><svg width="14" height="14"><use href="#i-sort"/></svg>推荐优先</button>
+      </div>
+
+      <section class="grid" aria-label="成品号商品">
+        <article class="product">
+          <div class="product-top">
+            <span class="brand-dot">GPT</span>
+            <div class="product-title"><h3>ChatGPT Plus 成品号</h3><p>独享账号 · 支持改密</p></div>
+            <span class="tag">推荐</span>
+          </div>
+          <ul class="features">
+            <li><svg><use href="#i-check"/></svg>已开通 Plus 套餐</li>
+            <li><svg><use href="#i-check"/></svg>独享账号，支持修改密码</li>
+            <li><svg><use href="#i-check"/></svg>付款后立即交付</li>
+          </ul>
+          <div class="product-foot">
+            <div><span class="price">$129<small>/ 账号</small></span><span class="stock">库存 36</span></div>
+            <button class="buy accent">立即购买</button>
+          </div>
+        </article>
+
+        <article class="product">
+          <div class="product-top">
+            <span class="brand-dot">GPT</span>
+            <div class="product-title"><h3>ChatGPT Pro 成品号</h3><p>Pro 套餐 · 独享账号</p></div>
+          </div>
+          <ul class="features">
+            <li><svg><use href="#i-check"/></svg>已开通 Pro 套餐</li>
+            <li><svg><use href="#i-check"/></svg>更高模型使用额度</li>
+            <li><svg><use href="#i-check"/></svg>支持网页端使用</li>
+          </ul>
+          <div class="product-foot">
+            <div><span class="price">$499<small>/ 账号</small></span><span class="stock">库存 8</span></div>
+            <button class="buy">立即购买</button>
+          </div>
+        </article>
+
+        <article class="product">
+          <div class="product-top">
+            <span class="brand-dot">CL</span>
+            <div class="product-title"><h3>Claude Pro 成品号</h3><p>独享账号 · 即买即用</p></div>
+          </div>
+          <ul class="features">
+            <li><svg><use href="#i-check"/></svg>已开通 Claude Pro</li>
+            <li><svg><use href="#i-check"/></svg>独享账号，支持改密</li>
+            <li><svg><use href="#i-check"/></svg>付款后立即交付</li>
+          </ul>
+          <div class="product-foot">
+            <div><span class="price">$159<small>/ 账号</small></span><span class="stock">仅剩 3 个</span></div>
+            <button class="buy">立即购买</button>
+          </div>
+        </article>
+      </section>
+
+      <p class="hint"><i></i>价格与库存为演示数据；本页只展示前端交互，不发起真实支付。</p>
+    </main>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="移动端底栏">
+  <button><svg><use href="#i-home"/></svg>首页</button>
+  <button aria-current="page"><svg><use href="#i-store"/></svg>商城</button>
+  <button><svg><use href="#i-card"/></svg>卡片</button>
+  <button><svg><use href="#i-wallet"/></svg>钱包</button>
+  <button><svg><use href="#i-receipt"/></svg>我的</button>
+</nav>
+
+<script>
+  const btn = document.getElementById('noteToggle');
+  btn.addEventListener('click', () => {
+    const on = document.body.classList.toggle('annotated');
+    btn.textContent = on ? '隐藏标注' : '显示标注';
+  });
+</script>
+</body>
+</html>

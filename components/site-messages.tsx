@@ -121,7 +121,7 @@ export function SiteMessages({ open, onOpenChange }: { open?: boolean; onOpenCha
           className="site-bell-button"
           aria-label="站内信"
           aria-expanded={panelOpen}
-          onClick={() => setPanelOpen((open) => !open)}
+          onClick={() => setPanelOpen(!panelOpen)}
         >
           <Bell aria-hidden="true" />
           {unreadCount > 0 && (
