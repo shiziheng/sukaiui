@@ -596,6 +596,8 @@ export default function Home() {
         if (config.content.navCard === "虚拟卡") config.content.navCard = "卡片";
         if (config.content.navRecharge === "代充") config.content.navRecharge = "商城";
         if (config.content.navInvite === "我的邀请") config.content.navInvite = "推广";
+        // 侧栏一级菜单用短词：推广奖励 → 推广（页面标题仍是「推广奖励」）
+        if (config.content.navInvite === "推广奖励") config.content.navInvite = "推广";
         // 账单词选「我的账单」：页内标题与菜单统一
         if (config.content.ordersPageTitle === "我的订单") config.content.ordersPageTitle = "我的账单";
         // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）

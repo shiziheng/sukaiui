@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { EditableText } from "@/components/editable-text";
 
@@ -60,6 +60,16 @@ export function AppSidebar({
   // 二级菜单默认全展开，用户手动收起才记成 closed。
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
   const toggleGroup = (id: string) => setClosedGroups((current) => ({ ...current, [id]: !current[id] }));
+  const openGroup = (id: string) => setClosedGroups((current) => (current[id] ? { ...current, [id]: false } : current));
+
+  // 从别处（首页快捷入口、顶栏、页面内的按钮）跳到某个子页时，把它所在的父项展开，
+  // 别出现「当前在卡流水，菜单里却看不到卡流水」的情况。只跟 activeId 变化，手动收起不会被弹回来。
+  useEffect(() => {
+    const owner = groups.find((group) => group.items.some((item) => item.children?.some((child) => child.id === activeId)));
+    const parent = owner?.items.find((item) => item.children?.some((child) => child.id === activeId));
+    if (parent) setClosedGroups((current) => (current[parent.id] ? { ...current, [parent.id]: false } : current));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   let index = 0;
 
@@ -97,8 +107,27 @@ export function AppSidebar({
                       data-child-active={childActive || undefined}
                       data-new={item.isNew || undefined}
                       aria-current={activeId === item.id ? "page" : undefined}
+                      aria-expanded={hasChildren && !collapsed ? isOpen : undefined}
                       type="button"
-                      onClick={() => onNavigate(destination)}
+                      onClick={() => {
+                        if (!hasChildren) {
+                          onNavigate(item.id);
+                          return;
+                        }
+                        // 图标轨（收起态）看不到二级菜单，点了就直接进第一个子页。
+                        if (collapsed) {
+                          onNavigate(destination);
+                          return;
+                        }
+                        // 已经在这个分组里，再点一次父项 = 收起二级菜单，页面不动。
+                        if (isOpen && childActive) {
+                          toggleGroup(item.id);
+                          return;
+                        }
+                        // 其余情况：展开并落到第一个子页。
+                        openGroup(item.id);
+                        onNavigate(destination);
+                      }}
                       title={collapsed ? item.label : undefined}
                       style={{ ["--i" as string]: order }}
                     >

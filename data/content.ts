@@ -433,7 +433,7 @@ export const defaultContent: DemoContent = {
   billTypeCard: "卡流水",
   walletFlowTitle: "余额流水",
   walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
-  navInvite: "推广奖励",
+  navInvite: "推广",
   personalCenter: "我的",
   logout: "退出登录",
   supportNav: "在线客服",
