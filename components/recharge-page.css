@@ -44,29 +44,6 @@
   top: 24px;
 }
 
-.rc-countdown {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 28px;
-  border-radius: 999px;
-  background: #f1f3ec;
-  color: #4f554c;
-  padding: 0 11px;
-  font-size: 12.5px;
-  font-weight: 500;
-}
-
-.rc-countdown svg {
-  width: 13px;
-  height: 13px;
-}
-
-.rc-countdown[data-urgent="true"] {
-  background: #faeeda;
-  color: #854f0b;
-}
-
 .rc-pending {
   display: flex;
   align-items: center;
@@ -381,17 +358,6 @@
   height: 15px;
 }
 
-.rc-payable {
-  display: grid;
-  gap: 5px;
-  padding-bottom: 16px;
-}
-
-.rc-payable-label {
-  color: #8a9086;
-  font-size: 11.5px;
-}
-
 .rc-amount {
   display: inline-flex;
   align-items: baseline;
@@ -419,152 +385,6 @@
   font-size: 26px;
 }
 
-.rc-payable p {
-  margin: 2px 0 0;
-  color: #8a9086;
-  font-size: 11.5px;
-  line-height: 1.6;
-}
-
-.rc-copy-amount {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 28px;
-  margin-top: 4px;
-  border: 1px solid #d7dad0;
-  border-radius: 6px;
-  background: #fff;
-  color: #4f554c;
-  padding: 0 10px;
-  font-size: 11.5px;
-  cursor: pointer;
-}
-
-.rc-copy-amount:hover {
-  border-color: #17191c;
-  color: #17191c;
-}
-
-.rc-copy-amount svg {
-  width: 12px;
-  height: 12px;
-}
-
-.rc-pay-grid {
-  display: grid;
-  grid-template-columns: 172px minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
-  margin: 4px 0 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eef0e9;
-  max-width: 560px;
-}
-
-.rc-qr {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-}
-
-.rc-qr-badge {
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: #17191c;
-  color: #fff;
-  padding: 0 10px;
-  font-size: 10.5px;
-  font-weight: 500;
-}
-
-.rc-qr-box {
-  width: 172px;
-  height: 172px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #e3e5dc;
-  border-radius: 9px;
-  background: #fff;
-}
-
-.rc-qr-box svg {
-  width: 112px;
-  height: 112px;
-  color: #17191c;
-}
-
-.rc-qr p {
-  margin: 0;
-  color: #9aa094;
-  font-size: 10.5px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.rc-address-block {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-}
-
-.rc-address-block > span {
-  color: #8a9086;
-  font-size: 11.5px;
-}
-
-.rc-address-block code {
-  display: block;
-  border-radius: 8px;
-  background: #f6f7f2;
-  color: #17191c;
-  padding: 10px 12px;
-  font-size: 11.5px;
-  line-height: 1.6;
-  word-break: break-all;
-}
-
-.rc-address-block > button {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 28px;
-  border: 1px solid #d7dad0;
-  border-radius: 6px;
-  background: #fff;
-  color: #4f554c;
-  padding: 0 10px;
-  font-size: 11.5px;
-  cursor: pointer;
-}
-
-.rc-address-block > button:hover {
-  border-color: #17191c;
-  color: #17191c;
-}
-
-.rc-address-block > button svg {
-  width: 12px;
-  height: 12px;
-}
-
-.rc-pay-state {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 2px;
-}
-
-.rc-pay-state small {
-  color: #9aa094;
-  font-size: 10.5px;
-}
-
 .rc-state {
   display: inline-flex;
   align-items: center;
@@ -582,39 +402,6 @@
 
 .rc-state.is-detected i {
   background: #c8d43d;
-}
-
-.rc-warn {
-  display: flex;
-  gap: 9px;
-  border-radius: 8px;
-  background: #faeeda;
-  color: #854f0b;
-  padding: 11px 13px;
-  margin-bottom: 14px;
-}
-
-.rc-warn svg {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-top: 1px;
-}
-
-.rc-warn p {
-  margin: 0;
-  font-size: 11.5px;
-  line-height: 1.65;
-}
-
-.rc-warn strong {
-  font-weight: 500;
-}
-
-.rc-foot {
-  margin: 9px 0 0;
-  color: #9aa094;
-  font-size: 11px;
 }
 
 .rc-expired {
@@ -932,6 +719,407 @@
   font-weight: 500;
 }
 
+/* ---------- 收款信息弹窗：金额、倒计时、二维码同屏 ---------- */
+.rcp-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  gap: 0;
+  border: 1px solid #e3e5dc;
+  border-radius: 14px;
+  background: #fff;
+  padding: 22px 24px 24px;
+}
+
+.rcp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rcp-head h2 {
+  margin: 0;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.rcp-head p {
+  margin: 4px 0 0;
+  color: #9aa094;
+  font-size: 11.5px;
+}
+
+.rcp-close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f5ef;
+  color: #7b8178;
+  cursor: pointer;
+}
+
+.rcp-close:hover {
+  background: #ebece4;
+  color: #17191c;
+}
+
+.rcp-close svg {
+  width: 15px;
+  height: 15px;
+}
+
+.rcp-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.rcp-amount {
+  display: grid;
+  gap: 5px;
+}
+
+.rcp-label {
+  color: #8a9086;
+  font-size: 11.5px;
+}
+
+/* 倒计时放在金额右侧同一行，不再缩在页头角落 */
+.rcp-countdown {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  border-radius: 10px;
+  background: #f4f5ef;
+  padding: 8px 12px 9px;
+}
+
+.rcp-countdown-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8a9086;
+  font-size: 10.5px;
+}
+
+.rcp-countdown-label svg {
+  width: 11px;
+  height: 11px;
+}
+
+.rcp-countdown strong {
+  color: #17191c;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.rcp-countdown[data-urgent="true"] {
+  background: #faeeda;
+}
+
+.rcp-countdown[data-urgent="true"] strong,
+.rcp-countdown[data-urgent="true"] .rcp-countdown-label {
+  color: #854f0b;
+}
+
+.rcp-tail {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 9px;
+}
+
+.rcp-tail p {
+  flex: 1;
+  margin: 0;
+  color: #8a9086;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.rcp-tail button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  margin-top: -2px;
+  border: 1px solid #d7dad0;
+  border-radius: 6px;
+  background: #fff;
+  color: #4f554c;
+  padding: 0 9px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.rcp-tail button:hover {
+  border-color: #17191c;
+  color: #17191c;
+}
+
+.rcp-tail svg {
+  width: 11px;
+  height: 11px;
+}
+
+.rcp-pay {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 20px;
+  margin: 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid #eef0e9;
+}
+
+.rcp-qr {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 8px;
+}
+
+.rcp-net-pill {
+  height: 21px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #17191c;
+  color: #fff;
+  padding: 0 9px;
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.rcp-qr-box {
+  width: 168px;
+  height: 168px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e5dc;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.rcp-qr-box svg {
+  width: 108px;
+  height: 108px;
+  color: #17191c;
+}
+
+.rcp-qr p {
+  margin: 0;
+  color: #9aa094;
+  font-size: 10.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.rcp-address {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.rcp-address > span {
+  color: #8a9086;
+  font-size: 11.5px;
+}
+
+.rcp-address code {
+  display: block;
+  border-radius: 8px;
+  background: #f6f7f2;
+  color: #17191c;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.rcp-address > button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  border: 1px solid #d7dad0;
+  border-radius: 6px;
+  background: #fff;
+  color: #4f554c;
+  padding: 0 10px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.rcp-address > button:hover {
+  border-color: #17191c;
+  color: #17191c;
+}
+
+.rcp-address > button svg {
+  width: 12px;
+  height: 12px;
+}
+
+.rcp-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 2px;
+}
+
+.rcp-state small {
+  color: #9aa094;
+  font-size: 10.5px;
+}
+
+.rcp-addr-note {
+  margin: 2px 0 0;
+  color: #9aa094;
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+.rcp-warn {
+  display: flex;
+  gap: 9px;
+  border-radius: 8px;
+  background: #faeeda;
+  color: #854f0b;
+  padding: 11px 13px;
+  margin-bottom: 14px;
+}
+
+.rcp-warn svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+}
+
+.rcp-warn p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.65;
+}
+
+.rcp-warn strong {
+  font-weight: 500;
+}
+
+.rcp-dialog .rc-primary {
+  width: 100%;
+}
+
+.rcp-foot {
+  margin: 9px 0 0;
+  color: #9aa094;
+  font-size: 11px;
+  text-align: center;
+}
+
+.rcp-expired {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 26px 8px 6px;
+  text-align: center;
+}
+
+.rcp-expired-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #faeeda;
+  color: #9a8340;
+  margin-bottom: 4px;
+}
+
+.rcp-expired-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.rcp-expired > strong {
+  color: #17191c;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.rcp-expired > p {
+  margin: 0;
+  max-width: 340px;
+  color: #8a9086;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.rcp-expired-actions {
+  display: flex;
+  gap: 9px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.rcp-expired-actions .rc-primary {
+  flex: 1;
+}
+
+.rcp-ghost {
+  height: 44px;
+  border: 1px solid #d7dad0;
+  border-radius: 9px;
+  background: #fff;
+  color: #17191c;
+  padding: 0 18px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rcp-ghost:hover {
+  border-color: #17191c;
+}
+
+/* 关掉弹窗后，第 3 步留一条待支付摘要，点一下就能把弹窗叫回来 */
+.rc-pay-open {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.rc-pay-open-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.rc-pay-open-copy > span {
+  color: #8a9086;
+  font-size: 11.5px;
+}
+
+.rc-pay-open-copy > span strong {
+  color: #9a8340;
+  font-weight: 500;
+}
+
 @media (max-width: 1180px) {
   .rc-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -974,15 +1162,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .rc-pay-grid {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: start;
-  }
-
-  .rc-qr {
-    justify-items: start;
-  }
-
   .rc-done-facts {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -990,6 +1169,32 @@
   .rc-step-head {
     flex-direction: column;
     gap: 2px;
+  }
+
+  .rcp-dialog {
+    padding: 18px;
+  }
+
+  .rcp-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rcp-countdown {
+    justify-items: start;
+  }
+
+  .rcp-pay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rcp-qr {
+    justify-items: start;
+  }
+
+  .rcp-expired-actions {
+    flex-direction: column-reverse;
   }
 
   .rc-records ul {

@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Check, CheckCircle2, Clock3, Copy, Info, QrCode, RefreshCcw, TriangleAlert, Zap,
+  ArrowRight, Check, CheckCircle2, Clock3, Copy, Info, QrCode, RefreshCcw, TriangleAlert, X, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PageHeading, type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
@@ -87,6 +88,7 @@ export function RechargePage({
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [completion, setCompletion] = useState<PaymentCompletion | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(countdownStart);
+  const [payOpen, setPayOpen] = useState(false);
   const confirming = useRef(false);
 
   const recentRecords = topUpRecords.slice(0, 3);
@@ -116,6 +118,7 @@ export function RechargePage({
     });
     setIntent(result.paymentIntent);
     setCompletion(result);
+    setPayOpen(false);
     setPhase("done");
     onComplete(result);
     toast.success(`充值成功，已到账 ${money3(result.paymentIntent.receivedAmount)}`);
@@ -134,12 +137,14 @@ export function RechargePage({
     setSecondsLeft(countdownStart);
     confirming.current = false;
     setPhase("pay");
+    setPayOpen(true);
   };
 
   const modify = () => {
     setIntent(null);
     setCompletion(null);
     setSecondsLeft(countdownStart);
+    setPayOpen(false);
     setPhase("form");
   };
 
@@ -173,9 +178,6 @@ export function RechargePage({
       editMode={editMode}
       updateContent={updateContent}
       icon={<Zap aria-hidden="true" />}
-      actions={phase === "pay" && intent ? <span className="rc-countdown" data-urgent={secondsLeft <= 300 || undefined}>
-        <Clock3 aria-hidden="true" />{clock(secondsLeft)}
-      </span> : undefined}
     />
 
     {/* 与卡片页的「共 N 张 · 卡内可用」同构：页头下面先给一行当前状态，再接流程 */}
@@ -281,7 +283,7 @@ export function RechargePage({
         <div className="rc-step-body">
           <div className="rc-step-head">
             <strong>转账</strong>
-            <span>{phase === "pay" ? "在你的钱包里向下方地址转账" : "生成收款信息后显示金额、地址与二维码"}</span>
+            <span>{phase === "pay" ? "收款码在弹窗里，扫码或复制地址付款" : "生成收款信息后，在弹窗里扫码付款"}</span>
           </div>
 
           {phase === "form" ? <>
@@ -295,57 +297,21 @@ export function RechargePage({
             {expired ? <div className="rc-expired">
               <TriangleAlert aria-hidden="true" />
               <div>
-                <strong>支付单已过期</strong>
-                <p>为避免往旧地址继续转账，地址和二维码已隐藏。</p>
+                <strong>这笔充值单已失效</strong>
+                <p>地址和二维码已作废，重新生成后按新金额转账。</p>
               </div>
-              <button type="button" onClick={restart}><RefreshCcw aria-hidden="true" />重新发起</button>
+              <button type="button" onClick={restart}><RefreshCcw aria-hidden="true" />重新生成</button>
             </div> : <>
-              <div className="rc-payable">
-                <span className="rc-payable-label">应付金额</span>
-                <PayableAmount value={intent.uniquePayableAmount} />
-                <p>尾数用于匹配这笔充值。四舍五入成 {intent.uniquePayableAmount.toFixed(2)} 会匹配失败。</p>
-                <button
-                  className="rc-copy-amount"
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(payable(intent.uniquePayableAmount));
-                    toast.success(`已复制 ${payable(intent.uniquePayableAmount)}，请在钱包选择 ${networkInfo.name}`);
-                  }}
-                ><Copy aria-hidden="true" />复制金额</button>
-              </div>
-
-              <div className="rc-pay-grid">
-                <div className="rc-qr">
-                  <span className="rc-qr-badge">{networkInfo.name}</span>
-                  <div className="rc-qr-box" aria-label="Demo 收款二维码"><QrCode aria-hidden="true" /></div>
-                  <p>扫码只带出地址，网络仍要在钱包里自己选。</p>
+              <div className="rc-pay-open">
+                <div className="rc-pay-open-copy">
+                  <span>待支付 · 剩余 <strong>{clock(secondsLeft)}</strong></span>
+                  <PayableAmount value={intent.uniquePayableAmount} small />
                 </div>
-                <div className="rc-address-block">
-                  <span>收款地址</span>
-                  <code>{networkInfo.address}</code>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(networkInfo.address);
-                      toast.success(`已复制，请在钱包选择 ${networkInfo.name}`);
-                    }}
-                  ><Copy aria-hidden="true" />复制地址</button>
-                  <div className="rc-pay-state">
-                    <span className={`rc-state is-${intent.status}`}><i />{detected ? "链上确认中" : "等待付款"}</span>
-                    <small>充值单 {intent.id}</small>
-                  </div>
-                </div>
+                <button className="rc-primary" type="button" onClick={() => setPayOpen(true)}>
+                  打开收款信息<ArrowRight aria-hidden="true" />
+                </button>
               </div>
-
-              <div className="rc-warn">
-                <TriangleAlert aria-hidden="true" />
-                <p><strong>请从个人钱包转账，不要从交易所直接提币。</strong>部分交易所会抹掉三位小数或走内部地址，尾数就丢了。</p>
-              </div>
-
-              <button className="rc-primary" type="button" disabled={detected} onClick={confirmTransfer}>
-                {detected ? "链上确认中…" : "我已转账，查询到账"}
-              </button>
-              <p className="rc-foot">通常 1–5 分钟到账。可以关掉页面，到账后余额自动更新。</p>
+              <p className="rc-placeholder">关掉弹窗这笔单仍然有效，15 分钟内付款都能自动到账。</p>
             </>}
           </> : null}
         </div>
@@ -387,5 +353,91 @@ export function RechargePage({
         </section>
       </aside>
     </div>
+
+    {/* 收款信息独立成弹窗：二维码、地址、倒计时都在一个视野里，不用来回扫屏找时间 */}
+    <Dialog open={payOpen && phase === "pay" && Boolean(intent)} onOpenChange={setPayOpen}>
+      <DialogContent className="rcp-dialog" showCloseButton={false}>
+        <DialogTitle className="sr-only">充值收款信息</DialogTitle>
+        <DialogDescription className="sr-only">扫码或复制地址完成 USDT 转账，充值单 15 分钟内有效。</DialogDescription>
+
+        {intent ? <>
+          <header className="rcp-head">
+            <div>
+              <h2>{expired ? "支付单已失效" : "扫码付款"}</h2>
+              <p>{networkInfo.name} · 充值单 {intent.id}</p>
+            </div>
+            <button className="rcp-close" type="button" onClick={() => setPayOpen(false)} aria-label="关闭收款信息">
+              <X aria-hidden="true" />
+            </button>
+          </header>
+
+          {expired ? <div className="rcp-expired">
+            <span className="rcp-expired-icon"><TriangleAlert aria-hidden="true" /></span>
+            <strong>这笔充值单已过期</strong>
+            <p>收款地址和二维码已作废。为避免钱转进没人认领的地址，要继续充值只能重新生成一笔。</p>
+            <div className="rcp-expired-actions">
+              <button className="rc-primary" type="button" onClick={restart}>重新生成一笔</button>
+              <button className="rcp-ghost" type="button" onClick={() => setPayOpen(false)}>关闭</button>
+            </div>
+          </div> : <>
+            <div className="rcp-top">
+              <div className="rcp-amount">
+                <span className="rcp-label">应付金额</span>
+                <PayableAmount value={intent.uniquePayableAmount} />
+              </div>
+              <div className="rcp-countdown" data-urgent={secondsLeft <= 300 || undefined}>
+                <span className="rcp-countdown-label"><Clock3 aria-hidden="true" />剩余支付时间</span>
+                <strong>{clock(secondsLeft)}</strong>
+              </div>
+            </div>
+
+            <div className="rcp-tail">
+              <p>尾数用于匹配这笔充值，四舍五入成 {intent.uniquePayableAmount.toFixed(2)} 会匹配失败。</p>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(payable(intent.uniquePayableAmount));
+                  toast.success(`已复制 ${payable(intent.uniquePayableAmount)}，请在钱包选择 ${networkInfo.name}`);
+                }}
+              ><Copy aria-hidden="true" />复制金额</button>
+            </div>
+
+            <div className="rcp-pay">
+              <div className="rcp-qr">
+                <span className="rcp-net-pill">{networkInfo.name}</span>
+                <div className="rcp-qr-box" aria-label="Demo 收款二维码"><QrCode aria-hidden="true" /></div>
+                <p>扫码只带出地址，网络仍要在钱包里自己选。</p>
+              </div>
+              <div className="rcp-address">
+                <span>收款地址</span>
+                <code>{networkInfo.address}</code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(networkInfo.address);
+                    toast.success(`已复制，请在钱包选择 ${networkInfo.name}`);
+                  }}
+                ><Copy aria-hidden="true" />复制地址</button>
+                <div className="rcp-state">
+                  <span className={`rc-state is-${intent.status}`}><i />{detected ? "链上确认中" : "等待付款"}</span>
+                  <small>过期前完成转账</small>
+                </div>
+                <p className="rcp-addr-note">转账后 1–5 分钟到账。弹窗可以关掉，到账后余额自动更新。</p>
+              </div>
+            </div>
+
+            <div className="rcp-warn">
+              <TriangleAlert aria-hidden="true" />
+              <p><strong>请从个人钱包转账，不要从交易所直接提币。</strong>部分交易所会抹掉三位小数或走内部地址，尾数就丢了。</p>
+            </div>
+
+            <button className="rc-primary" type="button" disabled={detected} onClick={confirmTransfer}>
+              {detected ? "链上确认中…" : "我已转账，查询到账"}
+            </button>
+            <p className="rcp-foot">倒计时结束这笔充值单自动失效，地址和二维码一起作废。</p>
+          </>}
+        </> : null}
+      </DialogContent>
+    </Dialog>
   </section>;
 }
