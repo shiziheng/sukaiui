@@ -602,6 +602,8 @@ export default function Home() {
         if (config.content.ordersPageSubtitle === "查看和管理你的成品号与代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充订单。";
         if (config.content.ordersPageSubtitle === "查看和管理你的成品号、代充订单与资金流水。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充订单。";
         if (config.content.walletFlowTitle === "余额流水") config.content.walletFlowTitle = "资金流水";
+        // 侧栏一级菜单统一两字：资金流水 → 余额（页内标题仍是「资金流水」）
+        if (config.content.navFlows === "资金流水") config.content.navFlows = "余额";
         if (config.content.billTypeCard === "卡流水") config.content.billTypeCard = "卡相关";
         if (config.content.billAllTypes === "全部类型") config.content.billAllTypes = "全部";
         // 账单词选「我的账单」：页内标题与菜单统一
@@ -960,8 +962,8 @@ export default function Home() {
 
   /**
    * 登录后的左侧菜单：一级主线 + 两个二级分组。
-   * 首页 / 充值 / 卡片（虚拟卡·卡流水） / 商品（代充·成品号·订单） / 资金流水 / 推广。
-   * 商品订单属于商品域，挂在「商品」下；「资金流水」是平台余额变动，独立成一级。
+   * 首页 / 充值 / 卡片（虚拟卡·卡流水） / 商品（代充·成品号·订单） / 余额 / 推广。
+   * 商品订单属于商品域，挂在「商品」下；「余额」是平台余额变动，独立成一级（页内标题叫「资金流水」）。
    * 开卡中心不占菜单，从「虚拟卡」里的开卡按钮弹出。
    */
   const sidebarGroups: SidebarGroup[] = [

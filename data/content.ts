@@ -424,7 +424,7 @@ export const defaultContent: DemoContent = {
   navVirtualCard: "虚拟卡",
   navTopup: "充值",
   navOrders: "订单",
-  navFlows: "资金流水",
+  navFlows: "余额",
   bizTabRecharge: "套餐代充",
   bizTabAccount: "成品号",
   billTabFlows: "资金流水",
