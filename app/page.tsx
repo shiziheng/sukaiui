@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { AccountHome } from "@/components/account-home";
+import { AccountDashboard } from "@/components/account-dashboard";
 import { AccountPurchaseDialog, type PurchaseStage } from "@/components/account-purchase-dialog";
 import { SiteMessages } from "@/components/site-messages";
 import { EditableText } from "@/components/editable-text";
@@ -1164,7 +1164,7 @@ export default function Home() {
                 onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountHome onNavigate={(destination) => { if (destination === "invite" || destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "invite" || destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} cardFlows={cardFlows} />
             ) : (selectedMenu === "my" || selectedMenu === "invite" || selectedMenu === "profile" || selectedMenu === "security") ? (
