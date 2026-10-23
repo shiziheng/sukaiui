@@ -32,6 +32,7 @@ import { WalletDrawer } from "@/components/wallet-drawer";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
 import { PublicCardPage } from "@/components/public-card-page";
 import { AppSidebar, type SidebarGroup } from "@/components/app-sidebar";
+import { InvitePage } from "@/components/invite-page";
 import { MyPage, type MyTab } from "@/components/my-page";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -510,8 +511,10 @@ export default function Home() {
   /** 钱包不再占菜单，收进顶栏余额胶囊：点开是「余额 + 充值 + 最近流水」的抽屉。 */
   const [walletOpen, setWalletOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
-  // 虚拟卡的页签由左侧二级菜单驱动：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
-  const [cardTab, setCardTab] = useState<"cards" | "market" | "transactions">("cards");
+  // 虚拟卡的二级菜单：虚拟卡（卡包） / 卡流水。
+  const [cardTab, setCardTab] = useState<"cards" | "transactions">("cards");
+  // 未登录在公开卡页点「开卡」：登录后直接弹开卡中心（它不再是独立页签）。
+  const [cardMarketOnLogin, setCardMarketOnLogin] = useState(false);
   // 再点一次顶栏「我的卡片」：详情页是模块内子视图，靠 key 自增强制回到列表首页签。
   const [cardResetCount, setCardResetCount] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState<BrandId>("chatgpt");
@@ -747,6 +750,7 @@ export default function Home() {
     // 默认切页签即作废挂起订单；只有「去充值」这一条路需要把它带到充值页。
     if (!options?.keepPendingOrder) setPendingOrder(null);
     setCardTab("cards");
+    setCardMarketOnLogin(false);
     // 已经在虚拟卡页再点顶栏入口时，selectedMenu 不变、模块不会重挂载，
     // 这里自增一次 key 让模块回到列表（否则停在卡片详情页，看着像点击没生效）。
     if (destination === "card") setCardResetCount((count) => count + 1);
@@ -784,10 +788,11 @@ export default function Home() {
     setSelectedMenu("home");
   };
   const handleDemoRegister = () => toast.info("注册为 Demo 交互");
-  // 未登录在虚拟卡页点「开卡」：沿用站内一键登录，登录后直接落到卡段市场继续。
+  // 未登录在虚拟卡页点「开卡」：沿用站内一键登录，登录后直接弹开卡中心。
   const handlePublicOpenCard = () => {
     signInDemo();
-    setCardTab("market");
+    setCardTab("cards");
+    setCardMarketOnLogin(true);
   };
   const openBatchRecharge = () => {
     // 批量代充同样「下单即登录」，入口先过纯登录动作，不动向导内部的 5 步结构。
@@ -946,8 +951,9 @@ export default function Home() {
   };
 
   /**
-   * 登录后的左侧菜单：5 个一级入口直接平铺，对应「首页 → 充值 → 卡片 → 商城 → 订单」。
-   * 钱包不占菜单（收进顶栏余额胶囊），帮助中心本轮下线，「我的」在侧栏底部与头像菜单。
+   * 登录后的左侧菜单：一级主线 + 两个二级分组。
+   * 首页 / 充值 / 卡片（虚拟卡·卡流水） / 商品（代充·成品号） / 订单 / 推广。
+   * 开卡中心不占菜单，从「虚拟卡」里的开卡按钮弹出。
    */
   const sidebarGroups: SidebarGroup[] = [
     {
@@ -955,23 +961,51 @@ export default function Home() {
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
         { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
-        { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
-        { id: "recharge", label: content.navRecharge, icon: <ShoppingBag aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
+        {
+          id: "card-parent",
+          label: content.navCard,
+          icon: <CreditCard aria-hidden="true" />,
+          targetId: "card-cards",
+          onLabelChange: (value) => updateContent("navCard", value),
+          children: [
+            { id: "card-cards", label: content.navVirtualCard, onLabelChange: (value) => updateContent("navVirtualCard", value) },
+            { id: "card-transactions", label: content.cardTabTransactions, onLabelChange: (value) => updateContent("cardTabTransactions", value) },
+          ],
+        },
+        {
+          id: "products-parent",
+          label: content.navProducts,
+          icon: <ShoppingBag aria-hidden="true" />,
+          targetId: "biz-recharge",
+          onLabelChange: (value) => updateContent("navProducts", value),
+          children: [
+            { id: "biz-recharge", label: content.rechargeLabel, onLabelChange: (value) => updateContent("rechargeLabel", value) },
+            { id: "biz-account", label: content.navAccount, onLabelChange: (value) => updateContent("navAccount", value) },
+          ],
+        },
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
+        { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
       ],
     },
   ];
 
   const sidebarIsCollapsed = sidebarCollapsed;
 
-  // 侧栏高亮：成品号是商城的子页签，归到 recharge；「我的」单独走底部按钮。
-  const sidebarActiveId = selectedMenu === "my" ? "my" : selectedMenu === "account" ? "recharge" : selectedMenu;
+  // 侧栏高亮：二级项按当前子页点亮父项；「我的」单独走底部按钮。
+  const sidebarActiveId = selectedMenu === "my" ? "my"
+    : selectedMenu === "card" ? (cardTab === "transactions" ? "card-transactions" : "card-cards")
+      : selectedMenu === "recharge" ? (productsBiz === "account" ? "biz-account" : "biz-recharge")
+        : selectedMenu;
 
   const handleSidebarNavigate = (id: string) => {
-    if (id === "recharge" || id === "account") {
-      // 商城页内两个页签：套餐代充 / 成品号。
-      setBizTab(id === "account" ? "account" : "recharge");
+    if (id === "recharge" || id === "account" || id === "biz-recharge" || id === "biz-account") {
+      // 商品的两个子页：代充 / 成品号。
+      setBizTab(id === "account" || id === "biz-account" ? "account" : "recharge");
       navigateTo("recharge");
+    } else if (id === "card-cards" || id === "card-transactions") {
+      // 卡片：虚拟卡（卡包）/ 卡流水。navigateTo 会先把页签重置成 cards，这里再覆盖。
+      navigateTo("card");
+      setCardTab(id === "card-transactions" ? "transactions" : "cards");
     } else {
       const destination = id as MenuId;
       if (destination === "topup" && selectedMenu === "topup") setTopupResetCount((count) => count + 1);
@@ -1146,15 +1180,17 @@ export default function Home() {
                 onExit={() => { navigateTo("recharge"); setSelectedBrand("chatgpt"); }}
               />
             ) : selectedMenu === "home" ? (
-              isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "invite" || destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
+              isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "invite") { navigateTo("invite"); } else if (destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
               <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} cardFlows={cardFlows} />
-            ) : (selectedMenu === "my" || selectedMenu === "invite" || selectedMenu === "profile" || selectedMenu === "security") ? (
+            ) : selectedMenu === "invite" ? (
+              <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
+            ) : (selectedMenu === "my" || selectedMenu === "profile" || selectedMenu === "security") ? (
               <MyPage
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
-                tab={selectedMenu === "invite" ? "invite" : selectedMenu === "profile" ? "profile" : selectedMenu === "security" ? "security" : myTab}
+                tab={selectedMenu === "profile" ? "profile" : selectedMenu === "security" ? "security" : myTab}
                 onTabChange={(tab) => { setMyTab(tab); if (selectedMenu !== "my") navigateTo("my"); }}
                 onLogout={() => setLogoutOpen(true)}
                 onEnterEdit={() => setEditMode(true)}
@@ -1180,7 +1216,7 @@ export default function Home() {
                 <CardModule
                   key={`card-${cardResetCount}`}
                   tab={cardTab}
-                  onTabChange={setCardTab}
+                  initialMarketOpen={cardMarketOnLogin}
                   cards={virtualCards}
                   setCards={setVirtualCards}
                   flows={cardFlows}
@@ -1212,14 +1248,6 @@ export default function Home() {
                   updateContent={updateContent}
                   icon={productsBiz === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
                   actions={productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
-                  tabs={isLoggedIn ? (
-                    <Tabs value={bizTab} onValueChange={(value) => setBizTab(value as typeof bizTab)} className="uc-tabs-list biz-tabs">
-                      <TabsList>
-                        <TabsTrigger value="recharge"><Zap aria-hidden="true" /><EditableText active={editMode} value={content.bizTabRecharge} onChange={(value) => updateContent("bizTabRecharge", value)} /></TabsTrigger>
-                        <TabsTrigger value="account"><PackageOpen aria-hidden="true" /><EditableText active={editMode} value={content.bizTabAccount} onChange={(value) => updateContent("bizTabAccount", value)} /></TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  ) : null}
                 />
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">

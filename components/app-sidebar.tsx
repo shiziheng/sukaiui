@@ -1,8 +1,15 @@
 "use client";
 
-import { type ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { EditableText } from "@/components/editable-text";
+
+/** 二级菜单：点一下直接切到对应子页。 */
+export type SidebarChild = {
+  id: string;
+  label: string;
+  onLabelChange?: (value: string) => void;
+};
 
 export type SidebarItem = {
   id: string;
@@ -12,6 +19,10 @@ export type SidebarItem = {
   onLabelChange?: (value: string) => void;
   /** 新入口的小圆点 */
   isNew?: boolean;
+  /** 有二级菜单时，父项右侧出箭头；默认展开 */
+  children?: SidebarChild[];
+  /** 点父项本身去哪个页面；缺省落到第一个子项 */
+  targetId?: string;
 };
 
 export type SidebarGroup = {
@@ -46,6 +57,10 @@ export function AppSidebar({
   onHome: () => void;
   onToggleCollapse: () => void;
 }) {
+  // 二级菜单默认全展开，用户手动收起才记成 closed。
+  const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
+  const toggleGroup = (id: string) => setClosedGroups((current) => ({ ...current, [id]: !current[id] }));
+
   let index = 0;
 
   return (
@@ -68,26 +83,66 @@ export function AppSidebar({
             {group.title ? <p className="sb-group-title">{group.title}</p> : null}
             {group.items.map((item) => {
               const order = index++;
+              const children = item.children ?? [];
+              const hasChildren = children.length > 0;
+              const childActive = children.some((child) => child.id === activeId);
+              const isOpen = hasChildren && !closedGroups[item.id];
+              const destination = item.targetId ?? children[0]?.id ?? item.id;
               return (
-                <button
-                  className="sb-item"
-                  data-active={activeId === item.id}
-                  aria-current={activeId === item.id ? "page" : undefined}
-                  data-new={item.isNew || undefined}
-                  type="button"
-                  onClick={() => onNavigate(item.id)}
-                  title={collapsed ? item.label : undefined}
-                  style={{ ["--i" as string]: order }}
-                  key={item.id}
-                >
-                  <span className="sb-item-icon">{item.icon}</span>
-                  <span className="sb-item-label">
-                    {item.onLabelChange ? (
-                      <EditableText active={editMode} value={item.label} onChange={item.onLabelChange} />
-                    ) : item.label}
-                  </span>
-                  {item.isNew && !collapsed ? <span className="sb-item-new">新</span> : null}
-                </button>
+                <div className="sb-item-block" key={item.id}>
+                  <div className="sb-item-row">
+                    <button
+                      className="sb-item"
+                      data-active={activeId === item.id}
+                      data-child-active={childActive || undefined}
+                      data-new={item.isNew || undefined}
+                      aria-current={activeId === item.id ? "page" : undefined}
+                      type="button"
+                      onClick={() => onNavigate(destination)}
+                      title={collapsed ? item.label : undefined}
+                      style={{ ["--i" as string]: order }}
+                    >
+                      <span className="sb-item-icon">{item.icon}</span>
+                      <span className="sb-item-label">
+                        {item.onLabelChange ? (
+                          <EditableText active={editMode} value={item.label} onChange={item.onLabelChange} />
+                        ) : item.label}
+                      </span>
+                      {item.isNew && !collapsed ? <span className="sb-item-new">新</span> : null}
+                    </button>
+                    {hasChildren ? (
+                      <button
+                        className="sb-caret"
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-label={isOpen ? `收起${item.label}` : `展开${item.label}`}
+                        onClick={() => toggleGroup(item.id)}
+                      >
+                        <ChevronDown aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </div>
+                  {hasChildren && isOpen ? (
+                    <div className="sb-sub">
+                      {children.map((child) => (
+                        <button
+                          className="sb-subitem"
+                          data-active={activeId === child.id}
+                          type="button"
+                          onClick={() => onNavigate(child.id)}
+                          title={collapsed ? child.label : undefined}
+                          key={child.id}
+                        >
+                          <span className="sb-subitem-label">
+                            {child.onLabelChange ? (
+                              <EditableText active={editMode} value={child.label} onChange={child.onLabelChange} />
+                            ) : child.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               );
             })}
           </div>

@@ -13,7 +13,7 @@ import { type DemoContent } from "@/data/content";
 type Editable = (key: keyof DemoContent, value: string) => void;
 
 export function CardTransactions({
-  cards, closedCards = [], flows, content, editMode, updateContent,
+  cards, closedCards = [], flows, content, editMode, updateContent, embedded = false,
 }: {
   cards: VirtualCard[];
   /** 已销卡的卡片快照：流水保留，卡列显示「已销卡」。 */
@@ -22,6 +22,8 @@ export function CardTransactions({
   content: DemoContent;
   editMode: boolean;
   updateContent: Editable;
+  /** 作为一级页面（侧栏「卡流水」）时，标题交给页头，只留条数和筛选。 */
+  embedded?: boolean;
 }) {
   const [cardId, setCardId] = useState<string>("all");
   const [type, setType] = useState<"all" | CardFlowType>("all");
@@ -58,14 +60,14 @@ export function CardTransactions({
 
   return (
     <section className="vtxn-panel">
-      <header className="vtxn-panel-head">
-        <div className="vtxn-panel-copy">
+      <header className="vtxn-panel-head" data-embedded={embedded || undefined}>
+        {embedded ? null : <div className="vtxn-panel-copy">
           <span className="section-title-icon"><ReceiptText aria-hidden="true" /></span>
           <div>
             <h2>{editable("cardTxnTitle")}</h2>
             <p>{editable("cardTxnSubtitle")}</p>
           </div>
-        </div>
+        </div>}
         <span className="vtxn-count">共 {visible.length} 条</span>
       </header>
 

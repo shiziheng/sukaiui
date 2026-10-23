@@ -10,7 +10,9 @@ export type DemoContent = {
   navHome: string;
   navAccount: string;
   navRecharge: string;
+  navProducts: string;
   navCard: string;
+  navVirtualCard: string;
   navTopup: string;
   navOrders: string;
   bizTabRecharge: string;
@@ -286,6 +288,7 @@ export type DemoContent = {
   /* ---- 虚拟卡 ---- */
   cardPageTitle: string;
   cardPageSubtitle: string;
+  cardFlowsPageSubtitle: string;
   cardTabCards: string;
   cardTabMarket: string;
   cardTabTransactions: string;
@@ -414,7 +417,9 @@ export const defaultContent: DemoContent = {
   navHome: "首页",
   navAccount: "成品号",
   navRecharge: "商城",
+  navProducts: "商品",
   navCard: "卡片",
+  navVirtualCard: "虚拟卡",
   navTopup: "充值",
   navOrders: "订单",
   bizTabRecharge: "套餐代充",
@@ -690,6 +695,7 @@ export const defaultContent: DemoContent = {
   /* ---- 虚拟卡 ---- */
   cardPageTitle: "虚拟卡",
   cardPageSubtitle: "开通虚拟卡用平台余额充值，卡内余额按需划转，支付订阅与线上消费更灵活。",
+  cardFlowsPageSubtitle: "每张卡的消费、退款和划转记录都在这里，可按卡片与类型筛选。",
   cardTabCards: "我的卡片",
   cardTabMarket: "开卡中心",
   cardTabTransactions: "卡流水",

@@ -2,13 +2,12 @@
 
 import { useRef, type ChangeEvent } from "react";
 import {
-  ChevronRight, Download, Gift, LogOut, Pencil, RotateCcw, ShieldCheck, Upload, UserRound, Wrench,
+  ChevronRight, Download, LogOut, Pencil, RotateCcw, ShieldCheck, Upload, UserRound, Wrench,
 } from "lucide-react";
 
 import "./my-page.css";
 
 import { EditableText } from "@/components/editable-text";
-import { InvitePage } from "@/components/invite-page";
 import { ProfilePage } from "@/components/profile-page";
 import { SecurityPage } from "@/components/security-page";
 import { PageHeading, type CopyUpdater } from "@/components/user-center-shared";
@@ -18,14 +17,14 @@ import { type DemoContent } from "@/data/content";
 export type MyTab = "profile" | "security" | "invite" | "tools";
 
 const TAB_META: Array<{
-  id: MyTab;
-  labelKey: "myTabProfile" | "myTabSecurity" | "myTabInvite" | "myTabTools";
+  id: Exclude<MyTab, "invite">;
+  labelKey: "myTabProfile" | "myTabSecurity" | "myTabTools";
   group: "account" | "more";
   icon: typeof UserRound;
 }> = [
   { id: "profile", labelKey: "myTabProfile", group: "account", icon: UserRound },
   { id: "security", labelKey: "myTabSecurity", group: "account", icon: ShieldCheck },
-  { id: "invite", labelKey: "myTabInvite", group: "more", icon: Gift },
+  // 推广已提到侧栏一级入口，不再挂在「我的」里。
   { id: "tools", labelKey: "myTabTools", group: "more", icon: Wrench },
 ];
 
@@ -118,7 +117,6 @@ export function MyPage({
         <div className="my-panel">
           {tab === "profile" ? <ProfilePage content={content} editMode={editMode} updateContent={updateContent} embedded /> : null}
           {tab === "security" ? <SecurityPage content={content} editMode={editMode} updateContent={updateContent} embedded /> : null}
-          {tab === "invite" ? <InvitePage content={content} editMode={editMode} updateContent={updateContent} embedded /> : null}
           {tab === "tools" ? (
             <section className="uc-card my-tools">
               <header className="my-tools-heading">
