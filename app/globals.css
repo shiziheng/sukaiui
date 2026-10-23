@@ -388,6 +388,7 @@ button{font:inherit}
 .uc-page-heading-copy{display:flex;align-items:center;gap:16px}
 .uc-page-heading h1{font-size:34px;font-weight:770}
 .orders-page .uc-light-stats{gap:14px}
+.orders-page .uc-light-stats.is-three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .orders-page .uc-light-stats>div{position:relative;min-height:108px;overflow:hidden;border-color:#d6d8d1;padding:20px;box-shadow:0 6px 18px rgba(24,27,32,.04)}
 .orders-page .uc-light-stats>div:after{content:"";position:absolute;inset:auto 0 0;height:3px;background:#e2e4dd}
 .orders-page .uc-light-stats>div:first-child{background:linear-gradient(145deg,#fff 25%,#fbfddf 100%)}
@@ -1772,7 +1773,8 @@ button{font:inherit}
 
 /* ---------- v0.21.1：我的账单流水表窄宽优化（侧栏占宽后 1280 左右说明列与金额列挤在一起） ---------- */
 /* 说明列限宽省略，金额列左侧留出呼吸空隙；1240 以下藏掉单号列（单号在订单详情抽屉里仍可查） */
-.bill-flow-table .flow-desc{display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.bill-flow-table th:nth-child(3){width:38%}
+.bill-flow-table .flow-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:520px;overflow:hidden;white-space:normal;line-height:1.55}
 .bill-flow-table td.is-amount{padding-left:28px}
 @media(max-width:1240px){
   .bill-flow-table th:nth-child(6),.bill-flow-table td:nth-child(6){display:none}

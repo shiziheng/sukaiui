@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import { EditableText } from "@/components/editable-text";
@@ -11,25 +11,25 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
+import { money } from "@/data/card-business";
 import {
   accountStatusOptions, getOrderActions, getUnifiedStatus, orderManagementMock, rechargeStatusOptions, unifiedStatusOptions,
   type ManagedOrder, type ManagedOrderKind, type ManagedOrderStatus, type OrderActionId, type UnifiedOrderStatus,
 } from "@/data/order-management";
 import {
-  billFlowTypeLabel, defaultBillFlows, type BillFlowItem, type BillFlowType,
+  billFlowTypeLabel, defaultBillFlows, platformFlowTypeLabel, type BillFlowItem, type BillFlowType, type PlatformFlow,
 } from "@/data/bill-flows";
-import {
-  cardFlowStatusLabel, cardFlowTypeLabel, cardTail, money, type CardFlowItem,
-} from "@/data/card-business";
 import { type DemoContent } from "@/data/content";
 
 type OrderTab = "all" | ManagedOrderKind;
 type QuickFilter = OrderTab | "pending";
 type StatusFilter = "all" | ManagedOrderStatus | UnifiedOrderStatus;
 type TimeFilter = "all" | "7" | "30" | "90" | "custom";
-/** 我的账单顶层视图：平台流水（代充/成品号/退单返佣/卡流水）或原订单列表。 */
-type BillView = "flows" | "orders";
-type FlowFilter = "all" | BillFlowType | "card";
+/** 订单页 / 资金流水页共用一套表格：mode 决定渲染哪一半，菜单里一分为二。 */
+type BillMode = "orders" | "flows";
+/** 资金流水分类：平台余额的进和出。卡内消费属于「卡流水」，不在这里。 */
+type FlowCategory = "topup" | "recharge_service" | "account_service" | "commission" | "card";
+type FlowFilter = "all" | "topup" | "recharge_service" | "account_service" | "refund" | "card";
 
 const PAGE_SIZE = 10;
 const DEMO_NOW = new Date("2026-09-15T23:59:59");
@@ -55,10 +55,20 @@ function withinTimeRange(order: ManagedOrder, range: TimeFilter, customFrom: str
   return created >= cutoff && created <= DEMO_NOW;
 }
 
-export function OrdersPage({ content, editMode, updateContent, extraOrders = [], cardFlows = [] }: { content: DemoContent; editMode: boolean; updateContent: CopyUpdater; extraOrders?: ManagedOrder[]; cardFlows?: CardFlowItem[] }) {
+export function OrdersPage({
+  content, editMode, updateContent, mode = "orders", extraOrders = [], platformFlows = [],
+}: {
+  content: DemoContent;
+  editMode: boolean;
+  updateContent: CopyUpdater;
+  /** orders = 商品订单（挂在「商品」下）；flows = 平台余额流水（独立菜单） */
+  mode?: BillMode;
+  extraOrders?: ManagedOrder[];
+  /** 平台余额流水（充值、开卡扣费、卡充值、卡退款、销卡退款），由页面状态传入，能反映本次操作 */
+  platformFlows?: PlatformFlow[];
+}) {
   const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
   const [billFlows] = useState<BillFlowItem[]>(() => defaultBillFlows.map((flow) => ({ ...flow })));
-  const [view, setView] = useState<BillView>("orders");
   const [flowFilter, setFlowFilter] = useState<FlowFilter>("all");
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
@@ -135,9 +145,24 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
   type FlowRow = {
     key: string; time: string; typeLabel: string; typeClass: string;
     title: string; amount: number; balanceAfter: number; orderNo: string;
-    status: "success" | "processing" | "failed";
+    status: "success" | "processing" | "failed"; category: FlowCategory;
   };
 
+  // 平台余额流水：充值、开卡扣费、卡充值、卡退款、销卡退款
+  const platformRows: FlowRow[] = useMemo(() => platformFlows.map((flow) => ({
+    key: flow.id,
+    time: flow.time,
+    typeLabel: platformFlowTypeLabel[flow.type],
+    typeClass: flow.type === "card_open" ? "fee" : flow.amount > 0 ? "refund" : "consume",
+    title: flow.note,
+    amount: flow.amount,
+    balanceAfter: flow.balanceAfter,
+    orderNo: flow.id,
+    status: flow.status,
+    category: flow.type === "topup" ? "topup" : "card",
+  })), [platformFlows]);
+
+  // 平台余额流水：代充 / 成品号 / 退单返佣
   const billRows: FlowRow[] = useMemo(() => billFlows.map((flow) => ({
     key: flow.id,
     time: flow.time,
@@ -148,54 +173,59 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
     balanceAfter: flow.balanceAfter,
     orderNo: flow.orderNo,
     status: flow.status,
+    category: flow.type,
   })), [billFlows]);
 
-  const cardRows: FlowRow[] = useMemo(() => cardFlows.map((flow) => ({
-    key: flow.id,
-    time: flow.time,
-    typeLabel: `卡·${cardFlowTypeLabel[flow.type]}`,
-    typeClass: flow.type === "recharge" ? "recharge" : flow.type === "refund" ? "refund" : flow.type === "fee" ? "fee" : "consume",
-    title: flow.merchant,
-    amount: flow.amount,
-    balanceAfter: flow.balanceAfter,
-    orderNo: flow.txNo === "—" ? flow.id : flow.txNo,
-    status: flow.status,
-  })), [cardFlows]);
-
   const allFlowRows = useMemo(() => (
-    [...billRows, ...cardRows].sort((a, b) => (a.time < b.time ? 1 : -1))
-  ), [billRows, cardRows]);
+    [...platformRows, ...billRows].sort((a, b) => (a.time < b.time ? 1 : -1))
+  ), [platformRows, billRows]);
 
   const filteredFlowRows = flowFilter === "all"
     ? allFlowRows
-    : flowFilter === "card"
-      ? cardRows
-      : billRows.filter((row) => {
-        if (flowFilter === "recharge_service") return row.typeLabel === billFlowTypeLabel.recharge_service;
-        if (flowFilter === "account_service") return row.typeLabel === billFlowTypeLabel.account_service;
-        return row.typeLabel === billFlowTypeLabel.commission;
-      });
+    : flowFilter === "refund"
+      ? allFlowRows.filter((row) => row.category === "commission" || (row.category === "card" && row.amount > 0))
+      : allFlowRows.filter((row) => row.category === flowFilter);
+
+  // 资金流水页顶部三数：进来了多少、出去多少、净变动
+  const flowSummary = useMemo(() => {
+    const income = allFlowRows.reduce((sum, row) => sum + (row.amount > 0 ? row.amount : 0), 0);
+    const expense = allFlowRows.reduce((sum, row) => sum + (row.amount < 0 ? Math.abs(row.amount) : 0), 0);
+    return { income, expense, net: income - expense };
+  }, [allFlowRows]);
+
+  const heading = mode === "flows"
+    ? { titleKey: "walletFlowTitle" as const, subtitleKey: "walletFlowSubtitle" as const, icon: <WalletCards />, aside: <span className="orders-period-summary">平台余额 · 共 {allFlowRows.length} 条</span> }
+    : { titleKey: "ordersPageTitle" as const, subtitleKey: "ordersPageSubtitle" as const, icon: <ReceiptText />, aside: <span className="orders-period-summary">近30天 · {recentCount}个订单</span> };
 
   return (
     <section className="user-center-page orders-page">
-      <PageHeading titleKey="ordersPageTitle" subtitleKey="ordersPageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<ReceiptText />} aside={<span className="orders-period-summary">近30天 · {recentCount}个订单</span>} tabs={
-        <Tabs value={view} onValueChange={(value) => setView(value as BillView)}>
-          <TabsList className="uc-tabs-list orders-view-tabs">
-            <TabsTrigger value="orders"><EditableText active={editMode} value={content.billTabOrders} onChange={(value) => updateContent("billTabOrders", value)} /></TabsTrigger>
-            <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
-          </TabsList>
-        </Tabs>
-      } />
+      <PageHeading
+        titleKey={heading.titleKey}
+        subtitleKey={heading.subtitleKey}
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+        icon={heading.icon}
+        aside={heading.aside}
+      />
 
-      {view === "flows" ? (
+      {mode === "flows" ? (
+        <>
+        <div className="uc-light-stats order-stat-filters is-three" aria-label="资金流水汇总">
+          <div><ArrowDownLeft aria-hidden="true" /><span>累计入账</span><strong>+{money(flowSummary.income)}</strong></div>
+          <div><ArrowUpRight aria-hidden="true" /><span>累计支出</span><strong>−{money(flowSummary.expense)}</strong></div>
+          <div><WalletCards aria-hidden="true" /><span>净变动</span><strong>{flowSummary.net >= 0 ? "+" : "−"}{money(Math.abs(flowSummary.net))}</strong></div>
+        </div>
+
         <section className="uc-card order-management-panel bill-flow-panel">
           <div className="order-tabs-row">
             <div className="bill-type-tabs" role="group" aria-label="流水类型筛选">
               {([
                 ["all", content.billAllTypes],
+                ["topup", content.flowTypeTopup],
                 ["recharge_service", content.billTypeRecharge],
                 ["account_service", content.billTypeAccount],
-                ["commission", content.billTypeCommission],
+                ["refund", content.billTypeCommission],
                 ["card", content.billTypeCard],
               ] as const).map(([value, label]) => (
                 <button key={value} type="button" className="bill-type-tab" data-active={flowFilter === value} onClick={() => setFlowFilter(value)}>{label}</button>
@@ -227,6 +257,7 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
             <div className="uc-empty order-filter-empty"><Search aria-hidden="true" /><strong>暂无相关流水</strong><p>切换类型或完成新的交易后，流水会显示在这里。</p></div>
           )}
         </section>
+        </>
       ) : (
         <>
           <div className="uc-light-stats order-stat-filters" aria-label="订单统计快捷筛选">

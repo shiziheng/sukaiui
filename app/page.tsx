@@ -598,6 +598,12 @@ export default function Home() {
         if (config.content.navInvite === "我的邀请") config.content.navInvite = "推广";
         // 侧栏一级菜单用短词：推广奖励 → 推广（页面标题仍是「推广奖励」）
         if (config.content.navInvite === "推广奖励") config.content.navInvite = "推广";
+        // v0.32.0：订单归到「商品」下，资金流水独立成一级，流水口径只剩平台余额
+        if (config.content.ordersPageSubtitle === "查看和管理你的成品号与代充服务订单。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充订单。";
+        if (config.content.ordersPageSubtitle === "查看和管理你的成品号、代充订单与资金流水。") config.content.ordersPageSubtitle = "查看和管理你的成品号与代充订单。";
+        if (config.content.walletFlowTitle === "余额流水") config.content.walletFlowTitle = "资金流水";
+        if (config.content.billTypeCard === "卡流水") config.content.billTypeCard = "卡相关";
+        if (config.content.billAllTypes === "全部类型") config.content.billAllTypes = "全部";
         // 账单词选「我的账单」：页内标题与菜单统一
         if (config.content.ordersPageTitle === "我的订单") config.content.ordersPageTitle = "我的账单";
         // 卡按钮改版：注销卡片 → 删卡（链式迁移，只匹配已知旧值）
@@ -954,7 +960,8 @@ export default function Home() {
 
   /**
    * 登录后的左侧菜单：一级主线 + 两个二级分组。
-   * 首页 / 充值 / 卡片（虚拟卡·卡流水） / 商品（代充·成品号） / 订单 / 推广。
+   * 首页 / 充值 / 卡片（虚拟卡·卡流水） / 商品（代充·成品号·订单） / 资金流水 / 推广。
+   * 商品订单属于商品域，挂在「商品」下；「资金流水」是平台余额变动，独立成一级。
    * 开卡中心不占菜单，从「虚拟卡」里的开卡按钮弹出。
    */
   const sidebarGroups: SidebarGroup[] = [
@@ -983,9 +990,10 @@ export default function Home() {
           children: [
             { id: "biz-recharge", label: content.rechargeLabel, onLabelChange: (value) => updateContent("rechargeLabel", value) },
             { id: "biz-account", label: content.navAccount, onLabelChange: (value) => updateContent("navAccount", value) },
+            { id: "orders", label: content.navOrders, onLabelChange: (value) => updateContent("navOrders", value) },
           ],
         },
-        { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
+        { id: "flows", label: content.navFlows, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navFlows", value) },
         { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
       ],
     },
@@ -1150,7 +1158,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card", "my"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
+      <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "flows", "invite", "wallet", "profile", "security", "card", "my"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
               <RechargePage
@@ -1184,7 +1192,9 @@ export default function Home() {
             ) : selectedMenu === "home" ? (
               isLoggedIn ? <AccountDashboard onNavigate={(destination) => { if (destination === "invite") { navigateTo("invite"); } else if (destination === "profile" || destination === "security") { setMyTab(destination); navigateTo("my"); } else if (destination === "account") { setBizTab("account"); navigateTo("recharge"); } else navigateTo(destination); }} onOpenRecharge={openWalletRecharge} availableBalance={effectiveBalance} content={content} editMode={editMode} updateContent={updateContent} /> : <PublicLandingPage onNavigate={(destination) => { navigateTo(destination); if (destination === "help") window.history.replaceState(null, "", "#help"); }} onLogin={handleDemoLogin} onRegister={handleDemoRegister} onSupport={() => setSupportSurface("floating")} />
             ) : selectedMenu === "orders" ? (
-              <OrdersPage content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} cardFlows={cardFlows} />
+              <OrdersPage mode="orders" content={content} editMode={editMode} updateContent={updateContent} extraOrders={generatedOrders} />
+            ) : selectedMenu === "flows" ? (
+              <OrdersPage mode="flows" content={content} editMode={editMode} updateContent={updateContent} platformFlows={platformFlows} />
             ) : selectedMenu === "invite" ? (
               <InvitePage content={content} editMode={editMode} updateContent={updateContent} />
             ) : (selectedMenu === "my" || selectedMenu === "profile" || selectedMenu === "security") ? (
@@ -1375,7 +1385,7 @@ export default function Home() {
         frozenBalance={accountDashboardMock.summary.frozenBalance}
         records={walletRecords}
         onRecharge={() => { setWalletOpen(false); openWalletRecharge(); }}
-        onViewAll={() => { setWalletOpen(false); navigateTo("wallet"); }}
+        onViewAll={() => { setWalletOpen(false); navigateTo("flows"); }}
       />
 
       <Sheet open={Boolean(editorProduct)} onOpenChange={(open) => !open && setEditorProductId(null)}>

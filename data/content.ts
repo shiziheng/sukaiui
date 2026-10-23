@@ -15,11 +15,13 @@ export type DemoContent = {
   navVirtualCard: string;
   navTopup: string;
   navOrders: string;
+  navFlows: string;
   bizTabRecharge: string;
   bizTabAccount: string;
   billTabFlows: string;
   billTabOrders: string;
   billAllTypes: string;
+  flowTypeTopup: string;
   billTypeRecharge: string;
   billTypeAccount: string;
   billTypeCommission: string;
@@ -422,17 +424,19 @@ export const defaultContent: DemoContent = {
   navVirtualCard: "虚拟卡",
   navTopup: "充值",
   navOrders: "订单",
+  navFlows: "资金流水",
   bizTabRecharge: "套餐代充",
   bizTabAccount: "成品号",
   billTabFlows: "资金流水",
   billTabOrders: "订单",
-  billAllTypes: "全部类型",
+  billAllTypes: "全部",
+  flowTypeTopup: "充值",
   billTypeRecharge: "代充流水",
   billTypeAccount: "成品号流水",
   billTypeCommission: "退单/返佣",
-  billTypeCard: "卡流水",
-  walletFlowTitle: "余额流水",
-  walletFlowSubtitle: "平台余额的全部变动：充值、开卡扣费、卡充值、卡退款、销卡退款。",
+  billTypeCard: "卡相关",
+  walletFlowTitle: "资金流水",
+  walletFlowSubtitle: "平台余额的全部变动：充值到账、代充与成品号扣款、开卡扣费、卡充值、退款与返佣。",
   navInvite: "推广",
   personalCenter: "我的",
   logout: "退出登录",
@@ -553,7 +557,7 @@ export const defaultContent: DemoContent = {
   viewAllOrders: "查看全部订单",
   goBrowse: "去逛逛",
   ordersPageTitle: "订单",
-  ordersPageSubtitle: "查看和管理你的成品号、代充订单与资金流水。",
+  ordersPageSubtitle: "查看和管理你的成品号与代充订单。",
   allOrdersTab: "全部订单",
   accountOrdersTab: "成品号订单",
   rechargeOrdersTab: "代充订单",

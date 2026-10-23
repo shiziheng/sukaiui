@@ -106,7 +106,7 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance 
     <section className="hp-block">
       <header className="hp-block-head">
         <div><h2>整体</h2><p>余额可以花，累计数字用来看趋势</p></div>
-        <button className="hp-link" type="button" onClick={() => onNavigate("wallet")}>账户明细<ArrowRight aria-hidden="true" /></button>
+        <button className="hp-link" type="button" onClick={() => onNavigate("flows")}>账户明细<ArrowRight aria-hidden="true" /></button>
       </header>
       <div className="hp-stats is-four">
         <div className="hp-stat">

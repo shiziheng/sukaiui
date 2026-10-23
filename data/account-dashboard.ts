@@ -1,4 +1,4 @@
-export type DashboardDestination = "home" | "wallet" | "account" | "recharge" | "card" | "topup" | "orders" | "invite" | "profile" | "security" | "my" | "help";
+export type DashboardDestination = "home" | "wallet" | "account" | "recharge" | "card" | "topup" | "orders" | "flows" | "invite" | "profile" | "security" | "my" | "help";
 export type OrderKind = "account" | "recharge";
 export type OrderStatus = "completed" | "processing" | "pending" | "failed";
 
