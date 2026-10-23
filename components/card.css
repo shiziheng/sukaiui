@@ -6,8 +6,9 @@
 .card-module{display:block}
 .card-tabs{margin-bottom:12px}
 .vcard-panel,.vbin-panel,.vtxn-panel{display:block}
-/* L3 页头带：与代充/钱包页头同款渐变带，工具按钮收进带内右侧 */
-.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid #daddd4;border-radius:14px;background:linear-gradient(110deg,#fff 0%,#fafbf5 72%,#f3f6dc 100%);box-shadow:var(--ds-shadow-subtle)}
+/* 面板头改成扁平工具栏：页头已经是页面级标题，面板不再重复套第二层色带 */
+.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap;padding:0}
+.vcard-panel-meta{margin:0;font-size:13px;color:var(--color-text-secondary);font-variant-numeric:tabular-nums}
 .vcard-panel-copy,.vbin-panel-copy,.vtxn-panel-copy{display:flex;align-items:center;gap:12px;min-width:0}
 .vcard-panel-copy .section-title-icon,.vbin-panel-copy .section-title-icon,.vtxn-panel-copy .section-title-icon{width:36px;height:36px;border-radius:10px;flex:none}
 .vcard-panel-copy h2,.vbin-panel-copy h2,.vtxn-panel-copy h2{margin:0;font-size:20px;line-height:1.2;font-weight:720;letter-spacing:-.02em;color:var(--color-text-primary)}

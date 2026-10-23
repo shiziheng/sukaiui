@@ -148,13 +148,11 @@ export function CardList({
   return (
     <section className="vcard-panel">
       <header className="vcard-panel-head">
-        <div className="vcard-panel-copy">
-          <span className="section-title-icon"><CreditCard aria-hidden="true" /></span>
-          <div>
-            <h2>{showClosed ? editable("cardClosedTitle") : editable("cardCardsTitle")}</h2>
-            <p>{showClosed ? content.cardClosedEmptyHint : editable("cardCardsSubtitle")}</p>
-          </div>
-        </div>
+        <p className="vcard-panel-meta">
+          {showClosed
+            ? `已注销 ${filtered.length} 张`
+            : `共 ${filtered.length} 张 · 卡内可用 ${money(filtered.reduce((sum, card) => sum + card.balance, 0))}`}
+        </p>
         <div className="vcard-head-tools">
           <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
             <Download aria-hidden="true" />{editable("cardExport")}

@@ -958,21 +958,6 @@ export default function Home() {
     },
   ];
 
-  const menuTitles: Record<MenuId, string> = {
-    home: content.navHome,
-    account: content.navAccount,
-    card: content.navCard,
-    recharge: content.navRecharge,
-    topup: content.navTopup,
-    orders: content.navOrders,
-    wallet: content.walletMenu,
-    invite: content.navInvite,
-    security: content.securityMenu,
-    profile: content.personalCenter,
-    my: content.myTitle,
-    help: "帮助中心",
-  };
-
   const sidebarIsCollapsed = sidebarCollapsed;
 
   // 侧栏高亮：成品号是商城的子页签，归到 recharge；「我的」单独走底部按钮。
@@ -1042,11 +1027,6 @@ export default function Home() {
             <button className="sidebar-toggle" type="button" onClick={handleSidebarToggleClick} aria-label="切换菜单">
               <PanelLeft aria-hidden="true" />
             </button>
-            <div className="header-crumb">
-              <span>工作台</span>
-              <i aria-hidden="true">/</i>
-              <strong>{menuTitles[selectedMenu]}</strong>
-            </div>
           </div>
         ) : (
           <button className="header-left header-logo-button" type="button" onClick={() => handlePublicNavigation("home")} aria-label="返回首页">

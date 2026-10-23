@@ -643,7 +643,7 @@ button{font:inherit}
 @media(max-width:1280px){:root{--ds-page-gutter:32px}.share-template-grid{grid-template-columns:1fr}.share-template-grid article{min-height:142px}.uc-invite-workspace{grid-template-columns:minmax(0,1fr) 310px}}
 @media(max-width:1000px){.ds-stat-grid{grid-template-columns:repeat(2,1fr)}.invite-core-card{grid-template-columns:1fr 220px}.uc-invite-workspace{grid-template-columns:1fr}.share-template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){:root{--ds-page-gutter:16px}.site-header{height:118px;padding-inline:16px}.business-nav,.business-nav-item{height:56px}.content-inset{padding-top:118px}.main-content,.dashboard-inset .main-content{padding:26px var(--ds-page-gutter) 52px}.uc-page-heading{min-height:100px;align-items:flex-start;padding:19px}.uc-page-heading h1{font-size:28px}.uc-page-heading-icon{width:42px;height:42px}.ds-stat-grid{grid-template-columns:1fr}.invite-core-card{grid-template-columns:1fr}.invite-core-qr{align-items:flex-start;border-top:1px solid var(--ds-border-default);border-left:0;padding-top:20px}.invite-core-qr p{text-align:left}.share-template-grid{grid-template-columns:1fr}.invite-tabs-row{align-items:flex-start;flex-direction:column}.invite-result-count{align-self:flex-end}.uc-tabs-list{max-width:calc(100vw - 72px);overflow-x:auto}}
-@media(max-width:520px){.uc-page-heading{flex-direction:column}.uc-page-heading aside{margin-left:58px}.ds-stat-card{min-height:124px;padding:18px}.invite-value-row.is-code strong{font-size:21px}.invite-core-qr .qr-demo{width:150px;height:150px}.invite-core-qr .qr-demo svg{width:112px;height:112px}}
+@media(max-width:520px){.uc-page-heading{flex-direction:column}.uc-page-heading aside{margin-left:50px}.ds-stat-card{min-height:124px;padding:18px}.invite-value-row.is-code strong{font-size:21px}.invite-core-qr .qr-demo{width:150px;height:150px}.invite-core-qr .qr-demo svg{width:112px;height:112px}}
 
 /* Account product cards and purchase confirmation */
 .brand-mark{color:var(--brand-accent,#25282d)}
@@ -1262,10 +1262,10 @@ button{font:inherit}
 
 /* ===== v0.13.1 统一页头体系：二级页签高对比分段控件 + 三级页头带紧凑化 ===== */
 /* L2 二级页签：虚拟卡三页签 / 代充双页签 / 账单切换 / 钱包邀请页签 全局统一，激活=深色胶囊+品牌字 */
-.uc-tabs-list{height:48px!important;gap:4px!important;border:1px solid #dcddd8!important;border-radius:12px!important;background:#eef0ea!important;padding:4px!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-list]{background:transparent!important;border:0!important;border-radius:10px!important;height:40px!important;padding:0!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger]{height:40px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:#71766d!important;padding:0 18px!important;font-size:14px!important;font-weight:650!important;box-shadow:none!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger] svg{width:16px!important;height:16px!important}
+.uc-tabs-list{height:40px!important;gap:3px!important;border:1px solid #dcddd8!important;border-radius:10px!important;background:#eef0ea!important;padding:3px!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-list]{background:transparent!important;border:0!important;border-radius:8px!important;height:34px!important;padding:0!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger]{height:34px!important;border:0!important;border-radius:7px!important;background:transparent!important;color:#71766d!important;padding:0 15px!important;font-size:13px!important;font-weight:650!important;box-shadow:none!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger] svg{width:14px!important;height:14px!important}
 .uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger][data-state=active]{background:#17181b!important;color:var(--color-brand)!important;box-shadow:0 3px 10px rgba(17,18,20,.25)!important}
 .uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger][data-state=active]:after{display:none!important}
 .orders-page .uc-tabs-list [data-slot=tabs-trigger][data-state=active]{background:#17181b!important;color:var(--color-brand)!important;box-shadow:0 3px 10px rgba(17,18,20,.25)!important}
@@ -1274,13 +1274,12 @@ button{font:inherit}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active] svg{color:var(--color-brand)!important}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active]:after{display:none!important}
 .commerce-panel .biz-tabs{margin-bottom:0}
-/* L3 页头带：钱包/用户中心 uc-page-heading 与代充 commerce-page-heading 统一紧凑节奏 */
-.uc-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
-.uc-page-heading .uc-page-heading-icon,.commerce-page-icon{width:36px!important;height:36px!important;border-radius:10px!important;box-shadow:none!important}
-.uc-page-heading .uc-page-heading-icon svg,.commerce-page-icon svg{width:18px!important;height:18px!important}
-.uc-page-heading h1,.commerce-page-heading h1{font-size:20px!important;line-height:1.2!important;font-weight:720!important;letter-spacing:-.02em!important}
-.uc-page-heading p,.commerce-page-heading p{margin-top:2px!important;font-size:13px!important}
-.commerce-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
+/* L3 页头带：全站页头统一「无容器」扁平排版——直接坐在页面底上，只留品牌图标块，不再套色卡 */
+.uc-page-heading{min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+.uc-page-heading .uc-page-heading-icon{width:34px!important;height:34px!important;border-radius:10px!important;box-shadow:none!important}
+.uc-page-heading .uc-page-heading-icon svg{width:17px!important;height:17px!important}
+.uc-page-heading h1{font-size:24px!important;line-height:1.2!important;font-weight:720!important;letter-spacing:-.025em!important}
+.uc-page-heading p{margin-top:5px!important;font-size:13px!important;color:#6B7268!important}
 .commerce-panel .panel-toolbar{margin-bottom:0!important}
 /* 账单页：跟随全站 12px 纵向节奏（压过 user-center-page 的 24px） */
 .orders-page{gap:12px}
@@ -1685,11 +1684,8 @@ button{font:inherit}
 /* 图标轨下版式弹层浮到侧栏右侧，否则选完「只留图标」就再也切不回来 */
 .app-sidebar[data-collapsed=true] .sb-layout-pop{left:calc(100% + 10px);right:auto;bottom:0;width:214px}
 
-/* 顶栏：让出侧栏、瘦到 60px，左侧改成面包屑 */
+/* 顶栏：让出侧栏、瘦到 60px，左侧只留菜单开关（页面名称已在侧栏高亮，不再重复面包屑） */
 .app-shell.has-sidebar .site-header{left:var(--sb-w);height:var(--sb-head);display:flex;justify-content:space-between;gap:24px;padding-inline:24px;border-bottom:1px solid #232528;box-shadow:none;transition:left .34s var(--sb-ease)}
-.header-crumb{display:flex;align-items:center;gap:8px;min-width:0;color:#6f757c;font-size:12.5px;white-space:nowrap}
-.header-crumb i{font-style:normal;color:#3d4147}
-.header-crumb strong{overflow:hidden;color:#f2f4ef;font-size:14px;font-weight:650;text-overflow:ellipsis}
 .sidebar-toggle{width:32px;height:32px;flex:none;display:grid;place-items:center;border:1px solid #2c2f33;border-radius:8px;background:transparent;color:#c4c9cf;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,color .15s ease}
 .sidebar-toggle:hover{border-color:#41444a;background:#1d1f22;color:#fff}
 .sidebar-toggle svg{width:16px;height:16px}
@@ -1723,7 +1719,6 @@ button{font:inherit}
   .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-item[data-active=true]::before{left:-6px}
   .app-shell.has-sidebar.mobile-nav-open .sb-backdrop{display:block;position:fixed;inset:0;z-index:45;border:0;background:rgba(8,9,11,.46);cursor:pointer}
   .app-shell.has-sidebar .site-header{left:0;padding-inline:16px;gap:12px}
-  .header-crumb>span,.header-crumb>i{display:none}
   .app-shell.has-sidebar .app-sidebar .sb-layout-pop{left:0;right:0;bottom:calc(100% + 8px);width:auto}
   .app-shell.has-sidebar .app-sidebar .sb-collapse{display:none}
 }
@@ -1731,7 +1726,6 @@ button{font:inherit}
   .app-shell.has-sidebar{--sb-head:56px}
   .app-shell.has-sidebar .site-header{height:56px}
   .app-shell.has-sidebar .content-inset{padding-top:56px}
-  .app-shell.has-sidebar .header-crumb{display:none}
 }
 
 /* 侧栏下的卡片网格断点：宽度少了 244px，4 列门槛按可用宽重算 */
