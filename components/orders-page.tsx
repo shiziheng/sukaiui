@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag, WalletCards } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 
 import "./bill-page.css";
@@ -32,6 +32,7 @@ type BillMode = "orders" | "flows";
 /** 资金流水分类：平台余额的进和出。卡内消费属于「卡流水」，不在这里。 */
 type FlowCategory = "topup" | "recharge_service" | "account_service" | "commission" | "card";
 type FlowFilter = "all" | "topup" | "recharge_service" | "account_service" | "refund" | "card";
+type FlowStatusFilter = "all" | "success" | "processing" | "failed";
 /** 账单周期：按自然月对账，本月 / 上月 / 近 3 个自然月 / 全部。 */
 type BillPeriod = "month" | "lastMonth" | "quarter" | "all";
 
@@ -67,7 +68,7 @@ function billPeriodRange(period: BillPeriod): { start: Date | null; end: Date | 
 function formatDayLabel(day: string) {
   const date = new Date(`${day}T00:00:00`);
   const week = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
-  return `${date.getMonth() + 1}月${date.getDate()}日 ${week}`;
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${week}`;
 }
 
 function actionLabel(id: OrderActionId, content: DemoContent) {
@@ -106,6 +107,9 @@ export function OrdersPage({
   const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
   const [billFlows] = useState<BillFlowItem[]>(() => defaultBillFlows.map((flow) => ({ ...flow })));
   const [flowFilter, setFlowFilter] = useState<FlowFilter>("all");
+  const [flowStatus, setFlowStatus] = useState<FlowStatusFilter>("all");
+  const [flowSearch, setFlowSearch] = useState("");
+  const [collapsedDays, setCollapsedDays] = useState<string[]>([]);
   const [period, setPeriod] = useState<BillPeriod>("month");
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
@@ -226,11 +230,28 @@ export function OrdersPage({
     return time >= periodRange.start && time <= periodRange.end;
   }), [allFlowRows, periodRange]);
 
-  const filteredFlowRows = flowFilter === "all"
-    ? periodRows
-    : flowFilter === "refund"
-      ? periodRows.filter((row) => row.category === "commission" || (row.category === "card" && row.amount > 0))
-      : periodRows.filter((row) => row.category === flowFilter);
+  const filteredFlowRows = useMemo(() => {
+    const query = flowSearch.trim().toLowerCase();
+    return periodRows.filter((row) => {
+      if (flowStatus !== "all" && row.status !== flowStatus) return false;
+      if (query && !row.orderNo.toLowerCase().includes(query) && !row.title.toLowerCase().includes(query)) return false;
+      if (flowFilter === "all") return true;
+      if (flowFilter === "refund") return row.category === "commission" || (row.category === "card" && row.amount > 0);
+      return row.category === flowFilter;
+    });
+  }, [flowFilter, flowSearch, flowStatus, periodRows]);
+
+  const hasFlowFilters = period !== "month" || flowFilter !== "all" || flowStatus !== "all" || Boolean(flowSearch);
+  const resetFlowFilters = () => {
+    setPeriod("month");
+    setFlowFilter("all");
+    setFlowStatus("all");
+    setFlowSearch("");
+    setCollapsedDays([]);
+  };
+  const toggleDay = (day: string) => setCollapsedDays((current) => (
+    current.includes(day) ? current.filter((item) => item !== day) : [...current, day]
+  ));
 
   /** 期初 = 周期开始前最后一笔的变动后余额；期末 = 周期内最后一笔的变动后余额。 */
   const flowSummary = useMemo(() => {
@@ -324,20 +345,35 @@ export function OrdersPage({
         </div>
 
         <section className="uc-card order-management-panel bill-flow-panel">
-          <div className="order-tabs-row">
-            <div className="bill-type-tabs" role="group" aria-label="账单类型筛选">
-              {([
-                ["all", content.billAllTypes],
-                ["topup", content.flowTypeTopup],
-                ["recharge_service", content.billTypeRecharge],
-                ["account_service", content.billTypeAccount],
-                ["refund", content.billTypeCommission],
-                ["card", content.billTypeCard],
-              ] as const).map(([value, label]) => (
-                <button key={value} type="button" className="bill-type-tab" data-active={flowFilter === value} onClick={() => setFlowFilter(value)}>{label}</button>
-              ))}
-            </div>
-            <span className="order-result-count">共 <strong>{filteredFlowRows.length}</strong> 条</span>
+          <div className="bill-filter-bar">
+            <label className="bill-filter-field">
+              <span>类型</span>
+              <select value={flowFilter} onChange={(event) => setFlowFilter(event.target.value as FlowFilter)}>
+                <option value="all">{content.billAllTypes}</option>
+                <option value="topup">{content.flowTypeTopup}</option>
+                <option value="recharge_service">{content.billTypeRecharge}</option>
+                <option value="account_service">{content.billTypeAccount}</option>
+                <option value="refund">{content.billTypeCommission}</option>
+                <option value="card">{content.billTypeCard}</option>
+              </select>
+            </label>
+            <label className="bill-filter-field">
+              <span>状态</span>
+              <select value={flowStatus} onChange={(event) => setFlowStatus(event.target.value as FlowStatusFilter)}>
+                <option value="all">全部状态</option>
+                <option value="success">成功</option>
+                <option value="processing">处理中</option>
+                <option value="failed">失败</option>
+              </select>
+            </label>
+            <label className="bill-filter-search">
+              <Search aria-hidden="true" />
+              <input value={flowSearch} onChange={(event) => setFlowSearch(event.target.value)} placeholder="搜单号或说明" aria-label="搜单号或说明" />
+            </label>
+            <button type="button" className={`bill-filter-reset ${hasFlowFilters ? "is-active" : ""}`} onClick={resetFlowFilters}>
+              <RotateCcw aria-hidden="true" />重置
+            </button>
+            <span className="bill-filter-count">共 <strong>{filteredFlowRows.length}</strong> 条</span>
           </div>
 
           {filteredFlowRows.length ? (
@@ -345,19 +381,24 @@ export function OrdersPage({
               <table className="uc-table order-management-table bill-flow-table">
                 <thead><tr><th className="bill-col-time">时间</th><th>类型</th><th>说明</th><th className="is-amount">金额</th><th>变动后余额</th><th>单号 / 交易号</th><th>状态</th></tr></thead>
                 <tbody>
-                  {flowGroups.map((group) => (
+                  {flowGroups.map((group) => {
+                    const collapsed = collapsedDays.includes(group.day);
+                    return (
                     <Fragment key={group.day}>
                       <tr className="bill-day-row">
                         <td colSpan={7}>
-                          <div>
-                            <span>{formatDayLabel(group.day)}</span>
+                          <button type="button" className="bill-day-toggle" aria-expanded={!collapsed} onClick={() => toggleDay(group.day)}>
+                            <span className="bill-day-label">
+                              {collapsed ? <ChevronRight aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
+                              {formatDayLabel(group.day)}
+                            </span>
                             <small>{group.rows.length} 笔 · 净 {group.net >= 0 ? "+" : "−"}{money(Math.abs(group.net))}</small>
-                          </div>
+                          </button>
                         </td>
                       </tr>
-                      {group.rows.map((row) => (
+                      {!collapsed && group.rows.map((row) => (
                         <tr key={row.key}>
-                          <td><time className="bill-time">{row.time.slice(11)}</time></td>
+                          <td><time className="bill-time" title={row.time}>{row.time.slice(11)}</time></td>
                           <td><span className={`uc-kind-tag vcard-flow-type is-${row.typeClass}`}>{row.typeLabel}</span></td>
                           <td><span className="flow-desc">{row.title}</span></td>
                           <td className={`is-amount vcard-flow-amount ${row.amount > 0 ? "is-income" : "is-expense"}`}>{row.amount > 0 ? "+" : "−"}{money(Math.abs(row.amount))}</td>
@@ -367,7 +408,8 @@ export function OrdersPage({
                         </tr>
                       ))}
                     </Fragment>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
