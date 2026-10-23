@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Check, CheckCircle2, Clock3, Copy, QrCode, RefreshCcw, TriangleAlert,
+  ArrowRight, Check, CheckCircle2, Clock3, Copy, QrCode, RefreshCcw, TriangleAlert, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { EditableText } from "@/components/editable-text";
-import { type CopyUpdater } from "@/components/user-center-shared";
+import { PageHeading, type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
 import {
@@ -91,6 +90,7 @@ export function RechargePage({
   const confirming = useRef(false);
 
   const recentRecords = topUpRecords.slice(0, 3);
+  const topUpTotal = topUpRecords.reduce((sum, record) => sum + record.amount, 0);
   const networkInfo = paymentNetworks[intent?.network ?? network];
   const expired = intent?.status === "expired";
   const detected = intent?.status === "detected";
@@ -166,20 +166,29 @@ export function RechargePage({
   };
 
   return <section className="rc-page">
-    <header className="rc-heading">
-      <div className="rc-heading-copy">
-        <h1><EditableText active={editMode} value={content.topupTitle} onChange={(value) => updateContent("topupTitle", value)} /></h1>
-        <p>三步完成充值。金额会带 3 位尾数，用于自动匹配到账。</p>
-      </div>
-      <div className="rc-heading-side">
-        {phase === "pay" && intent ? <span className="rc-countdown" data-urgent={secondsLeft <= 300 || undefined}>
-          <Clock3 aria-hidden="true" />{clock(secondsLeft)}
-        </span> : null}
-        <span className="rc-balance">可用余额 <strong>{money(availableBalance)}</strong></span>
-      </div>
-    </header>
+    <PageHeading
+      titleKey="topupTitle"
+      subtitleKey="topupSubtitle"
+      content={content}
+      editMode={editMode}
+      updateContent={updateContent}
+      icon={<Zap aria-hidden="true" />}
+      actions={phase === "pay" && intent ? <span className="rc-countdown" data-urgent={secondsLeft <= 300 || undefined}>
+        <Clock3 aria-hidden="true" />{clock(secondsLeft)}
+      </span> : undefined}
+    />
+
+    {/* 与卡片页的「共 N 张 · 卡内可用」同构：页头下面先给一行当前状态，再接流程 */}
+    <div className="rc-meta">
+      <span>当前余额 <strong>{money(availableBalance)}</strong></span>
+      <span>累计充值 <strong>{money(topUpTotal)}</strong></span>
+      <span>单笔限额 <strong>$10,000</strong></span>
+    </div>
 
     {pendingOrderHint ? <p className="rc-pending"><Clock3 aria-hidden="true" />{pendingOrderHint}</p> : null}
+
+    <div className="rc-grid">
+      <div className="rc-main">
 
     {phase === "done" && completion ? <section className="rc-done">
       <span className="rc-done-icon"><CheckCircle2 aria-hidden="true" /></span>
@@ -343,25 +352,31 @@ export function RechargePage({
       </li>
     </ol>}
 
-    <p className="rc-policy">平台不收取充值手续费；链上手续费由你的钱包收取。</p>
+        <p className="rc-policy">平台不收取充值手续费；链上手续费由你的钱包收取。</p>
+      </div>
 
-    <section className="rc-records">
-      <header>
-        <strong>最近充值</strong>
-        <button type="button" onClick={onBack}>查看钱包流水<ArrowRight aria-hidden="true" /></button>
-      </header>
-      {recentRecords.length ? <ul>
-        {recentRecords.map((record) => <li key={record.id}>
-          <div>
-            <code>{record.id}</code>
-            <span>{record.method} · {record.createdAt}</span>
-          </div>
-          <strong>{money(record.amount)}</strong>
-          {record.status === "已完成"
-            ? <em className="is-done"><Check aria-hidden="true" />已完成</em>
-            : <button type="button" onClick={() => resumeRecord(record)}>继续支付</button>}
-        </li>)}
-      </ul> : <p className="rc-empty">还没有充值记录，完成第一笔后会显示在这里。</p>}
-    </section>
+      <aside className="rc-aside">
+        <section className="rc-records">
+          <header>
+            <strong>最近充值</strong>
+            <button type="button" onClick={onBack}>查看钱包流水<ArrowRight aria-hidden="true" /></button>
+          </header>
+          {recentRecords.length ? <ul>
+            {recentRecords.map((record) => <li key={record.id}>
+              <div className="rc-record-top">
+                <strong>{money(record.amount)}</strong>
+                {record.status === "已完成"
+                  ? <em className="is-done"><Check aria-hidden="true" />已完成</em>
+                  : <button type="button" onClick={() => resumeRecord(record)}>继续支付</button>}
+              </div>
+              <div className="rc-record-meta">
+                <code>{record.id}</code>
+                <span>{record.method} · {record.createdAt}</span>
+              </div>
+            </li>)}
+          </ul> : <p className="rc-empty">还没有充值记录，完成第一笔后会显示在这里。</p>}
+        </section>
+      </aside>
+    </div>
   </section>;
 }

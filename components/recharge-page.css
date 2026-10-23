@@ -1,39 +1,47 @@
 .rc-page {
-  width: min(820px, 100%);
-  margin: 0 auto;
+  width: 100%;
   padding-bottom: 56px;
   color: #17191c;
   font-variant-numeric: tabular-nums;
 }
 
-.rc-heading {
+/* 页头下面的状态行：和卡片页的统计行同一节奏，避免页头到流程之间突然断档 */
+.rc-meta {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #e3e5dc;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 22px;
+  margin-top: 14px;
+  color: #8a9086;
+  font-size: 12px;
 }
 
-.rc-heading-copy h1 {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+.rc-meta strong {
+  margin-left: 5px;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.rc-heading-copy p {
-  margin: 5px 0 0;
-  color: #7b8178;
-  font-size: 12.5px;
-  line-height: 1.5;
+/* 与卡片/订单页共用同一内容容器：左边界对齐，切换菜单时内容不再横向跳动。
+   主体靠左、最近充值放右栏，避免窄栏居中留下两侧空白。 */
+.rc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 48px;
+  align-items: start;
+  max-width: 1400px;
+  margin-top: 26px;
 }
 
-.rc-heading-side {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: none;
+.rc-main {
+  min-width: 0;
+}
+
+.rc-aside {
+  min-width: 0;
+  position: sticky;
+  top: 24px;
 }
 
 .rc-countdown {
@@ -57,18 +65,6 @@
 .rc-countdown[data-urgent="true"] {
   background: #faeeda;
   color: #854f0b;
-}
-
-.rc-balance {
-  color: #8a9086;
-  font-size: 12px;
-}
-
-.rc-balance strong {
-  margin-left: 4px;
-  color: #17191c;
-  font-size: 13.5px;
-  font-weight: 500;
 }
 
 .rc-pending {
@@ -246,6 +242,8 @@
   align-items: center;
   gap: 10px;
   min-height: 30px;
+  /* 收起态的行不要拉满整栏，否则「修改」会漂到右栏边界，看着像另一个模块的按钮 */
+  max-width: 560px;
 }
 
 .rc-line strong {
@@ -259,7 +257,7 @@
 }
 
 .rc-line button {
-  margin-left: auto;
+  margin-left: 2px;
   border: 0;
   background: transparent;
   color: #4f554c;
@@ -273,7 +271,7 @@
   display: flex;
   align-items: baseline;
   gap: 7px;
-  width: min(340px, 100%);
+  width: min(400px, 100%);
   border-bottom: 1px solid #cfd1ca;
   padding: 2px 0 9px;
   transition: border-color 0.15s ease;
@@ -317,12 +315,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  width: min(400px, 100%);
   margin-top: 12px;
 }
 
 .rc-quick button {
+  flex: 1;
   height: 30px;
-  min-width: 56px;
+  min-width: 0;
   border: 1px solid #e3e5dc;
   border-radius: 7px;
   background: #fff;
@@ -460,6 +460,7 @@
   margin: 4px 0 16px;
   padding-top: 16px;
   border-top: 1px solid #eef0e9;
+  max-width: 560px;
 }
 
 .rc-qr {
@@ -767,16 +768,18 @@
   border-color: #17191c;
 }
 
+/* 右栏：最近充值。侧栏较窄，改成「金额 + 状态」在上、「单号 + 时间」在下 */
 .rc-records {
-  margin-top: 26px;
+  margin-top: 0;
 }
 
 .rc-records > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 8px;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e3e5dc;
 }
 
 .rc-records > header strong {
@@ -812,36 +815,26 @@
 }
 
 .rc-records li {
+  display: grid;
+  gap: 5px;
+  border-bottom: 1px solid #eef0e9;
+  padding: 13px 0;
+}
+
+.rc-record-top {
   display: flex;
   align-items: center;
-  gap: 14px;
-  border-top: 1px solid #eef0e9;
-  padding: 11px 0;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.rc-records li > div {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  gap: 2px;
+.rc-record-top > strong {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.rc-records code {
-  font-size: 11.5px;
-  color: #4f554c;
-}
-
-.rc-records li > div span {
-  color: #9aa094;
-  font-size: 10.5px;
-}
-
-.rc-records li > strong {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.rc-records li > em {
+.rc-record-top > em {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -850,19 +843,39 @@
   font-style: normal;
 }
 
-.rc-records li > em svg {
+.rc-record-top > em svg {
   width: 11px;
   height: 11px;
 }
 
-.rc-records li > button {
+.rc-record-top > button {
   border: 0;
   background: transparent;
   color: #17191c;
+  padding: 0;
   font-size: 11.5px;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+}
+
+.rc-record-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rc-records code {
+  overflow: hidden;
+  color: #7b8178;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rc-record-meta span {
+  color: #9aa094;
+  font-size: 10.5px;
 }
 
 .rc-empty {
@@ -871,16 +884,37 @@
   font-size: 12px;
 }
 
-@media (max-width: 760px) {
-  .rc-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
+@media (max-width: 1180px) {
+  .rc-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    max-width: 100%;
   }
 
-  .rc-heading-side {
-    width: 100%;
-    justify-content: space-between;
+  .rc-main {
+    max-width: 100%;
+  }
+
+  .rc-aside {
+    position: static;
+  }
+
+  .rc-records ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 28px;
+  }
+
+  .rc-records li:nth-child(1),
+  .rc-records li:nth-child(2) {
+    border-top: 1px solid #eef0e9;
+  }
+}
+
+@media (max-width: 760px) {
+  /* 窄屏页头竖排后，倒计时胶囊跟标题对齐，不要顶到页面最左边 */
+  .rc-page .uc-page-heading-aside {
+    margin-left: 50px;
   }
 
   .rc-networks {
@@ -903,5 +937,9 @@
   .rc-step-head {
     flex-direction: column;
     gap: 2px;
+  }
+
+  .rc-records ul {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

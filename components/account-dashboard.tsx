@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, LayoutDashboard, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { SpendTrendChart } from "@/components/dashboard-charts";
@@ -65,8 +65,11 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance 
   return <section className="hp-page">
     <header className="hp-head">
       <div className="hp-head-copy">
-        <h1>你好，{data.user.name}</h1>
-        <p>今天的情况和账户整体，一屏看完。<em>更新于 {updatedAt}</em></p>
+        <span className="hp-head-icon" aria-hidden="true"><LayoutDashboard /></span>
+        <div>
+          <h1>你好，{data.user.name}</h1>
+          <p>今天的情况和账户整体，一屏看完。<em>更新于 {updatedAt}</em></p>
+        </div>
       </div>
       <div className="hp-head-actions">
         <button className="hp-icon-button" type="button" onClick={refresh} aria-label="刷新数据" data-loading={refreshing || undefined}>
