@@ -365,6 +365,436 @@
   }
 }
 
+/* ============================================================
+   v0.35.0：首页内容项改成运营看板口径（版式仍是 hp 区块骨架）
+   ============================================================ */
+
+/* 核心指标：本月消费额做主卡（深底 + 迷你走势），其余三格沿用原样 */
+.hp-stat.is-primary {
+  position: relative;
+  overflow: hidden;
+  background: #17191c;
+  border-radius: 14px;
+  margin: -8px 0;
+  padding: 16px 18px 14px;
+}
+
+.hp-stat.is-primary > span {
+  color: #949a90;
+}
+
+.hp-stat.is-primary > strong {
+  color: #fff;
+  font-size: 27px;
+}
+
+.hp-stat.is-primary > em.hp-delta {
+  color: #c8d43d;
+}
+
+.hp-stat.is-primary .hp-stat-foot {
+  color: #7f857b;
+}
+
+/* 迷你走势钉在主卡右下角（globals.css 的 .dash-spark 默认绝对定位，父级要先定位） */
+.hp-stat.is-primary .dash-spark {
+  right: 10px;
+  bottom: 8px;
+  width: 104px;
+  height: 32px;
+  margin-top: 0;
+}
+
+/* 环比标签：▲ / ▼ + 百分比 + 口径 */
+.hp-stat > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.hp-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #c8d43d;
+}
+
+.hp-dot.is-success {
+  background: #5d806b;
+}
+
+.hp-dot.is-danger {
+  background: #a9635b;
+}
+
+.hp-dot.is-warning {
+  background: #c2a151;
+}
+
+.hp-stat > em.hp-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hp-stat > em.hp-delta svg {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+
+.hp-stat > em.hp-delta i {
+  margin-left: 5px;
+  color: #a0a69b;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.hp-stat > em.hp-delta.is-good {
+  color: #4f7a1c;
+}
+
+.hp-stat > em.hp-delta.is-bad {
+  color: #a9635b;
+}
+
+.hp-stat > small.hp-stat-foot {
+  color: #a0a69b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* 运营六格 */
+.hp-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hp-ops-cell {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  border: 1px solid #eef0e9;
+  border-radius: 11px;
+  background: #fbfcf9;
+  padding: 12px 14px;
+}
+
+.hp-ops-cell > span {
+  color: #8a9086;
+  font-size: 11.5px;
+}
+
+.hp-ops-cell > strong {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.hp-ops-cell > strong small {
+  margin-left: 4px;
+  color: #9aa094;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.hp-ops-cell > em {
+  color: #a5a9a0;
+  font-size: 10.5px;
+  font-style: normal;
+}
+
+.hp-ops-cell[data-tone="danger"] {
+  border-color: #f0e0dc;
+  background: #fdf6f4;
+}
+
+.hp-ops-cell[data-tone="danger"] > strong {
+  color: #a9635b;
+}
+
+.hp-ops-cell[data-tone="warning"] {
+  border-color: #efe7cf;
+  background: #fdfaf0;
+}
+
+.hp-ops-cell[data-tone="warning"] > strong {
+  color: #a9852f;
+}
+
+/* 块底注释与图例 */
+.hp-note {
+  margin: 12px 0 0;
+  color: #a0a69b;
+  font-size: 11px;
+}
+
+.hp-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #8a9086;
+  font-size: 11.5px;
+}
+
+.hp-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hp-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #c8d43d;
+}
+
+.hp-legend i.is-spend {
+  background: #5b635e;
+}
+
+.hp-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dfe3d0;
+  border-radius: 999px;
+  background: #f6f8e8;
+  color: #6b7268;
+  padding: 4px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.hp-live-tag i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8fa000;
+}
+
+.hp-total {
+  border: 1px solid #e3e5dd;
+  border-radius: 999px;
+  background: #f8f9f6;
+  color: #6f756c;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 680;
+  white-space: nowrap;
+}
+
+.hp-compare {
+  min-height: 220px;
+}
+
+/* 实时交易动态：金额正负着色、类型标签着色 */
+.hp-orders .hp-order-kind[data-tone="success"] {
+  background: #f2f4e6;
+  color: #6f7a12;
+}
+
+.hp-orders .hp-order-kind[data-tone="danger"] {
+  background: #fbf0ed;
+  color: #a9635b;
+}
+
+.hp-orders .hp-order-kind[data-tone="warning"] {
+  background: #fbf5e7;
+  color: #a9852f;
+}
+
+.hp-orders b.is-positive {
+  color: #4f7a60;
+}
+
+/* 快捷入口 */
+.hp-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hp-quick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #eef0e9;
+  border-radius: 11px;
+  background: #fbfcf9;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.hp-quick:hover {
+  border-color: #dfe1d8;
+  background: #fff;
+}
+
+.hp-quick-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 9px;
+  background: #f2f4e6;
+  color: #6f7a12;
+}
+
+.hp-quick-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.hp-quick-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+
+.hp-quick-copy strong {
+  font-size: 12.5px;
+  font-weight: 620;
+}
+
+.hp-quick-copy small {
+  color: #9aa094;
+  font-size: 10.5px;
+}
+
+.hp-quick > svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: #b3b8ae;
+}
+
+/* 邀请与客服 */
+.hp-service {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.hp-service-block {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid #eef0e9;
+  border-radius: 13px;
+  background: #fbfcf9;
+  padding: 16px;
+}
+
+.hp-service-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hp-service-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.hp-service-head strong {
+  font-size: 13.5px;
+  font-weight: 640;
+}
+
+.hp-service-head small {
+  color: #9aa094;
+  font-size: 11px;
+}
+
+.hp-service-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.hp-service-facts.is-block {
+  grid-template-columns: 1fr 1fr;
+}
+
+.hp-service-facts > div {
+  display: grid;
+  gap: 3px;
+}
+
+.hp-service-facts dt {
+  color: #9aa094;
+  font-size: 10.5px;
+}
+
+.hp-service-facts dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+}
+
+.hp-service-facts code {
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 13px;
+}
+
+.hp-text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  border: 0;
+  background: none;
+  color: #6b7268;
+  padding: 0;
+  font-size: 11.5px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.hp-text-action:hover {
+  color: #17191c;
+}
+
+.hp-text-action svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 1000px) {
+  .hp-ops-grid,
+  .hp-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hp-service {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hp-ops-grid,
+  .hp-quick-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hp-service-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 760px) {
   .hp-head {
     align-items: flex-start;

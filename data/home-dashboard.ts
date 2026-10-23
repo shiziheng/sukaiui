@@ -177,7 +177,7 @@ export const homeOpsMock = {
   ] satisfies ComparePoint[],
   operations: [
     { id: "active-cards", label: "已激活卡片", value: "428", unit: "张" },
-    { id: "today-chargeback", label: "今日拒付订单", value: "8", unit: "笔", tone: "danger" },
+    { id: "today-chargeback", label: "今日拒付订单", value: "7", unit: "笔", tone: "danger" },
     { id: "today-refund", label: "今日退款订单", value: "6", unit: "笔", tone: "warning" },
     { id: "card-balance", label: "卡余额", value: "8,426.90", unit: "USD", strong: true },
     { id: "total-chargeback", label: "累计拒付订单", value: "61", unit: "笔", note: "占比 1.81%" },
