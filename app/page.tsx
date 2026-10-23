@@ -11,7 +11,7 @@ import {
 } from "react";
 import {
   ArrowDown, ArrowUp, Bell, BookOpen, Check, ChevronDown, ClipboardList, CreditCard, Download, ExternalLink, Gift,
-  Headphones, House, LogOut, Minus, PackageOpen, PanelLeft, Pencil, Plus, RotateCcw, Send, ShieldCheck, Trash2, Upload, UserRound, Wallet, WalletCards, Zap,
+  Headphones, House, LogOut, Minus, PackageOpen, PanelLeft, Pencil, Plus, RotateCcw, Send, ShieldCheck, ShoppingBag, Trash2, Upload, UserRound, WalletCards, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,9 +26,9 @@ import { OrdersPage } from "@/components/orders-page";
 import { type PaymentRequest } from "@/components/payment-experience";
 import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
-import { RechargeDialog } from "@/components/recharge-dialog";
+import { RechargePage } from "@/components/recharge-page";
 import { WalletPage } from "@/components/wallet-page";
-import { WalletRechargePage } from "@/components/wallet-recharge-page";
+import { WalletDrawer } from "@/components/wallet-drawer";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
 import { PublicCardPage } from "@/components/public-card-page";
 import { AppSidebar, type SidebarGroup } from "@/components/app-sidebar";
@@ -507,7 +507,8 @@ export default function Home() {
   const [resetOpen, setResetOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [rechargeOpen, setRechargeOpen] = useState(false);
+  /** 钱包不再占菜单，收进顶栏余额胶囊：点开是「余额 + 充值 + 最近流水」的抽屉。 */
+  const [walletOpen, setWalletOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
   // 虚拟卡的页签由左侧二级菜单驱动：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
   const [cardTab, setCardTab] = useState<"cards" | "market" | "transactions">("cards");
@@ -751,14 +752,10 @@ export default function Home() {
     if (destination === "card") setCardResetCount((count) => count + 1);
     setSelectedMenu(destination);
   };
+  // 充值只有一条路径：完整充值页。有待支付订单时把挂起单一起带过去，保住「返回订单继续支付」。
   const openWalletRecharge = () => {
-    // 有待支付订单时仍走完整充值页：那条链路要保留「返回订单继续支付」。
-    if (pendingOrder) {
-      navigateTo("topup", { keepPendingOrder: true });
-      return;
-    }
-    // 其它场景一律走轻量弹窗，不再把用户从当前页面带走。
-    setRechargeOpen(true);
+    if (pendingOrder) navigateTo("topup", { keepPendingOrder: true });
+    else navigateTo("topup");
   };
   // 余额不足：挂起本单并跳转充值页，充值完成后可由「返回订单继续支付」接回。
   const goTopupForOrder = (productId: string, nextQuantity: number) => {
@@ -949,30 +946,18 @@ export default function Home() {
   };
 
   /**
-   * 登录后的左侧菜单：扁平 5 个一级入口 + 底部「我的」。
-   * 卡片/商城/订单的二级全部收进页内页签，侧栏不再展开任何树。
-   * 在线客服 / 站内信走顶栏；账户与安全 / 个人中心 / 推广奖励收进「我的」。
+   * 登录后的左侧菜单：5 个一级入口直接平铺，对应「首页 → 充值 → 卡片 → 商城 → 订单」。
+   * 钱包不占菜单（收进顶栏余额胶囊），帮助中心本轮下线，「我的」在侧栏底部与头像菜单。
    */
   const sidebarGroups: SidebarGroup[] = [
     {
-      title: "工作台",
+      title: "",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
-        { id: "recharge", label: content.navRecharge, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
+        { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
         { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
-      ],
-    },
-    {
-      title: "资产与记录",
-      items: [
-        { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
+        { id: "recharge", label: content.navRecharge, icon: <ShoppingBag aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
-      ],
-    },
-    {
-      title: "支持",
-      items: [
-        { id: "help", label: "帮助中心", icon: <Headphones aria-hidden="true" /> },
       ],
     },
   ];
@@ -1084,8 +1069,7 @@ export default function Home() {
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
           ) : null}
-          {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
-          {isLoggedIn ? <button className="header-recharge" type="button" onClick={openWalletRecharge}><Plus aria-hidden="true" />充值</button> : null}
+          {isLoggedIn ? <button className="header-balance header-wallet" type="button" title="平台余额 · 点击查看钱包" aria-expanded={walletOpen} onClick={() => setWalletOpen(true)}><WalletCards aria-hidden="true" /><span className="header-balance-tag">余额</span>${walletBalance.toFixed(2)}<ChevronDown className="header-wallet-caret" aria-hidden="true" /></button> : null}
           {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"
@@ -1133,17 +1117,15 @@ export default function Home() {
       <div className={`content-inset ${!isLoggedIn && selectedMenu === "home" ? "public-landing-inset" : selectedMenu === "help" ? "help-center-inset" : selectedMenu === "topup" ? "topup-inset" : selectedMenu === "recharge" && wizardProduct ? "recharge-workspace-inset" : ["home", "orders", "invite", "wallet", "profile", "security", "card", "my"].includes(selectedMenu) ? "dashboard-inset" : ""}`}>
         <main className="main-content">
             {selectedMenu === "topup" ? (
-              <WalletRechargePage
+              <RechargePage
                 key={`topup-${topupResetCount}`}
                 content={content}
                 editMode={editMode}
                 updateContent={updateContent}
                 availableBalance={effectiveBalance}
                 topUpRecords={topUpRecords}
-                platformFlows={platformFlows}
                 onBack={() => navigateTo("wallet")}
                 onComplete={applyPaymentCompletion}
-                onSupport={() => setSupportSurface("floating")}
                 initialAmount={pendingOrderGapAmount}
                 onResumeOrder={pendingOrder ? resumePendingOrder : undefined}
                 pendingOrderHint={pendingOrder ? content.purchasePendingHint : undefined}
@@ -1356,13 +1338,14 @@ export default function Home() {
         updateContent={updateContent}
       />
 
-      <RechargeDialog
-        open={rechargeOpen}
-        onOpenChange={setRechargeOpen}
-        availableBalance={effectiveBalance}
-        initialAmount={pendingOrderGapAmount}
-        onComplete={applyPaymentCompletion}
-        onViewRecords={() => navigateTo("wallet")}
+      <WalletDrawer
+        open={walletOpen}
+        onOpenChange={setWalletOpen}
+        balance={walletBalance}
+        frozenBalance={accountDashboardMock.summary.frozenBalance}
+        records={walletRecords}
+        onRecharge={() => { setWalletOpen(false); openWalletRecharge(); }}
+        onViewAll={() => { setWalletOpen(false); navigateTo("wallet"); }}
       />
 
       <Sheet open={Boolean(editorProduct)} onOpenChange={(open) => !open && setEditorProductId(null)}>

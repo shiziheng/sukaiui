@@ -114,6 +114,37 @@ const spendTrend30: TrendPoint[] = [
   { label: "10/20", value: 2186 },
 ];
 
+/**
+ * 首页「消费趋势」用单账户口径，和 accountDashboardMock 的累计消费（约 $1,688）对得上。
+ * 运营大盘的 homeOpsMock.trend 是平台级金额，放在个人首页会跟「累计订单 10 笔」打架。
+ */
+const personalSpend30: TrendPoint[] = [
+  { label: "09/21", value: 42 }, { label: "09/22", value: 38 }, { label: "09/23", value: 55 },
+  { label: "09/24", value: 60 }, { label: "09/25", value: 47 }, { label: "09/26", value: 52 },
+  { label: "09/27", value: 66 }, { label: "09/28", value: 58 }, { label: "09/29", value: 44 },
+  { label: "09/30", value: 71 }, { label: "10/01", value: 63 }, { label: "10/02", value: 49 },
+  { label: "10/03", value: 57 }, { label: "10/04", value: 82 }, { label: "10/05", value: 68 },
+  { label: "10/06", value: 54 }, { label: "10/07", value: 46 }, { label: "10/08", value: 61 },
+  { label: "10/09", value: 73 }, { label: "10/10", value: 59 }, { label: "10/11", value: 48 },
+  { label: "10/12", value: 65 }, { label: "10/13", value: 77 }, { label: "10/14", value: 56 },
+  { label: "10/15", value: 43 }, { label: "10/16", value: 69 }, { label: "10/17", value: 58 },
+  { label: "10/18", value: 52 }, { label: "10/19", value: 64 }, { label: "10/20", value: 77.9 },
+];
+
+export const personalSpendTrend: Record<DashboardRange, TrendPoint[]> = {
+  month: personalSpend30,
+  week: personalSpend30.slice(-7),
+  today: [
+    { label: "00:00", value: 3 },
+    { label: "03:00", value: 6 },
+    { label: "06:00", value: 9 },
+    { label: "09:00", value: 12 },
+    { label: "12:00", value: 18 },
+    { label: "15:00", value: 21 },
+    { label: "18:00", value: 8.9 },
+  ],
+};
+
 export const homeOpsMock = {
   updatedAt: "10:42",
   kpi: {

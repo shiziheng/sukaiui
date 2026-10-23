@@ -73,7 +73,7 @@ export function SpendTrendChart({ points }: { points: TrendPoint[] }) {
   const pad = { top: 18, right: 18, bottom: 30, left: 54 };
   const innerW = Math.max(width - pad.left - pad.right, 0);
   const innerH = height - pad.top - pad.bottom;
-  const peak = Math.max(...points.map((point) => point.value), 1000);
+  const peak = Math.max(...points.map((point) => point.value), 1);
   const { step: yStep, max: yMax } = niceScale(peak);
   const step = points.length > 1 ? innerW / (points.length - 1) : 0;
   const toX = (index: number) => pad.left + (points.length > 1 ? index * step : innerW / 2);

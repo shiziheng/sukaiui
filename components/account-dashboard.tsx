@@ -1,35 +1,39 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowDownRight, ArrowRight, ArrowUpRight, Clock3, Gift, Headphones,
-  LayoutDashboard, ReceiptText, RefreshCw, Sparkles, WalletCards,
-} from "lucide-react";
+import { ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { RechargeSpendChart, SparkLine, SpendTrendChart } from "@/components/dashboard-charts";
-import { EditableText } from "@/components/editable-text";
-import { formatMoney, type CopyUpdater } from "@/components/user-center-shared";
+import { SpendTrendChart } from "@/components/dashboard-charts";
+import { type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
-import { homeOpsCopy, homeOpsMock, type DashboardRange } from "@/data/home-dashboard";
+import { homeOpsMock, personalSpendTrend, type DashboardRange } from "@/data/home-dashboard";
+import "./home-overview.css";
 
-const money2 = (value: number) =>
+const money = (value: number) =>
   `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const orderTotal = homeOpsMock.orderStatus.reduce((sum, item) => sum + Number(item.count.replace(/[^\d]/g, "")), 0);
+const ranges: Array<{ id: DashboardRange; label: string }> = [
+  { id: "today", label: "今日" },
+  { id: "week", label: "近 7 天" },
+  { id: "month", label: "近 30 天" },
+];
 
-export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance, content, editMode, updateContent }: {
+/**
+ * 登录后首页：只回答三个问题——今天怎么样、整体还剩多少、下一步做什么。
+ * 四块内容用一条细线分隔，不套卡片。
+ */
+export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance }: {
   onNavigate: (destination: DashboardDestination) => void;
   onOpenRecharge: () => void;
   availableBalance: number;
-  content: DemoContent;
-  editMode: boolean;
-  updateContent: CopyUpdater;
+  content?: DemoContent;
+  editMode?: boolean;
+  updateContent?: CopyUpdater;
 }) {
   const data = accountDashboardMock;
   const ops = homeOpsMock;
-  const copy = homeOpsCopy;
   const [range, setRange] = useState<DashboardRange>("week");
   const [updatedAt, setUpdatedAt] = useState(ops.updatedAt);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,13 +41,16 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
 
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
 
-  const pending = data.orders.filter((order) => order.status === "pending" || order.status === "processing").length;
-  const rangeLabel = copy.ranges.find((item) => item.id === range)?.label ?? "";
-  const monthCap = ops.kpi.monthSpend;
-  const todaySuccess = ops.kpi.todaySuccess;
-  const todayFailed = ops.kpi.todayFailed;
-  const chargeback = ops.kpi.chargebackRate;
-  const sparkValues = ops.trend.month.slice(-14).map((point) => point.value);
+  // 「今日」按最近两笔订单算，保证和下方「累计订单 10 笔」是同一个账户口径。
+  const todayOrders = data.orders.slice(0, 2);
+  const failedCount = todayOrders.filter((order) => order.status === "failed").length;
+  const todaySpend = todayOrders.reduce((sum, order) => sum + order.amount, 0);
+  const todayAccount = todayOrders.filter((order) => order.kind === "account").length;
+  const todayRecharge = todayOrders.filter((order) => order.kind === "recharge").length;
+  const successRate = todayOrders.length
+    ? ((todayOrders.length - failedCount) / todayOrders.length) * 100
+    : 100;
+  const recentOrders = data.orders.slice(0, 5);
 
   const refresh = () => {
     if (refreshing) return;
@@ -55,252 +62,106 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
     }, 600);
   };
 
-  const quickLinks: Array<{ id: string; icon: typeof Sparkles; label: string; editableKey?: keyof DemoContent; note: string; onClick: () => void }> = [
-    { id: "recharge", icon: Sparkles, label: "套餐代充", note: "单账号 / 批量", onClick: () => onNavigate("recharge") },
-    { id: "wallet", icon: WalletCards, label: content.availableBalance, editableKey: "availableBalance", note: money2(availableBalance), onClick: () => onNavigate("wallet") },
-    { id: "orders", icon: ReceiptText, label: "交易记录", note: `${data.orders.length} 笔 · 待处理 ${pending}`, onClick: () => onNavigate("orders") },
-    { id: "invite", icon: Gift, label: content.navInvite, editableKey: "navInvite", note: `已邀请 ${data.summary.invitedUsers} 人`, onClick: () => onNavigate("invite") },
-    { id: "support", icon: Headphones, label: content.supportNav, editableKey: "supportNav", note: "3 分钟内响应", onClick: () => toast.info("在线客服为 Demo 入口") },
-  ];
+  return <section className="hp-page">
+    <header className="hp-head">
+      <div className="hp-head-copy">
+        <h1>你好，{data.user.name}</h1>
+        <p>今天的情况和账户整体，一屏看完。<em>更新于 {updatedAt}</em></p>
+      </div>
+      <div className="hp-head-actions">
+        <button className="hp-icon-button" type="button" onClick={refresh} aria-label="刷新数据" data-loading={refreshing || undefined}>
+          <RefreshCw aria-hidden="true" />
+        </button>
+        <button className="hp-ghost" type="button" onClick={onOpenRecharge}>充值</button>
+        <button className="hp-primary" type="button" onClick={() => onNavigate("card")}>去办卡<ArrowRight aria-hidden="true" /></button>
+      </div>
+    </header>
 
-  return (
-    <section className="user-center-page business-dashboard home-ops-dashboard">
-      <header className="uc-page-heading dash-heading">
-        <div className="uc-page-heading-copy">
-          <span className="uc-page-heading-icon" aria-hidden="true"><LayoutDashboard /></span>
-          <div>
-            <h1>{copy.title}</h1>
-            <p>{copy.subtitle}<em className="dash-updated">{copy.updatedPrefix} {updatedAt}</em></p>
-          </div>
+    <section className="hp-block">
+      <header className="hp-block-head">
+        <div><h2>今日</h2><p>成功与失败订单分开统计，不含历史</p></div>
+      </header>
+      <div className="hp-stats is-three">
+        <div className="hp-stat">
+          <span>今日消费</span>
+          <strong>{money(todaySpend)}</strong>
+          <em>最近 {todayOrders.length} 笔订单合计</em>
         </div>
-        <div className="uc-page-heading-aside dash-heading-actions">
-          <div className="dash-range" role="group" aria-label={copy.rangeLabel}>
-            {copy.ranges.map((item) => (
-              <button key={item.id} type="button" data-active={range === item.id} onClick={() => setRange(item.id as DashboardRange)}>{item.label}</button>
-            ))}
-          </div>
-          <button className="dash-refresh" type="button" onClick={refresh} data-loading={refreshing} aria-label={copy.refresh}>
-            <RefreshCw aria-hidden="true" /><span>{copy.refresh}</span>
-          </button>
-          <button className="ph-btn is-primary" type="button" onClick={onOpenRecharge}>
-            {copy.openRecharge}<ArrowRight aria-hidden="true" />
-          </button>
+        <div className="hp-stat">
+          <span>今日订单</span>
+          <strong>{todayOrders.length}<small>笔</small></strong>
+          <em>成品号 {todayAccount} · 代充 {todayRecharge}</em>
+        </div>
+        <div className="hp-stat">
+          <span>支付成功率</span>
+          <strong>{successRate.toFixed(0)}<small>%</small></strong>
+          <em>{failedCount ? `${failedCount} 笔未成功` : "暂无失败订单"}</em>
+        </div>
+      </div>
+    </section>
+
+    <section className="hp-block">
+      <header className="hp-block-head">
+        <div><h2>整体</h2><p>余额可以花，累计数字用来看趋势</p></div>
+        <button className="hp-link" type="button" onClick={() => onNavigate("wallet")}>账户明细<ArrowRight aria-hidden="true" /></button>
+      </header>
+      <div className="hp-stats is-four">
+        <div className="hp-stat">
+          <span>可用余额</span>
+          <strong>{money(availableBalance)}</strong>
+          <em>可直接下单</em>
+        </div>
+        <div className="hp-stat">
+          <span>冻结金额</span>
+          <strong>{money(data.summary.frozenBalance)}</strong>
+          <em>处理中订单占用</em>
+        </div>
+        <div className="hp-stat">
+          <span>累计消费</span>
+          <strong>{money(data.summary.totalSpent)}</strong>
+          <em>{data.summary.completedOrders} 笔已完成</em>
+        </div>
+        <div className="hp-stat">
+          <span>累计订单</span>
+          <strong>{data.summary.totalOrders}<small>笔</small></strong>
+          <em>成品号 {data.summary.accountOrders} · 代充 {data.summary.rechargeOrders}</em>
+        </div>
+      </div>
+    </section>
+
+    <section className="hp-block">
+      <header className="hp-block-head">
+        <div><h2>消费趋势</h2><p>单位 USD，按你选的范围聚合</p></div>
+        <div className="hp-range" role="group" aria-label="统计范围">
+          {ranges.map((item) => <button
+            key={item.id}
+            type="button"
+            data-active={range === item.id}
+            onClick={() => setRange(item.id)}
+          >{item.label}</button>)}
         </div>
       </header>
-
-      <section className="dash-kpi-grid" aria-label="核心指标">
-        <article className="dash-kpi is-hero">
-          <div className="dash-kpi-top">
-            <span className="dash-kpi-label">{copy.kpi.monthSpend.label}</span>
-          </div>
-          <strong className="dash-kpi-value">{money2(monthCap.amount)}</strong>
-          <div className="dash-kpi-foot">
-            <em className="is-good"><ArrowUpRight aria-hidden="true" />{monthCap.delta}%</em>
-            <span>{copy.kpi.monthSpend.note}</span>
-          </div>
-          <p className="dash-kpi-hint">{copy.kpi.monthSpend.hint}</p>
-          <SparkLine values={sparkValues} />
-        </article>
-
-        <article className="dash-kpi">
-          <div className="dash-kpi-top">
-            <span className="dash-kpi-label">{copy.kpi.todaySuccess.label}</span>
-          </div>
-          <strong className="dash-kpi-value">{money2(todaySuccess.amount)}</strong>
-          <div className="dash-kpi-foot">
-            <em className="is-good"><ArrowUpRight aria-hidden="true" />{todaySuccess.delta}%</em>
-            <span>较昨日</span>
-          </div>
-          <p className="dash-kpi-hint">{copy.kpi.todaySuccess.hint} · {todaySuccess.count} 笔</p>
-        </article>
-
-        <article className="dash-kpi">
-          <div className="dash-kpi-top">
-            <span className="dash-kpi-label">{copy.kpi.todayFailed.label}</span>
-          </div>
-          <strong className="dash-kpi-value">{money2(todayFailed.amount)}</strong>
-          <div className="dash-kpi-foot">
-            <em className={todayFailed.delta <= 0 ? "is-good" : "is-bad"}>
-              <ArrowDownRight aria-hidden="true" />{Math.abs(todayFailed.delta)}%
-            </em>
-            <span>较昨日</span>
-          </div>
-          <p className="dash-kpi-hint">{copy.kpi.todayFailed.hint} · {todayFailed.count} 笔</p>
-        </article>
-
-        <article className="dash-kpi">
-          <div className="dash-kpi-top">
-            <span className="dash-kpi-label">{copy.kpi.chargebackRate.label}</span>
-          </div>
-          <strong className="dash-kpi-value">{chargeback.value}<small>%</small></strong>
-          <div className="dash-kpi-foot">
-            <em className={chargeback.delta <= 0 ? "is-good" : "is-bad"}>
-              <ArrowDownRight aria-hidden="true" />{Math.abs(chargeback.delta)}pt
-            </em>
-            <span>较昨日</span>
-          </div>
-          <p className="dash-kpi-hint">{copy.kpi.chargebackRate.hint} · {chargeback.failed} / {chargeback.total} 笔</p>
-        </article>
-      </section>
-
-      <section className="dash-grid is-main">
-        <article className="uc-card dash-panel dash-panel-trend">
-          <header className="dash-panel-head">
-            <div>
-              <h2>{copy.trendTitle}</h2>
-              <p>{copy.trendHint} · {rangeLabel}</p>
-            </div>
-            <span className="dash-legend"><i className="is-line" />消费金额</span>
-          </header>
-          <SpendTrendChart points={ops.trend[range]} />
-        </article>
-
-        <article className="uc-card dash-panel dash-panel-ops">
-          <header className="dash-panel-head">
-            <div>
-              <h2>{copy.opsTitle}</h2>
-              <p>{copy.opsHint}</p>
-            </div>
-            <span className="dash-live-tag"><i />实时</span>
-          </header>
-          <div className="dash-ops-grid">
-            {ops.operations.map((metric) => (
-              <div className="dash-ops-cell" key={metric.id} data-tone={metric.tone ?? "neutral"}>
-                <span>{metric.label}</span>
-                <strong className={metric.strong ? "is-strong" : undefined}>{metric.value}<small>{metric.unit}</small></strong>
-                {metric.note ? <em>{metric.note}</em> : null}
-              </div>
-            ))}
-          </div>
-          <p className="dash-panel-note">失败、拒付与退款金额仅统计虚拟卡订单。</p>
-        </article>
-      </section>
-
-      <section className="dash-grid is-split">
-        <article className="uc-card dash-panel dash-panel-compare">
-          <header className="dash-panel-head">
-            <div>
-              <h2>{copy.compareTitle}</h2>
-              <p>{copy.compareHint}</p>
-            </div>
-            <div className="dash-legend is-pair">
-              <span><i className="is-recharge" />充值</span>
-              <span><i className="is-spend" />消费</span>
-            </div>
-          </header>
-          <RechargeSpendChart points={ops.compare} />
-        </article>
-
-        <article className="uc-card dash-panel dash-panel-status">
-          <header className="dash-panel-head">
-            <div>
-              <h2>{copy.statusTitle}</h2>
-              <p>{copy.statusHint}</p>
-            </div>
-            <span className="dash-total">{orderTotal.toLocaleString("en-US")} 笔</span>
-          </header>
-          <div className="dash-status-list">
-            {ops.orderStatus.map((item) => (
-              <div className="dash-status-row" key={item.id} data-tone={item.tone}>
-                <div className="dash-status-line">
-                  <span><i />{item.label}</span>
-                  <strong>{item.amount}<small>{item.count}</small></strong>
-                </div>
-                <div className="dash-status-track"><i style={{ width: `${Math.max(item.percent, 1.4)}%` }} /></div>
-                <em>{item.percent}%</em>
-              </div>
-            ))}
-          </div>
-          <p className="dash-panel-note">状态以订单最终结果为准，处理中订单不计入。</p>
-        </article>
-      </section>
-
-      <section className="dash-grid is-bottom">
-        <article className="uc-card dash-panel dash-panel-live">
-          <header className="dash-panel-head">
-            <div>
-              <h2>{copy.liveTitle}</h2>
-              <p>{copy.liveHint}</p>
-            </div>
-            <button className="uc-secondary-action" type="button" onClick={() => onNavigate("orders")}>
-              {copy.liveAll}<ArrowRight aria-hidden="true" />
-            </button>
-          </header>
-          <div className="dash-live-list">
-            {ops.live.map((item) => (
-              <div className="dash-live-row" key={item.id} data-tone={item.tone}>
-                <span className="dash-live-kind">{item.kind}</span>
-                <div className="dash-live-main">
-                  <strong>{item.title}</strong>
-                  <span>{item.ref} · {item.time}</span>
-                </div>
-                <strong className={`dash-live-amount ${item.positive ? "is-positive" : ""}`}>{item.amount}</strong>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <aside className="dash-side">
-          <article className="uc-card dash-panel dash-panel-quick">
-            <header className="dash-panel-head">
-              <div>
-                <h2>{copy.quickTitle}</h2>
-                <p>{copy.quickHint}</p>
-              </div>
-            </header>
-            <div className="dash-quick-grid">
-              {quickLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <button key={link.id} type="button" className="dash-quick" onClick={link.onClick}>
-                    <span className="dash-quick-icon"><Icon aria-hidden="true" /></span>
-                    <span className="dash-quick-copy">
-                      <strong>
-                        {link.editableKey
-                          ? <EditableText active={editMode} value={content[link.editableKey] as string} onChange={(value) => updateContent(link.editableKey as keyof DemoContent, value as never)} />
-                          : link.label}
-                      </strong>
-                      <small>{link.note}</small>
-                    </span>
-                    <ArrowRight aria-hidden="true" />
-                  </button>
-                );
-              })}
-            </div>
-          </article>
-
-          <article className="uc-card dash-panel dash-panel-service">
-            <div className="dash-service-block">
-              <div className="dash-service-head">
-                <span className="dash-quick-icon"><Gift aria-hidden="true" /></span>
-                <div><strong>{copy.inviteTitle}</strong><small>{copy.inviteHint}</small></div>
-              </div>
-              <dl className="dash-service-facts">
-                <div><dt>{copy.inviteCode}</dt><dd><code>{data.invite.code}</code></dd></div>
-                <div><dt>{copy.invitedUsers}</dt><dd>{data.summary.invitedUsers} 人</dd></div>
-                <div><dt>{copy.invitedRewards}</dt><dd>{formatMoney(data.summary.totalRewards)}</dd></div>
-              </dl>
-              <button className="dash-text-action" type="button" onClick={() => onNavigate("invite")}>
-                {content.viewInviteActivity}<ArrowRight aria-hidden="true" />
-              </button>
-            </div>
-
-            <div className="dash-service-block is-support">
-              <div className="dash-service-head">
-                <span className="dash-quick-icon"><Headphones aria-hidden="true" /></span>
-                <div><strong>{copy.supportTitle}</strong><small>订单、支付与账号问题</small></div>
-              </div>
-              <dl className="dash-service-facts is-block">
-                <div><dt><Clock3 aria-hidden="true" />{copy.supportHours}</dt><dd>{copy.supportHoursValue}</dd></div>
-                <div><dt>{copy.supportReply}</dt><dd>{copy.supportReplyValue}</dd></div>
-              </dl>
-              <button className="dash-text-action is-strong" type="button" onClick={() => toast.info("在线客服为 Demo 入口")}>
-                {copy.supportAction}<ArrowRight aria-hidden="true" />
-              </button>
-            </div>
-          </article>
-        </aside>
-      </section>
+      <div className="hp-trend">
+        <SpendTrendChart points={personalSpendTrend[range]} />
+      </div>
     </section>
-  );
+
+    <section className="hp-block is-last">
+      <header className="hp-block-head">
+        <div><h2>最近订单</h2><p>支付、处理、交付状态都集中在订单里</p></div>
+        <button className="hp-link" type="button" onClick={() => onNavigate("orders")}>全部订单<ArrowRight aria-hidden="true" /></button>
+      </header>
+      <ul className="hp-orders">
+        {recentOrders.map((order) => <li key={order.id}>
+          <span className="hp-order-kind">{order.kind === "account" ? "成品号" : "代充"}</span>
+          <div className="hp-order-main">
+            <strong>{order.product}</strong>
+            <small>{order.id} · {order.createdAt}</small>
+          </div>
+          <em className="hp-order-status" data-status={order.status}>{order.statusLabel}</em>
+          <b>{money(order.amount)}</b>
+        </li>)}
+      </ul>
+    </section>
+  </section>;
 }

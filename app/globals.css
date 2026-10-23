@@ -1886,3 +1886,22 @@ button{font:inherit}
   .header-recharge{height:34px;padding:0 10px;font-size:12px}
   .app-shell.has-sidebar .dashboard-inset .main-content{padding-top:20px}
 }
+
+/* ===== v0.28.0 顶栏钱包入口 =====
+   钱包不再占菜单，余额胶囊成为唯一入口：点开抽屉，余额、充值、最近流水都在里面。 */
+.header-wallet{
+  gap:6px;padding:0 10px 0 9px;
+  font-variant-numeric:tabular-nums;
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.header-wallet:hover{background:#24262a;border-color:#4a4d52}
+.header-wallet[aria-expanded="true"]{background:#24262a;border-color:#4a4d52}
+.header-wallet-caret{
+  width:13px!important;height:13px;margin-left:1px;
+  color:#8f958b!important;transition:transform .15s ease;
+}
+.header-wallet[aria-expanded="true"] .header-wallet-caret{transform:rotate(180deg)}
+
+/* 侧栏只剩一组一级入口：去掉分组标题残留的上下间距 */
+.app-sidebar .sb-group+.sb-group{margin-top:0}
+.app-sidebar .sb-nav{padding-top:8px}
