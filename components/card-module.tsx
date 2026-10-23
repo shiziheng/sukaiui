@@ -12,6 +12,7 @@ import { CardOpenDialog } from "@/components/card-open-dialog";
 import { CardRechargeDialog } from "@/components/card-recharge-dialog";
 import { CardRefundDialog } from "@/components/card-refund-dialog";
 import { EditableText } from "@/components/editable-text";
+import { PageHeading } from "@/components/user-center-shared";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -256,18 +257,28 @@ export function CardModule({
 
   return (
     <section className="card-module">
-      <Tabs
-        value={tab}
-        // 卡片详情是模块内的子视图，切页签要先退出详情，不然点了像没反应。
-        onValueChange={(value) => { setTab(value as CardTab); setDetailCard(null); }}
-        className="uc-tabs-list card-tabs"
-      >
-        <TabsList>
-          <TabsTrigger value="cards"><Layers aria-hidden="true" />{editable("cardTabCards")}</TabsTrigger>
-          <TabsTrigger value="market"><Sparkles aria-hidden="true" />{editable("cardTabMarket")}</TabsTrigger>
-          <TabsTrigger value="transactions"><ReceiptText aria-hidden="true" />{editable("cardTabTransactions")}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <PageHeading
+        titleKey="cardPageTitle"
+        subtitleKey="cardPageSubtitle"
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+        icon={<CreditCard aria-hidden="true" />}
+        tabs={
+          <Tabs
+            value={tab}
+            // 卡片详情是模块内的子视图，切页签要先退出详情，不然点了像没反应。
+            onValueChange={(value) => { setTab(value as CardTab); setDetailCard(null); }}
+            className="uc-tabs-list card-tabs"
+          >
+            <TabsList>
+              <TabsTrigger value="cards"><Layers aria-hidden="true" />{editable("cardTabCards")}</TabsTrigger>
+              <TabsTrigger value="market"><Sparkles aria-hidden="true" />{editable("cardTabMarket")}</TabsTrigger>
+              <TabsTrigger value="transactions"><ReceiptText aria-hidden="true" />{editable("cardTabTransactions")}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {detailCard ? (
         <CardDetail

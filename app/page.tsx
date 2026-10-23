@@ -20,6 +20,7 @@ import { AccountHome } from "@/components/account-home";
 import { AccountPurchaseDialog, type PurchaseStage } from "@/components/account-purchase-dialog";
 import { SiteMessages } from "@/components/site-messages";
 import { EditableText } from "@/components/editable-text";
+import { PageHeading } from "@/components/user-center-shared";
 import { HelpCenter } from "@/components/help-center";
 import { OrdersPage } from "@/components/orders-page";
 import { type PaymentRequest } from "@/components/payment-experience";
@@ -1221,22 +1222,23 @@ export default function Home() {
               )
             ) : isProductsPage ? (
               <section className="commerce-panel">
-                {isLoggedIn ? (
-                  <Tabs value={bizTab} onValueChange={(value) => setBizTab(value as typeof bizTab)} className="uc-tabs-list biz-tabs">
-                    <TabsList>
-                      <TabsTrigger value="recharge"><Zap aria-hidden="true" /><EditableText active={editMode} value={content.bizTabRecharge} onChange={(value) => updateContent("bizTabRecharge", value)} /></TabsTrigger>
-                      <TabsTrigger value="account"><PackageOpen aria-hidden="true" /><EditableText active={editMode} value={content.bizTabAccount} onChange={(value) => updateContent("bizTabAccount", value)} /></TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                ) : null}
-                <header className="commerce-page-heading">
-                  <span className="commerce-page-icon" aria-hidden="true">{productsBiz === "account" ? <PackageOpen /> : <Zap />}</span>
-                  <div>
-                    <h1><EditableText active={editMode} value={productsBiz === "account" ? content.accountLabel : content.rechargeLabel} onChange={(value) => updateContent(productsBiz === "account" ? "accountLabel" : "rechargeLabel", value)} /></h1>
-                    <p><EditableText active={editMode} value={productsBiz === "account" ? content.accountPageSubtitle : content.rechargePageSubtitle} onChange={(value) => updateContent(productsBiz === "account" ? "accountPageSubtitle" : "rechargePageSubtitle", value)} /></p>
-                  </div>
-                  {productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
-                </header>
+                <PageHeading
+                  titleKey={productsBiz === "account" ? "accountLabel" : "rechargeLabel"}
+                  subtitleKey={productsBiz === "account" ? "accountPageSubtitle" : "rechargePageSubtitle"}
+                  content={content}
+                  editMode={editMode}
+                  updateContent={updateContent}
+                  icon={productsBiz === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
+                  actions={productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
+                  tabs={isLoggedIn ? (
+                    <Tabs value={bizTab} onValueChange={(value) => setBizTab(value as typeof bizTab)} className="uc-tabs-list biz-tabs">
+                      <TabsList>
+                        <TabsTrigger value="recharge"><Zap aria-hidden="true" /><EditableText active={editMode} value={content.bizTabRecharge} onChange={(value) => updateContent("bizTabRecharge", value)} /></TabsTrigger>
+                        <TabsTrigger value="account"><PackageOpen aria-hidden="true" /><EditableText active={editMode} value={content.bizTabAccount} onChange={(value) => updateContent("bizTabAccount", value)} /></TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  ) : null}
+                />
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">
                     <TabsList className="brand-tabs-list" aria-label="选择 AI 品牌">

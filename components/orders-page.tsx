@@ -178,14 +178,14 @@ export function OrdersPage({ content, editMode, updateContent, extraOrders = [],
 
   return (
     <section className="user-center-page orders-page">
-      <PageHeading titleKey="ordersPageTitle" subtitleKey="ordersPageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<ReceiptText />} aside={<span className="orders-period-summary">近30天 · {recentCount}个订单</span>} />
-
-      <Tabs value={view} onValueChange={(value) => setView(value as BillView)}>
-        <TabsList className="uc-tabs-list orders-view-tabs">
-          <TabsTrigger value="orders"><EditableText active={editMode} value={content.billTabOrders} onChange={(value) => updateContent("billTabOrders", value)} /></TabsTrigger>
-          <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <PageHeading titleKey="ordersPageTitle" subtitleKey="ordersPageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<ReceiptText />} aside={<span className="orders-period-summary">近30天 · {recentCount}个订单</span>} tabs={
+        <Tabs value={view} onValueChange={(value) => setView(value as BillView)}>
+          <TabsList className="uc-tabs-list orders-view-tabs">
+            <TabsTrigger value="orders"><EditableText active={editMode} value={content.billTabOrders} onChange={(value) => updateContent("billTabOrders", value)} /></TabsTrigger>
+            <TabsTrigger value="flows"><EditableText active={editMode} value={content.billTabFlows} onChange={(value) => updateContent("billTabFlows", value)} /></TabsTrigger>
+          </TabsList>
+        </Tabs>
+      } />
 
       {view === "flows" ? (
         <section className="uc-card order-management-panel bill-flow-panel">
