@@ -1070,6 +1070,8 @@ export default function Home() {
             onNavigate={handleSidebarNavigate}
             onHome={() => handleSidebarNavigate("home")}
             onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
+            walletBalance={walletBalance}
+            onOpenWallet={() => setWalletOpen(true)}
           />
           <button className="sb-backdrop" type="button" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} />
         </>
@@ -1118,7 +1120,7 @@ export default function Home() {
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
           ) : null}
-          {isLoggedIn ? <button className="header-balance header-wallet" type="button" title="平台余额 · 点击查看钱包" aria-expanded={walletOpen} onClick={() => setWalletOpen(true)}><WalletCards aria-hidden="true" /><span className="header-balance-tag">余额</span>${walletBalance.toFixed(2)}<ChevronDown className="header-wallet-caret" aria-hidden="true" /></button> : null}
+          {isLoggedIn ? <button className="header-balance header-wallet top-balance-mobile" type="button" title="平台余额 · 点击查看钱包" aria-expanded={walletOpen} onClick={() => setWalletOpen(true)}><WalletCards aria-hidden="true" /><span className="header-balance-tag">余额</span>${walletBalance.toFixed(2)}<ChevronDown className="header-wallet-caret" aria-hidden="true" /></button> : null}
           {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"

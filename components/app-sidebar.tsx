@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, WalletCards } from "lucide-react";
 import { EditableText } from "@/components/editable-text";
 
 /** 二级菜单：点一下直接切到对应子页。 */
@@ -43,6 +43,8 @@ export function AppSidebar({
   onNavigate,
   onHome,
   onToggleCollapse,
+  walletBalance,
+  onOpenWallet,
 }: {
   groups: SidebarGroup[];
   activeId: string;
@@ -56,6 +58,8 @@ export function AppSidebar({
   onNavigate: (id: string) => void;
   onHome: () => void;
   onToggleCollapse: () => void;
+  walletBalance: number;
+  onOpenWallet: () => void;
 }) {
   // 二级菜单默认全展开，用户手动收起才记成 closed。
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
@@ -179,6 +183,23 @@ export function AppSidebar({
       </nav>
 
       <div className="sb-foot">
+        <button
+          className="sb-balance"
+          type="button"
+          onClick={onOpenWallet}
+          title={`平台余额 $${walletBalance.toFixed(2)} · 点击查看钱包`}
+          aria-label="查看平台余额"
+        >
+          {collapsed ? (
+            <WalletCards className="sb-balance-icon" aria-hidden="true" />
+          ) : (
+            <>
+              <span className="sb-balance-label">平台余额</span>
+              <span className="sb-balance-amount"><span className="cur">$</span>{walletBalance.toFixed(2)}</span>
+              <span className="sb-balance-hint">点击查看 / 充值</span>
+            </>
+          )}
+        </button>
         <button
           className="sb-user"
           data-active={activeId === "my"}
