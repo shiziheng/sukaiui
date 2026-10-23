@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowRight, Check, CheckCircle2, Clock3, Copy, QrCode, RefreshCcw, TriangleAlert, Zap,
+  ArrowRight, Check, CheckCircle2, Clock3, Copy, Info, QrCode, RefreshCcw, TriangleAlert, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -350,9 +350,7 @@ export function RechargePage({
           </> : null}
         </div>
       </li>
-    </ol>}
-
-        <p className="rc-policy">平台不收取充值手续费；链上手续费由你的钱包收取。</p>
+        </ol>}
       </div>
 
       <aside className="rc-aside">
@@ -375,6 +373,17 @@ export function RechargePage({
               </div>
             </li>)}
           </ul> : <p className="rc-empty">还没有充值记录，完成第一笔后会显示在这里。</p>}
+        </section>
+
+        {/* 常见坑集中到一块，右栏收口；流程里只留当下最该看的提示 */}
+        <section className="rc-notice" aria-label="充值须知">
+          <header><Info aria-hidden="true" />充值须知</header>
+          <ul>
+            <li><strong>15 分钟</strong>内完成付款，超时地址自动作废</li>
+            <li>金额要连<strong>三位小数</strong>一起转，四舍五入会匹配失败</li>
+            <li>网络必须和钱包一致，<strong>充错链无法退回</strong></li>
+            <li><strong>1:1</strong> 计入余额，平台不收充值手续费</li>
+          </ul>
         </section>
       </aside>
     </div>

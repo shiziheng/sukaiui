@@ -670,14 +670,6 @@
   height: 13px;
 }
 
-.rc-policy {
-  margin: 6px 0 0;
-  padding: 14px 0 0;
-  border-top: 1px solid #eef0e9;
-  color: #9aa094;
-  font-size: 11px;
-}
-
 .rc-done {
   display: grid;
   gap: 5px;
@@ -884,6 +876,62 @@
   font-size: 12px;
 }
 
+/* 右栏底部「充值须知」：常见坑集中一块，流程里只留当下最该看的提示 */
+.rc-notice {
+  margin-top: 22px;
+  border: 1px solid #e3e5dc;
+  border-radius: 10px;
+  background: #f8f9f3;
+  padding: 13px 14px 14px;
+}
+
+.rc-notice > header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4f554c;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rc-notice > header svg {
+  width: 13px;
+  height: 13px;
+  color: #8a9086;
+}
+
+.rc-notice ul {
+  display: grid;
+  gap: 6px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rc-notice li {
+  position: relative;
+  padding-left: 11px;
+  color: #7b8178;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.rc-notice li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #b9bdb1;
+}
+
+.rc-notice li strong {
+  color: #17191c;
+  font-weight: 500;
+}
+
 @media (max-width: 1180px) {
   .rc-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -897,6 +945,11 @@
 
   .rc-aside {
     position: static;
+  }
+
+  /* 窄屏右栏变整宽，须知别拉成一条长条 */
+  .rc-notice {
+    max-width: 520px;
   }
 
   .rc-records ul {
