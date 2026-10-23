@@ -1800,3 +1800,57 @@ button{font:inherit}
 @media(max-width:1240px){
   .bill-flow-table th:nth-child(6),.bill-flow-table td:nth-child(6){display:none}
 }
+
+/* ============================================================
+   .shell-v2 设计令牌层（P2 视觉统一基础）
+   按《菜单与界面大改方案》5.2/5.3：中性色板 + 统一字号/圆角/间距。
+   仅新增作用域，不修改旧规则；旧页面稳定后再逐步迁移。
+   ============================================================ */
+.shell-v2{
+  --v2-bg-page:#F6F7F2;
+  --v2-surface:#FFFFFF;
+  --v2-border:#E3E5DC;
+  --v2-border-strong:#CFD1CA;
+  --v2-text:#17191C;
+  --v2-text-2:#6B7268;
+  --v2-text-3:#9AA09A;
+  --v2-accent:#C8D43D;            /* 荧光绿：仅用于主按钮 / 当前导航 / 关键数字 */
+  --v2-accent-ink:#151713;
+  --v2-radius-lg:14px;
+  --v2-radius-ctl:10px;
+  --v2-gap-section:24px;
+  --v2-gap-card:20px;
+  --v2-pad-page:32px;
+  --v2-fs-title:28px;
+  --v2-fs-section:18px;
+  --v2-fs-body:14px;
+  --v2-fs-aux:12px;
+}
+
+/* 统一页头右侧操作区 + 主操作按钮（供 PageHeading 的 actions 使用） */
+.uc-page-heading-aside{display:flex;align-items:center;gap:10px;flex:none}
+.uc-page-heading-aside .ph-btn{
+  height:40px;display:inline-flex;align-items:center;gap:7px;border-radius:var(--v2-radius-ctl,10px);
+  padding:0 16px;font-size:13.5px;font-weight:700;white-space:nowrap;cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease,transform .15s ease;
+}
+.uc-page-heading-aside .ph-btn svg{width:15px;height:15px;flex:none}
+.uc-page-heading-aside .ph-btn.is-primary{border:1px solid var(--v2-accent,#C8D43D);background:var(--v2-accent,#C8D43D);color:var(--v2-accent-ink,#151713)}
+.uc-page-heading-aside .ph-btn.is-primary:hover{background:var(--color-brand-hover,#d6e85a);transform:translateY(-1px)}
+.uc-page-heading-aside .ph-btn.is-ghost{border:1px solid var(--v2-border-strong,#CFD1CA);background:#fff;color:#3b4039}
+.uc-page-heading-aside .ph-btn.is-ghost:hover{border-color:#aeb4a8;background:#fafbf7}
+
+/* 页内页签条：统一整站页头节奏（供 PageHeading 的 tabs 使用） */
+.uc-page-heading-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.uc-page-heading-tabs .ph-tab{
+  height:34px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--v2-border,#E3E5DC);
+  border-radius:999px;background:#fff;color:var(--v2-text-2,#6B7268);padding:0 14px;font-size:13px;font-weight:650;cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease,color .15s ease;
+}
+.uc-page-heading-tabs .ph-tab svg{width:15px;height:15px}
+.uc-page-heading-tabs .ph-tab[data-active="true"]{border-color:var(--v2-accent,#C8D43D);background:rgba(200,212,61,.12);color:var(--v2-text,#17191C)}
+
+/* 窄屏下页头操作区换行，避免两个按钮挤在一行溢出 */
+@media (max-width:640px){
+  .uc-page-heading-aside{flex-wrap:wrap;justify-content:flex-start;width:100%}
+}

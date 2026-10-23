@@ -72,6 +72,7 @@ export function AppSidebar({
                 <button
                   className="sb-item"
                   data-active={activeId === item.id}
+                  aria-current={activeId === item.id ? "page" : undefined}
                   data-new={item.isNew || undefined}
                   type="button"
                   onClick={() => onNavigate(item.id)}
@@ -97,6 +98,7 @@ export function AppSidebar({
         <button
           className="sb-user"
           data-active={activeId === "my"}
+          aria-current={activeId === "my" ? "page" : undefined}
           type="button"
           onClick={() => onNavigate("my")}
           title={collapsed ? `${userName} · 我的` : undefined}

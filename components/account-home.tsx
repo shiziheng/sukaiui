@@ -7,7 +7,7 @@ import {
 import "./account-home.css";
 
 import { EditableText } from "@/components/editable-text";
-import { StatusTag, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
+import { PageHeading, StatusTag, formatMoney, type CopyUpdater } from "@/components/user-center-shared";
 import { accountDashboardMock, type DashboardDestination } from "@/data/account-dashboard";
 import { type DemoContent } from "@/data/content";
 
@@ -45,27 +45,25 @@ export function AccountHome({
 
   return (
     <section className="user-center-page account-home">
-      <header className="acc-home-hero">
-        <div className="acc-home-hero-copy">
-          <span className="acc-home-eyebrow"><Sparkles aria-hidden="true" />会员中心</span>
-          <h1>
-            <EditableText active={editMode} value={content.homeActionTitle} onChange={(value) => updateContent("homeActionTitle", value)} />
-            <span>，{data.user.name}</span>
-          </h1>
-          <p>
-            <EditableText active={editMode} value={content.homeActionSubtitle} onChange={(value) => updateContent("homeActionSubtitle", value)} />
-          </p>
-        </div>
-        <div className="acc-home-hero-actions">
-          <button className="acc-home-primary" type="button" onClick={onOpenRecharge}>
-            <Plus aria-hidden="true" />{content.walletRecharge}
-          </button>
-          <button className="acc-home-secondary" type="button" onClick={() => onNavigate("orders")}>
-            <ReceiptText aria-hidden="true" />查看订单
-          </button>
-        </div>
-        <div className="acc-home-glow" aria-hidden="true" />
-      </header>
+      <PageHeading
+        titleKey="homeActionTitle"
+        subtitleKey="homeActionSubtitle"
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+        icon={<Sparkles aria-hidden="true" />}
+        titleSuffix={<>, {data.user.name}</>}
+        actions={
+          <>
+            <button className="ph-btn is-primary" type="button" onClick={onOpenRecharge}>
+              <Plus aria-hidden="true" />{content.walletRecharge}
+            </button>
+            <button className="ph-btn is-ghost" type="button" onClick={() => onNavigate("orders")}>
+              <ReceiptText aria-hidden="true" />查看订单
+            </button>
+          </>
+        }
+      />
 
       <section className="acc-home-stats" aria-label="账户概览">
         <button className="acc-home-stat is-primary" type="button" onClick={() => onNavigate("wallet")}>
