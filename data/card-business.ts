@@ -385,9 +385,9 @@ export const defaultCardFlows: CardFlowItem[] = [
   { id: "CF-KC-000001", cardId: "VC-20261012001", time: "2026-10-12 09:53:13", type: "recharge", amount: 120, balanceAfter: 120, merchant: "开卡初始充值", status: "success", txNo: "—" },
 
   // VC-…007
-  { id: "CF-1069435482", cardId: "VC-20261012007", time: "2026-10-13 08:04:12", type: "consume", amount: -3.9, balanceAfter: 56.11, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 3.9, settleAmount: 3.9, status: "success", txNo: "1069435482" },
+  { id: "CF-1069435482", cardId: "VC-20261012007", time: "2026-10-13 08:04:12", type: "consume", amount: -3.9, balanceAfter: 36.11, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 3.9, settleAmount: 3.9, status: "success", txNo: "1069435482" },
   { id: "CF-1069433476", cardId: "VC-20261012007", time: "2026-10-12 22:36:55", type: "consume", amount: -9.99, balanceAfter: 60.01, merchant: "OpenAI · ChatGPT 订阅", tradeAmount: 9.99, settleAmount: 9.99, status: "success", txNo: "1069433476" },
-  { id: "CF-KC-000090", cardId: "VC-20261012007", time: "2026-10-12 23:20:08", type: "cashout", amount: -20, balanceAfter: 70.01, merchant: "转出至平台余额", status: "success", txNo: "—" },
+  { id: "CF-KC-000090", cardId: "VC-20261012007", time: "2026-10-12 23:20:08", type: "cashout", amount: -20, balanceAfter: 40.01, merchant: "转出至平台余额", status: "success", txNo: "—" },
   { id: "CF-KC-000009", cardId: "VC-20261012007", time: "2026-10-12 10:02:20", type: "recharge", amount: 70, balanceAfter: 70, merchant: "开卡初始充值", status: "success", txNo: "—" },
 
   // VC-…012（中国香港卡）

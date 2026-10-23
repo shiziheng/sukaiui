@@ -20,8 +20,9 @@
 .bill-flow-table .bill-col-time{width:96px}
 .bill-flow-table .bill-time{font-size:12.5px;color:#6f757d;font-variant-numeric:tabular-nums}
 
-/* 查询条件行：类型 / 状态 / 单号搜索 / 重置，改完立刻生效 */
-.bill-filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 0 14px;margin:0 0 4px;border-bottom:1px solid #eef0e8}
+/* 查询条件行：类型 / 状态 / 单号搜索 / 重置，改完立刻生效
+   左右各留 20px：卡片本身没有内边距，不补的话控件和「共 N 条」会贴到卡片边缘。 */
+.bill-filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:17px 20px 15px;margin:0;border-bottom:1px solid #eef0e8}
 .bill-filter-field{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border:1px solid #e3e5dc;border-radius:9px;background:#fff}
 .bill-filter-field>span{font-size:12.5px;color:#7c828a;white-space:nowrap}
 .bill-filter-field select{max-width:132px;border:0;background:none;font-family:inherit;font-size:13px;font-weight:500;color:#17181b;outline:none;cursor:pointer}
@@ -33,13 +34,28 @@
 .bill-filter-reset svg{width:13px;height:13px}
 .bill-filter-reset:hover{color:#17181b;background:#f4f5ef}
 .bill-filter-reset.is-active{color:#17181b;border-color:#dfe2d6;background:#f7f8f2}
-.bill-filter-count{margin-left:auto;font-size:12.5px;color:#8a9098;white-space:nowrap}
-.bill-filter-count strong{font-weight:600;color:#17181b;font-variant-numeric:tabular-nums}
+.bill-filter-count{margin-left:auto;padding-left:16px;border-left:1px solid #eef0e8;font-size:13px;line-height:20px;color:#8a9098;white-space:nowrap}
+.bill-filter-count strong{font-weight:650;color:#17181b;font-variant-numeric:tabular-nums}
+
+/* 列宽重排：固定列合计 662px，说明列吃掉余量。
+   原来的固定列总和比 min-width 还宽，1280 及以下会把「状态」列挤出卡片右侧。 */
+.bill-flow-panel .bill-flow-table{min-width:1000px}
+.bill-flow-panel .bill-flow-table th:nth-child(1){width:90px}
+.bill-flow-panel .bill-flow-table th:nth-child(2){width:104px}
+.bill-flow-panel .bill-flow-table th:nth-child(3){width:auto}
+.bill-flow-panel .bill-flow-table th:nth-child(4){width:118px}
+.bill-flow-panel .bill-flow-table th:nth-child(5){width:106px}
+.bill-flow-panel .bill-flow-table th:nth-child(6){width:148px}
+.bill-flow-panel .bill-flow-table th:nth-child(7){width:96px}
+.bill-flow-panel .bill-flow-table th:first-child,
+.bill-flow-panel .bill-flow-table td:first-child{padding-left:20px}
+.bill-flow-panel .bill-flow-table th:last-child,
+.bill-flow-panel .bill-flow-table td:last-child{padding-right:20px}
 
 /* 按天分组：整行跨列的日期条，点一下收起当天的明细 */
 .bill-flow-table .bill-day-row td{padding:0;background:#f7f8f2;border-top:1px solid #eef0e8;border-bottom:1px solid #eef0e8}
 .bill-flow-table .bill-day-row:first-child td{border-top:0}
-.bill-day-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:9px 12px;border:0;background:none;font-family:inherit;font-size:12.5px;font-weight:500;color:#5f645c;text-align:left;cursor:pointer}
+.bill-day-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 20px;border:0;background:none;font-family:inherit;font-size:12.5px;font-weight:500;color:#5f645c;text-align:left;cursor:pointer}
 .bill-day-toggle:hover{background:#f1f3e9}
 .bill-day-toggle small{font-size:12px;font-weight:400;color:#8a9098;white-space:nowrap;font-variant-numeric:tabular-nums}
 .bill-day-label{display:inline-flex;align-items:center;gap:6px}
