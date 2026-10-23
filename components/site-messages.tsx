@@ -27,10 +27,16 @@ function loadRead(): string[] {
   }
 }
 
-export function SiteMessages() {
+export function SiteMessages({ open, onOpenChange }: { open?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [email, setEmail] = useState("");
   const [read, setRead] = useState<string[]>([]);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [internalPanelOpen, setInternalPanelOpen] = useState(false);
+  // 受控优先：菜单里点「站内信」可从外部打开；没传 prop 时内部自管。
+  const panelOpen = open ?? internalPanelOpen;
+  const setPanelOpen = (next: boolean) => {
+    if (onOpenChange) onOpenChange(next);
+    else setInternalPanelOpen(next);
+  };
   const [detail, setDetail] = useState<SiteMessage | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [forcedIndex, setForcedIndex] = useState(-1);
@@ -115,7 +121,7 @@ export function SiteMessages() {
           className="site-bell-button"
           aria-label="站内信"
           aria-expanded={panelOpen}
-          onClick={() => setPanelOpen((open) => !open)}
+          onClick={() => setPanelOpen(!panelOpen)}
         >
           <Bell aria-hidden="true" />
           {unreadCount > 0 && (

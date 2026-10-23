@@ -1,0 +1,379 @@
+/* 「我的」：左侧设置导航 + 右侧内容面板 */
+.my-page {
+  gap: 22px;
+}
+
+.my-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  border: 1px solid #dde2ae;
+  border-radius: 999px;
+  background: #f5f7df;
+  color: #616b00;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.my-layout {
+  display: grid;
+  grid-template-columns: 258px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.my-side {
+  display: grid;
+  gap: 18px;
+  padding: 16px;
+  position: sticky;
+  top: calc(var(--sb-head, 60px) + 20px);
+}
+
+.my-user {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding: 4px 4px 16px;
+}
+
+.my-avatar {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #17191c;
+  color: var(--color-brand);
+  font-size: 16px;
+  font-weight: 780;
+}
+
+.my-user > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.my-user strong,
+.my-user small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-user strong {
+  font-size: 14px;
+  font-weight: 680;
+}
+
+.my-user small {
+  color: var(--color-text-tertiary);
+  font-size: 11.5px;
+}
+
+.my-nav-group {
+  display: grid;
+  gap: 7px;
+}
+
+.my-nav-title {
+  color: #93978f;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.my-nav-items {
+  display: grid;
+  gap: 3px;
+}
+
+.my-nav-item {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #555b54;
+  padding: 0 9px;
+  font-size: 13.5px;
+  font-weight: 620;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.my-nav-item > svg:first-child {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: #858a82;
+}
+
+.my-nav-item > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.my-nav-item > svg:last-child {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: #b0b3ac;
+}
+
+.my-nav-item:hover {
+  background: #f2f3ef;
+  color: #1e211d;
+}
+
+.my-nav-item[data-active="true"] {
+  background: #17191c;
+  color: #f5f7ef;
+}
+
+.my-nav-item[data-active="true"] > svg:first-child {
+  color: var(--color-brand);
+}
+
+.my-nav-item[data-active="true"] > svg:last-child {
+  color: #6a6f67;
+}
+
+.my-logout {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: #fff;
+  color: #8a5148;
+  padding: 0 10px;
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.my-logout svg {
+  width: 15px;
+  height: 15px;
+}
+
+.my-logout:hover {
+  border-color: #e2c9c5;
+  background: #fbf3f2;
+}
+
+.my-panel {
+  min-width: 0;
+}
+
+.my-embedded {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.my-tools {
+  display: grid;
+  gap: 22px;
+  padding: 24px;
+}
+
+.my-tools-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.my-tools-icon {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dcddd7;
+  border-radius: 12px;
+  background: #f3f4f0;
+  color: #646a62;
+}
+
+.my-tools-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.my-tools-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.3;
+  font-weight: 680;
+}
+
+.my-tools-heading p {
+  margin: 6px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.my-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.my-tool {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fafbf8;
+  color: #292c28;
+  padding: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+}
+
+.my-tool:hover {
+  transform: translateY(-1px);
+  border-color: #c8cac2;
+  background: #fff;
+}
+
+.my-tool[data-active="true"] {
+  border-color: #dbe49c;
+  background: #f7f9e4;
+}
+
+.my-tool.is-danger:hover {
+  border-color: #e2c9c5;
+  background: #fbf5f4;
+}
+
+.my-tool-icon {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dfe1da;
+  border-radius: 10px;
+  background: #fff;
+  color: #676c65;
+}
+
+.my-tool-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.my-tool > span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.my-tool strong {
+  font-size: 13.5px;
+  font-weight: 680;
+}
+
+.my-tool small {
+  color: var(--color-text-tertiary);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.my-tool > svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: #a8aca4;
+}
+
+.my-tool-state {
+  flex: none;
+  border-radius: 999px;
+  background: #e9efc5;
+  color: #5c6500;
+  padding: 4px 8px;
+  font-size: 10.5px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.my-tools-footnote {
+  margin: 0;
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  .my-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .my-side {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 14px 18px;
+  }
+
+  .my-user {
+    grid-column: 1 / -1;
+    padding-bottom: 12px;
+  }
+
+  .my-logout {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  .my-side {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .my-nav-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-nav-item {
+    min-height: 40px;
+    font-size: 12.5px;
+  }
+
+  .my-nav-item > svg:last-child {
+    display: none;
+  }
+
+  .my-tools {
+    padding: 18px;
+  }
+
+  .my-tool-grid {
+    grid-template-columns: 1fr;
+  }
+}

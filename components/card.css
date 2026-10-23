@@ -6,8 +6,9 @@
 .card-module{display:block}
 .card-tabs{margin-bottom:12px}
 .vcard-panel,.vbin-panel,.vtxn-panel{display:block}
-/* L3 页头带：与代充/钱包页头同款渐变带，工具按钮收进带内右侧 */
-.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid #daddd4;border-radius:14px;background:linear-gradient(110deg,#fff 0%,#fafbf5 72%,#f3f6dc 100%);box-shadow:var(--ds-shadow-subtle)}
+/* 面板头改成扁平工具栏：页头已经是页面级标题，面板不再重复套第二层色带 */
+.vcard-panel-head,.vbin-panel-head,.vtxn-panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap;padding:0}
+.vcard-panel-meta{margin:0;font-size:13px;color:var(--color-text-secondary);font-variant-numeric:tabular-nums}
 .vcard-panel-copy,.vbin-panel-copy,.vtxn-panel-copy{display:flex;align-items:center;gap:12px;min-width:0}
 .vcard-panel-copy .section-title-icon,.vbin-panel-copy .section-title-icon,.vtxn-panel-copy .section-title-icon{width:36px;height:36px;border-radius:10px;flex:none}
 .vcard-panel-copy h2,.vbin-panel-copy h2,.vtxn-panel-copy h2{margin:0;font-size:20px;line-height:1.2;font-weight:720;letter-spacing:-.02em;color:var(--color-text-primary)}
@@ -500,4 +501,86 @@
   .vbin-feature-row{gap:3px 12px}
   .vbin-card-foot{flex-wrap:wrap;row-gap:10px}
   .vbin-open-button{flex:1 1 100%;min-width:0}
+}
+
+/* ---------- 开卡中心弹窗（从卡片列表的「开卡」按钮打开） ---------- */
+.card-market-dialog{
+  width:min(1080px,calc(100vw - 48px));
+  max-width:1080px;
+  max-height:calc(100vh - 56px);
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  overflow:hidden;
+  border:1px solid #e3e5dc;
+  border-radius:16px;
+  background:#fff;
+  padding:0;
+}
+
+.card-market-dialog-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:20px 24px 15px;
+  border-bottom:1px solid #e3e5dc;
+  flex:none;
+}
+
+.card-market-dialog-head h2{
+  margin:0;
+  color:#17191c;
+  font-size:18px;
+  font-weight:560;
+  letter-spacing:-.01em;
+}
+
+.card-market-dialog-head p{
+  margin:4px 0 0;
+  color:#8a9086;
+  font-size:12px;
+}
+
+.card-market-dialog-close{
+  flex:none;
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:50%;
+  background:#f4f5ef;
+  color:#7b8178;
+  cursor:pointer;
+}
+
+.card-market-dialog-close:hover{background:#ebece4;color:#17191c}
+.card-market-dialog-close:focus-visible{outline:2px solid #c8d43d;outline-offset:2px}
+.card-market-dialog-close svg{width:15px;height:15px}
+
+.card-market-dialog-body{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:14px 24px 24px;
+}
+
+/* 弹窗自带头部，市场自己的标题块就不重复了 */
+.card-market-dialog .vbin-panel-head{display:none}
+.card-market-dialog .vbin-filters{margin-top:0}
+
+@media (max-width:760px){
+  .card-market-dialog{
+    width:calc(100vw - 24px);
+    max-height:calc(100vh - 32px);
+  }
+  .card-market-dialog-head{padding:16px 16px 12px}
+  .card-market-dialog-body{padding:12px 16px 18px}
+}
+
+/* 卡流水作为一级页面：标题在页头，面板只留条数 */
+.vtxn-panel-head[data-embedded]{
+  justify-content:flex-end;
+  margin-bottom:8px;
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, LayoutTemplate, Sparkles, X } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { EditableText } from "@/components/editable-text";
 
-export type SidebarLayout = "collapsible" | "expanded" | "rail";
-
-/** 侧栏二级菜单：点一下直接切到对应子页 */
+/** 二级菜单：点一下直接切到对应子页。 */
 export type SidebarChild = {
   id: string;
   label: string;
@@ -19,7 +17,7 @@ export type SidebarItem = {
   icon: ReactNode;
   /** 编辑模式下改文案 */
   onLabelChange?: (value: string) => void;
-  /** 新提到一级的入口，给个荧光点 */
+  /** 新入口的小圆点 */
   isNew?: boolean;
   /** 有二级菜单时，父项右侧出箭头；默认展开 */
   children?: SidebarChild[];
@@ -32,54 +30,46 @@ export type SidebarGroup = {
   items: SidebarItem[];
 };
 
-const LAYOUT_OPTIONS: Array<{ id: SidebarLayout; name: string; desc: string }> = [
-  { id: "collapsible", name: "随手收起", desc: "默认展开，点箭头变图标轨" },
-  { id: "expanded", name: "一直展开", desc: "244px，功能名全露出来" },
-  { id: "rail", name: "只留图标", desc: "72px，鼠标悬停出名字" },
-];
-
 export function AppSidebar({
   groups,
   activeId,
   collapsed,
-  layout,
-  layoutOpen,
   editMode,
   brandText,
   onBrandChange,
   userInitials,
   userName,
   userMeta,
-  introVisible,
   onNavigate,
   onHome,
   onToggleCollapse,
-  onToggleLayout,
-  onPickLayout,
-  onDismissIntro,
 }: {
   groups: SidebarGroup[];
   activeId: string;
   collapsed: boolean;
-  layout: SidebarLayout;
-  layoutOpen: boolean;
   editMode: boolean;
   brandText: string;
   onBrandChange: (value: string) => void;
   userInitials: string;
   userName: string;
   userMeta: string;
-  introVisible: boolean;
   onNavigate: (id: string) => void;
   onHome: () => void;
   onToggleCollapse: () => void;
-  onToggleLayout: () => void;
-  onPickLayout: (layout: SidebarLayout) => void;
-  onDismissIntro: () => void;
 }) {
   // 二级菜单默认全展开，用户手动收起才记成 closed。
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
   const toggleGroup = (id: string) => setClosedGroups((current) => ({ ...current, [id]: !current[id] }));
+  const openGroup = (id: string) => setClosedGroups((current) => (current[id] ? { ...current, [id]: false } : current));
+
+  // 从别处（首页快捷入口、顶栏、页面内的按钮）跳到某个子页时，把它所在的父项展开，
+  // 别出现「当前在卡流水，菜单里却看不到卡流水」的情况。只跟 activeId 变化，手动收起不会被弹回来。
+  useEffect(() => {
+    const owner = groups.find((group) => group.items.some((item) => item.children?.some((child) => child.id === activeId)));
+    const parent = owner?.items.find((item) => item.children?.some((child) => child.id === activeId));
+    if (parent) setClosedGroups((current) => (current[parent.id] ? { ...current, [parent.id]: false } : current));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   let index = 0;
 
@@ -92,28 +82,15 @@ export function AppSidebar({
             <EditableText active={editMode} value={brandText} onChange={onBrandChange} />
           </span>
         </button>
-        {layout === "collapsible" ? (
-          <button className="sb-collapse" type="button" onClick={onToggleCollapse} aria-label={collapsed ? "展开侧栏" : "收起侧栏"}>
-            {collapsed ? <ChevronRight aria-hidden="true" /> : <ChevronLeft aria-hidden="true" />}
-          </button>
-        ) : null}
+        <button className="sb-collapse" type="button" onClick={onToggleCollapse} aria-label={collapsed ? "展开侧栏" : "收起侧栏"}>
+          {collapsed ? <ChevronRight aria-hidden="true" /> : <ChevronLeft aria-hidden="true" />}
+        </button>
       </div>
-
-      {introVisible && !collapsed ? (
-        <div className="sb-intro" role="status">
-          <Sparkles aria-hidden="true" />
-          <div>
-            <strong>常用功能已经挪到左边了</strong>
-            <p>钱包流水、邀请奖励、账号安全现在是直接入口，不用再点头像里找。</p>
-          </div>
-          <button type="button" onClick={onDismissIntro} aria-label="关闭提示"><X aria-hidden="true" /></button>
-        </div>
-      ) : null}
 
       <nav className="sb-nav">
         {groups.map((group) => (
-          <div className="sb-group" key={group.title}>
-            <p className="sb-group-title">{group.title}</p>
+          <div className="sb-group" key={group.title || "main"}>
+            {group.title ? <p className="sb-group-title">{group.title}</p> : null}
             {group.items.map((item) => {
               const order = index++;
               const children = item.children ?? [];
@@ -129,8 +106,28 @@ export function AppSidebar({
                       data-active={activeId === item.id}
                       data-child-active={childActive || undefined}
                       data-new={item.isNew || undefined}
+                      aria-current={activeId === item.id ? "page" : undefined}
+                      aria-expanded={hasChildren && !collapsed ? isOpen : undefined}
                       type="button"
-                      onClick={() => onNavigate(destination)}
+                      onClick={() => {
+                        if (!hasChildren) {
+                          onNavigate(item.id);
+                          return;
+                        }
+                        // 图标轨（收起态）看不到二级菜单，点了就直接进第一个子页。
+                        if (collapsed) {
+                          onNavigate(destination);
+                          return;
+                        }
+                        // 已经在这个分组里，再点一次父项 = 收起二级菜单，页面不动。
+                        if (isOpen && childActive) {
+                          toggleGroup(item.id);
+                          return;
+                        }
+                        // 其余情况：展开并落到第一个子页。
+                        openGroup(item.id);
+                        onNavigate(destination);
+                      }}
                       title={collapsed ? item.label : undefined}
                       style={{ ["--i" as string]: order }}
                     >
@@ -182,40 +179,22 @@ export function AppSidebar({
       </nav>
 
       <div className="sb-foot">
-        <div className="sb-user">
+        <button
+          className="sb-user"
+          data-active={activeId === "my"}
+          aria-current={activeId === "my" ? "page" : undefined}
+          type="button"
+          onClick={() => onNavigate("my")}
+          title={collapsed ? `${userName} · 我的` : undefined}
+          aria-label="打开我的"
+        >
           <span className="sb-user-avatar" aria-hidden="true">{userInitials}</span>
           <span className="sb-user-text">
             <strong>{userName}</strong>
             <small>{userMeta}</small>
           </span>
-        </div>
-        <div className="sb-layout-wrap">
-          <button className="sb-layout-button" type="button" onClick={onToggleLayout} aria-expanded={layoutOpen} title="版式设置">
-            <LayoutTemplate aria-hidden="true" />
-            <span>版式</span>
-          </button>
-          {layoutOpen ? (
-            <div className="sb-layout-pop" role="menu">
-              <p>侧栏怎么显示</p>
-              {LAYOUT_OPTIONS.map((option) => (
-                <button
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={layout === option.id}
-                  data-on={layout === option.id}
-                  onClick={() => onPickLayout(option.id)}
-                  key={option.id}
-                >
-                  <span>
-                    {option.name}
-                    <small>{option.desc}</small>
-                  </span>
-                  {layout === option.id ? <Check aria-hidden="true" /> : null}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+          <ChevronRight className="sb-user-chevron" aria-hidden="true" />
+        </button>
       </div>
     </aside>
   );

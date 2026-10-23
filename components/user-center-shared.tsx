@@ -15,7 +15,7 @@ export function formatMoney(value: number) {
 }
 
 export function PageHeading({
-  titleKey, subtitleKey, content, editMode, updateContent, aside, icon,
+  titleKey, subtitleKey, content, editMode, updateContent, aside, icon, titleSuffix, actions, tabs,
 }: {
   titleKey: keyof DemoContent;
   subtitleKey: keyof DemoContent;
@@ -24,17 +24,26 @@ export function PageHeading({
   updateContent: CopyUpdater;
   aside?: ReactNode;
   icon?: ReactNode;
+  /** 标题后追加的非编辑文案（如用户名），不进入文案编辑体系。 */
+  titleSuffix?: ReactNode;
+  /** 标题右侧的唯一主操作区（主按钮 + 可选的辅助按钮）。 */
+  actions?: ReactNode;
+  /** 页内页签条，渲染在说明文字下方，统一整站页头节奏。 */
+  tabs?: ReactNode;
 }) {
   return (
     <header className="uc-page-heading">
       <div className="uc-page-heading-copy">
         {icon ? <span className="uc-page-heading-icon" aria-hidden="true">{icon}</span> : null}
         <div>
-        <h1><EditableText active={editMode} value={content[titleKey]} onChange={(value) => updateContent(titleKey, value)} /></h1>
-        <p><EditableText active={editMode} value={content[subtitleKey]} onChange={(value) => updateContent(subtitleKey, value)} /></p>
+          <h1><EditableText active={editMode} value={content[titleKey]} onChange={(value) => updateContent(titleKey, value)} />{titleSuffix}</h1>
+          <p><EditableText active={editMode} value={content[subtitleKey]} onChange={(value) => updateContent(subtitleKey, value)} /></p>
+          {tabs ? <div className="uc-page-heading-tabs">{tabs}</div> : null}
         </div>
       </div>
-      {aside}
+      {actions || aside ? (
+        <div className="uc-page-heading-aside">{actions}{aside}</div>
+      ) : null}
     </header>
   );
 }

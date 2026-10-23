@@ -1,0 +1,531 @@
+/* 登录后首页：买家视角的账户总览 */
+.account-home {
+  gap: 20px;
+}
+
+.acc-home-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.acc-home-stat {
+  position: relative;
+  min-height: 132px;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #fff;
+  color: #242723;
+  padding: 20px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--ds-shadow-subtle, 0 5px 18px rgba(24, 27, 32, .04));
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.acc-home-stat:hover {
+  transform: translateY(-2px);
+  border-color: #c9ccc3;
+  box-shadow: 0 12px 26px rgba(24, 27, 32, .08);
+}
+
+.acc-home-stat.is-primary {
+  border-color: #2c2f31;
+  background: linear-gradient(145deg, #1b1d20 0%, #242822 100%);
+  color: #f4f6ef;
+}
+
+.acc-home-stat > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6e736c;
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.acc-home-stat.is-primary > span {
+  color: #aeb4ac;
+}
+
+.acc-home-stat > span svg {
+  width: 15px;
+  height: 15px;
+  color: #858a82;
+}
+
+.acc-home-stat.is-primary > span svg {
+  color: var(--color-brand);
+}
+
+.acc-home-stat > strong {
+  font-size: clamp(26px, 2.3vw, 34px);
+  line-height: 1.08;
+  font-weight: 780;
+  letter-spacing: -.035em;
+}
+
+.acc-home-stat > strong em {
+  margin-left: 4px;
+  color: #777c74;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 650;
+}
+
+.acc-home-stat.is-primary > strong em {
+  color: #aeb4ac;
+}
+
+.acc-home-stat > small {
+  color: #8b9088;
+  font-size: 12px;
+}
+
+.acc-home-stat > svg {
+  position: absolute;
+  right: 17px;
+  bottom: 17px;
+  width: 16px;
+  height: 16px;
+  color: #b4b8b0;
+}
+
+.acc-home-stat.is-primary > svg {
+  color: #7f867d;
+}
+
+.acc-home-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(288px, .72fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.acc-home-main {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.acc-home-panel {
+  overflow: hidden;
+}
+
+.acc-home-panel-head {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 17px 21px;
+}
+
+.acc-home-panel-head h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -.015em;
+}
+
+.acc-home-panel-head p {
+  margin: 5px 0 0;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
+.acc-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: #5e645c;
+  padding: 5px 0;
+  font-size: 12px;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.acc-home-link:hover {
+  color: #1e211d;
+}
+
+.acc-home-link svg {
+  width: 12px;
+  height: 12px;
+}
+
+.acc-home-order-list,
+.acc-home-recent-list {
+  display: grid;
+}
+
+.acc-home-order,
+.acc-home-recent {
+  width: 100%;
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: #292c28;
+  padding: 14px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .14s ease;
+}
+
+.acc-home-order:last-child,
+.acc-home-recent:last-child {
+  border-bottom: 0;
+}
+
+.acc-home-order:hover,
+.acc-home-recent:hover {
+  background: #f8f9f5;
+}
+
+.acc-home-order {
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+}
+
+.acc-home-recent {
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+}
+
+.acc-home-order-icon {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f2f3ef;
+  color: #646a62;
+}
+
+.acc-home-order-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.acc-home-order-icon.is-account {
+  background: #eef5e8;
+  color: #53724e;
+}
+
+.acc-home-order-icon.is-recharge {
+  background: #eef1f7;
+  color: #526b87;
+}
+
+.acc-home-order-main,
+.acc-home-recent-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.acc-home-order-main strong,
+.acc-home-recent-main strong {
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc-home-order-main small,
+.acc-home-recent-main small {
+  overflow: hidden;
+  color: var(--color-text-tertiary);
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc-home-order-amount,
+.acc-home-recent-amount {
+  font-size: 13.5px;
+  font-weight: 720;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.acc-home-order-arrow {
+  width: 14px;
+  height: 14px;
+  color: #b0b4ac;
+}
+
+.acc-home-recent-time {
+  color: var(--color-text-tertiary);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.acc-home-empty {
+  min-height: 210px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.acc-home-empty svg {
+  width: 24px;
+  height: 24px;
+}
+
+.acc-home-empty strong {
+  color: #4b5049;
+  font-size: 14px;
+}
+
+.acc-home-empty p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.acc-home-side {
+  display: grid;
+  gap: 14px;
+}
+
+.acc-home-quick {
+  padding: 0 0 8px;
+}
+
+.acc-home-quick .acc-home-panel-head {
+  border-bottom: 0;
+  padding-bottom: 8px;
+}
+
+.acc-home-quick-list {
+  display: grid;
+  padding: 0 10px;
+}
+
+.acc-home-quick-list > button {
+  min-height: 61px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #292c28;
+  padding: 7px 9px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .14s ease;
+}
+
+.acc-home-quick-list > button:hover {
+  background: #f5f6f1;
+}
+
+.acc-home-quick-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e0e2db;
+  border-radius: 9px;
+  background: #fafbf8;
+  color: #666b63;
+}
+
+.acc-home-quick-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.acc-home-quick-list > button > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.acc-home-quick-list strong {
+  font-size: 13px;
+  font-weight: 680;
+}
+
+.acc-home-quick-list small {
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+}
+
+.acc-home-quick-list > button > svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: #b0b4ac;
+}
+
+.acc-home-invite {
+  width: 100%;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dfe4b7;
+  border-radius: 16px;
+  background: linear-gradient(130deg, #fbfce9 0%, #f2f6cf 100%);
+  color: #2b2f24;
+  padding: 17px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.acc-home-invite:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(70, 78, 14, .1);
+}
+
+.acc-home-invite-icon {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #17191c;
+  color: var(--color-brand);
+}
+
+.acc-home-invite-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.acc-home-invite-copy {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.acc-home-invite-copy strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.acc-home-invite-copy small {
+  color: #71775c;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.acc-home-invite > svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: #7b8262;
+}
+
+@media (max-width: 1180px) {
+  .acc-home-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .acc-home-side {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, .55fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .acc-home-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acc-home-stat:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .acc-home-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 23px 20px;
+  }
+
+  .acc-home-hero-actions {
+    width: 100%;
+  }
+
+  .acc-home-primary,
+  .acc-home-secondary {
+    flex: 1;
+  }
+
+  .acc-home-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .acc-home-stat:last-child {
+    grid-column: auto;
+  }
+
+  .acc-home-side {
+    grid-template-columns: 1fr;
+  }
+
+  .acc-home-order,
+  .acc-home-recent {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-inline: 15px;
+  }
+
+  .acc-home-order .uc-status,
+  .acc-home-order-amount,
+  .acc-home-recent-time,
+  .acc-home-recent .uc-status {
+    display: none;
+  }
+
+  .acc-home-order-arrow {
+    display: block;
+  }
+
+  .acc-home-recent-amount {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .acc-home-panel-head {
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .acc-home-hero h1 {
+    font-size: 29px;
+  }
+
+  .acc-home-hero-actions {
+    flex-direction: column;
+  }
+
+  .acc-home-stat {
+    min-height: 118px;
+    padding: 17px;
+  }
+}

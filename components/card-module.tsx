@@ -2,7 +2,7 @@
 
 import "./card.css";
 import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
-import { CreditCard, Layers, ReceiptText, Sparkles } from "lucide-react";
+import { CreditCard, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { CardList, CardDetail } from "@/components/card-wallet";
@@ -12,11 +12,11 @@ import { CardOpenDialog } from "@/components/card-open-dialog";
 import { CardRechargeDialog } from "@/components/card-recharge-dialog";
 import { CardRefundDialog } from "@/components/card-refund-dialog";
 import { EditableText } from "@/components/editable-text";
+import { PageHeading } from "@/components/user-center-shared";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type PlatformFlowType } from "@/data/bill-flows";
 import {
   binTitle, money, type CardBin, type CardFlowItem, type VirtualCard,
@@ -24,19 +24,20 @@ import {
 import { type DemoContent } from "@/data/content";
 
 type Editable = (key: keyof DemoContent, value: string) => void;
-type CardTab = "cards" | "market" | "transactions";
+type CardTab = "cards" | "transactions";
 export type ClosedCardRecord = { card: VirtualCard; closedAt: string };
 /** 平台余额流水上报：开卡扣费 / 卡充值 / 卡退款 / 销卡退款，由父级写入余额流水。 */
 export type PlatformFlowInput = { type: PlatformFlowType; amount: number; balanceAfter: number; note: string };
 
 export function CardModule({
-  tab, onTabChange,
+  tab, initialMarketOpen = false,
   cards, setCards, flows, setFlows, bins, platformBalance, setPlatformBalance,
   content, editMode, updateContent, onGoTopup, onPlatformFlow,
 }: {
   /** 页签由父级（左侧二级菜单）控制，模块内不再自持状态。 */
   tab: CardTab;
-  onTabChange: (tab: CardTab) => void;
+  /** 未登录在公开卡页点「开卡」后，登录进来直接弹开卡中心。 */
+  initialMarketOpen?: boolean;
   cards: VirtualCard[];
   setCards: Dispatch<SetStateAction<VirtualCard[]>>;
   flows: CardFlowItem[];
@@ -50,8 +51,9 @@ export function CardModule({
   onGoTopup: () => void;
   onPlatformFlow: (flow: PlatformFlowInput) => void;
 }) {
-  const setTab = (next: CardTab) => onTabChange(next);
   const [detailCard, setDetailCard] = useState<VirtualCard | null>(null);
+  // 开卡中心不再是独立页签/菜单，改成列表里点「开卡」时弹出来。
+  const [marketOpen, setMarketOpen] = useState(initialMarketOpen);
   const [openBin, setOpenBin] = useState<CardBin | null>(null);
   const [fundCard, setFundCard] = useState<VirtualCard | null>(null);
   const [freezeTarget, setFreezeTarget] = useState<VirtualCard | null>(null);
@@ -256,18 +258,14 @@ export function CardModule({
 
   return (
     <section className="card-module">
-      <Tabs
-        value={tab}
-        // 卡片详情是模块内的子视图，切页签要先退出详情，不然点了像没反应。
-        onValueChange={(value) => { setTab(value as CardTab); setDetailCard(null); }}
-        className="uc-tabs-list card-tabs"
-      >
-        <TabsList>
-          <TabsTrigger value="cards"><Layers aria-hidden="true" />{editable("cardTabCards")}</TabsTrigger>
-          <TabsTrigger value="market"><Sparkles aria-hidden="true" />{editable("cardTabMarket")}</TabsTrigger>
-          <TabsTrigger value="transactions"><ReceiptText aria-hidden="true" />{editable("cardTabTransactions")}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <PageHeading
+        titleKey={tab === "transactions" ? "cardTabTransactions" : "cardPageTitle"}
+        subtitleKey={tab === "transactions" ? "cardFlowsPageSubtitle" : "cardPageSubtitle"}
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+        icon={<CreditCard aria-hidden="true" />}
+      />
 
       {detailCard ? (
         <CardDetail
@@ -288,21 +286,12 @@ export function CardModule({
         <CardList
           cards={cards}
           closedRecords={closedRecords}
-          onOpenMarket={() => setTab("market")}
+          onOpenMarket={() => setMarketOpen(true)}
           onDetail={setDetailCard}
           onFund={(card) => setFundCard(card)}
           onNote={openNote}
           onRequestFreeze={handleFreeze}
           onRequestDelete={handleDelete}
-          content={content}
-          editMode={editMode}
-          updateContent={updateContent}
-        />
-      ) : tab === "market" ? (
-        <CardMarket
-          bins={bins}
-          ownedCounts={ownedCounts}
-          onOpen={(bin) => setOpenBin(bin)}
           content={content}
           editMode={editMode}
           updateContent={updateContent}
@@ -315,8 +304,36 @@ export function CardModule({
           content={content}
           editMode={editMode}
           updateContent={updateContent}
+          embedded
         />
       )}
+
+      {/* 开卡中心：从列表里的「开卡」按钮弹出，不再占菜单和页签 */}
+      <Dialog open={marketOpen} onOpenChange={setMarketOpen}>
+        <DialogContent className="card-market-dialog" showCloseButton={false}>
+          <DialogTitle className="sr-only">开卡中心</DialogTitle>
+          <DialogDescription className="sr-only">按用途挑选卡段，查看开卡费、限额与适用场景。</DialogDescription>
+          <header className="card-market-dialog-head">
+            <div>
+              <h2>开卡中心</h2>
+              <p>按用途挑卡段，开卡费和限额直接写在卡面上。</p>
+            </div>
+            <button className="card-market-dialog-close" type="button" onClick={() => setMarketOpen(false)} aria-label="关闭开卡中心">
+              <X aria-hidden="true" />
+            </button>
+          </header>
+          <div className="card-market-dialog-body">
+            <CardMarket
+              bins={bins}
+              ownedCounts={ownedCounts}
+              onOpen={(bin) => { setMarketOpen(false); setOpenBin(bin); }}
+              content={content}
+              editMode={editMode}
+              updateContent={updateContent}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <CardOpenDialog
         bin={openBin}
@@ -324,7 +341,7 @@ export function CardModule({
         onOpenChange={(open) => { if (!open) setOpenBin(null); }}
         onComplete={handleOpenComplete}
         onGoTopup={onGoTopup}
-        onViewCards={() => { setTab("cards"); setOpenBin(null); }}
+        onViewCards={() => { setMarketOpen(false); setOpenBin(null); }}
         content={content}
         editMode={editMode}
         updateContent={updateContent}

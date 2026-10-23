@@ -1,0 +1,201 @@
+.wallet-drawer {
+  width: min(392px, 92vw);
+  max-width: 392px;
+  gap: 0;
+  padding: 26px 24px 24px;
+  overflow-y: auto;
+  border-left: 1px solid #e3e5dc;
+  background: #fff;
+  color: #17191c;
+}
+
+.wallet-drawer-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.wallet-drawer-desc {
+  margin: 4px 0 20px;
+  color: #7b8178;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.wd-balance {
+  display: grid;
+  gap: 4px;
+  border-radius: 14px;
+  background: #17191c;
+  padding: 18px 18px 16px;
+  color: #fff;
+}
+
+.wd-balance-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #9aa094;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.wd-balance-label svg {
+  width: 14px;
+  height: 14px;
+  color: #c8d43d;
+}
+
+.wd-balance strong {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.wd-balance-meta {
+  display: flex;
+  gap: 14px;
+  color: #8f958b;
+  font-size: 11.5px;
+}
+
+.wd-recharge {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #c8d43d;
+  color: #151713;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wd-recharge:hover {
+  background: #d6e85a;
+}
+
+.wd-recharge:focus {
+  outline: none;
+}
+
+.wd-recharge:focus-visible {
+  box-shadow: 0 0 0 3px rgba(200, 212, 61, 0.32);
+}
+
+.wd-recharge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.wd-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0 6px;
+}
+
+.wd-section-head strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4f554c;
+}
+
+.wd-section-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: #6b7268;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wd-section-head button:hover {
+  color: #17191c;
+}
+
+.wd-section-head svg {
+  width: 13px;
+  height: 13px;
+}
+
+.wd-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wd-list li {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid #eef0e9;
+  padding: 11px 0;
+}
+
+.wd-list li:last-child {
+  border-bottom: 0;
+}
+
+.wd-row-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wd-row-type {
+  font-size: 13px;
+  color: #23262a;
+}
+
+.wd-row-main em {
+  font-size: 13.5px;
+  font-style: normal;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.wd-row-main em.is-income {
+  color: #4f7a1c;
+}
+
+.wd-row-main em.is-expense {
+  color: #2d3136;
+}
+
+.wd-row-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #9aa094;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wd-empty {
+  color: #8a9086;
+  font-size: 12.5px;
+}
+
+.wd-note {
+  margin: 18px 0 0;
+  color: #9aa094;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .wallet-drawer {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 22px 18px;
+  }
+}

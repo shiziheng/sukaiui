@@ -332,21 +332,8 @@ button{font:inherit}
 .home-assist-card dd{font-size:17px;font-weight:750}
 
 .commerce-panel{display:grid;gap:12px}
-.commerce-page-heading{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  min-height:112px;
-  border:1px solid #daddd4;
-  border-radius:18px;
-  background:linear-gradient(110deg,#fff 0%,#fafbf5 70%,#f3f6dc 100%);
-  padding:23px 26px;
-  box-shadow:0 7px 22px rgba(24,27,32,.04);
-}
 .commerce-page-icon,.uc-page-heading-icon{width:48px;height:48px;display:grid;place-items:center;flex:none;border-radius:14px;background:#17191c;color:var(--color-brand);box-shadow:0 7px 16px rgba(17,18,20,.14)}
 .commerce-page-icon svg,.uc-page-heading-icon svg{width:21px;height:21px}
-.commerce-page-heading h1{margin:0;font-size:34px;line-height:1.16;font-weight:770;letter-spacing:-.035em}
-.commerce-page-heading p{margin:7px 0 0;color:var(--color-text-secondary);font-size:15px}
 .panel-toolbar{
   display:flex;
   align-items:center;
@@ -401,6 +388,7 @@ button{font:inherit}
 .uc-page-heading-copy{display:flex;align-items:center;gap:16px}
 .uc-page-heading h1{font-size:34px;font-weight:770}
 .orders-page .uc-light-stats{gap:14px}
+.orders-page .uc-light-stats.is-three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .orders-page .uc-light-stats>div{position:relative;min-height:108px;overflow:hidden;border-color:#d6d8d1;padding:20px;box-shadow:0 6px 18px rgba(24,27,32,.04)}
 .orders-page .uc-light-stats>div:after{content:"";position:absolute;inset:auto 0 0;height:3px;background:#e2e4dd}
 .orders-page .uc-light-stats>div:first-child{background:linear-gradient(145deg,#fff 25%,#fbfddf 100%)}
@@ -461,7 +449,7 @@ button{font:inherit}
   .wizard-step-heading h1{font-size:28px}
 }
 @media(max-width:520px){
-  .commerce-page-heading,.uc-page-heading-copy{align-items:flex-start}
+  .uc-page-heading-copy{align-items:flex-start}
   .commerce-page-icon,.uc-page-heading-icon{width:40px;height:40px}
   .orders-page .uc-light-stats{grid-template-columns:1fr}
   .price{font-size:32px}
@@ -656,7 +644,7 @@ button{font:inherit}
 @media(max-width:1280px){:root{--ds-page-gutter:32px}.share-template-grid{grid-template-columns:1fr}.share-template-grid article{min-height:142px}.uc-invite-workspace{grid-template-columns:minmax(0,1fr) 310px}}
 @media(max-width:1000px){.ds-stat-grid{grid-template-columns:repeat(2,1fr)}.invite-core-card{grid-template-columns:1fr 220px}.uc-invite-workspace{grid-template-columns:1fr}.share-template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){:root{--ds-page-gutter:16px}.site-header{height:118px;padding-inline:16px}.business-nav,.business-nav-item{height:56px}.content-inset{padding-top:118px}.main-content,.dashboard-inset .main-content{padding:26px var(--ds-page-gutter) 52px}.uc-page-heading{min-height:100px;align-items:flex-start;padding:19px}.uc-page-heading h1{font-size:28px}.uc-page-heading-icon{width:42px;height:42px}.ds-stat-grid{grid-template-columns:1fr}.invite-core-card{grid-template-columns:1fr}.invite-core-qr{align-items:flex-start;border-top:1px solid var(--ds-border-default);border-left:0;padding-top:20px}.invite-core-qr p{text-align:left}.share-template-grid{grid-template-columns:1fr}.invite-tabs-row{align-items:flex-start;flex-direction:column}.invite-result-count{align-self:flex-end}.uc-tabs-list{max-width:calc(100vw - 72px);overflow-x:auto}}
-@media(max-width:520px){.uc-page-heading{flex-direction:column}.uc-page-heading aside{margin-left:58px}.ds-stat-card{min-height:124px;padding:18px}.invite-value-row.is-code strong{font-size:21px}.invite-core-qr .qr-demo{width:150px;height:150px}.invite-core-qr .qr-demo svg{width:112px;height:112px}}
+@media(max-width:520px){.uc-page-heading{flex-direction:column}.uc-page-heading aside{margin-left:50px}.ds-stat-card{min-height:124px;padding:18px}.invite-value-row.is-code strong{font-size:21px}.invite-core-qr .qr-demo{width:150px;height:150px}.invite-core-qr .qr-demo svg{width:112px;height:112px}}
 
 /* Account product cards and purchase confirmation */
 .brand-mark{color:var(--brand-accent,#25282d)}
@@ -747,7 +735,7 @@ button{font:inherit}
 .batch-parsing-card{width:min(760px,100%);display:grid;gap:12px;margin:60px auto;border:1px solid #d7dad2;border-radius:15px;background:#fff;padding:25px}.batch-parsing-card>div:first-child{display:flex;justify-content:space-between}.batch-parsing-card strong{font-size:15px}.batch-parsing-card span,.batch-parsing-card p{color:#7d837c;font-size:12px}.batch-parsing-card p{margin:0}.batch-progress-bar{height:9px;overflow:hidden;border-radius:999px;background:#e8eae4}.batch-progress-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#bacc00,#dfff00);transition:width .15s ease}.batch-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.batch-stat-grid>div{display:grid;gap:5px;border:1px solid #d9dcd5;border-radius:10px;background:#fff;padding:13px}.batch-stat-grid span{color:#858b84;font-size:10px}.batch-stat-grid strong{font-size:22px;font-weight:750}.batch-table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:14px}.batch-table-toolbar>div{display:flex;gap:6px}.batch-table-toolbar button{height:33px;border:1px solid #d7dad2;border-radius:8px;background:#fff;color:#666c65;padding:0 11px;font-size:10px;font-weight:680;cursor:pointer}.batch-table-toolbar button[data-active=true]{border-color:#24272a;background:#24272a;color:#fff}.batch-table-toolbar label{height:34px;display:flex;align-items:center;gap:7px;border:1px solid #d7dad2;border-radius:8px;background:#fff;padding:0 10px}.batch-table-toolbar label svg{width:14px;color:#8b9089}.batch-table-toolbar input{width:180px;border:0;background:transparent;font-size:11px;outline:none}.batch-account-table-wrap{overflow:auto;margin-top:10px;border:1px solid #d7dad2;border-radius:12px;background:#fff}.batch-account-table{width:100%;min-width:1040px;border-collapse:collapse}.batch-account-table th{height:40px;background:#f3f5f0;color:#757b74;padding:0 10px;font-size:10px;font-weight:690;text-align:left}.batch-account-table td{height:54px;border-top:1px solid #e8eae5;padding:8px 10px;color:#555b54;font-size:11px}.batch-account-table tr[data-selected=true]{background:#fcfee9}.batch-account-table td:nth-child(2) strong{color:#2d322d;font-size:11px}.batch-target-tag,.batch-status{display:inline-flex;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:700}.batch-target-tag{border:1px solid #d5df6c;background:#f7fadf;color:#616a00}.batch-status.is-success{background:#eaf4e9;color:#4a7358}.batch-status.is-failed{background:#faece9;color:#9b4e44}.batch-status.is-processing{background:#edf1f7;color:#58708d}.batch-eligibility{display:block;max-width:210px;line-height:1.35}.batch-eligibility.is-yes{color:#477255;font-weight:680}.batch-eligibility.is-no{color:#8f5b50}.batch-row-actions{display:flex;gap:7px}.batch-row-actions button{border:0;background:transparent;color:#687300;font-size:10px;font-weight:680;cursor:pointer}.batch-row-actions button:last-child{color:#95635a}.batch-sticky-summary{position:sticky;bottom:10px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:13px;border:1px solid #2b2e31;border-radius:13px;background:rgba(24,26,29,.96);color:#fff;padding:13px 15px 13px 18px;box-shadow:0 14px 34px rgba(15,17,18,.2);backdrop-filter:blur(12px)}.batch-sticky-summary>div:first-child{display:grid;gap:3px}.batch-sticky-summary>div:first-child strong{font-size:13px}.batch-sticky-summary span{color:#b5b9b3;font-size:10px}.batch-sticky-summary>div:last-child{display:flex;align-items:center;gap:12px}.batch-sticky-summary>div:last-child>strong{color:#dfff00;font-size:21px}.batch-sticky-summary button{height:38px}
 .batch-confirm-grid{width:min(960px,100%);display:grid;grid-template-columns:380px 1fr;gap:14px;margin:0 auto}.batch-order-summary,.batch-selected-preview,.batch-exception-summary,.batch-payment-context,.batch-complete-card{border:1px solid #d7dad2;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(25,28,31,.04)}.batch-order-summary{padding:21px}.batch-order-summary>span{color:#8a9088;font-size:10px}.batch-order-summary h3{margin:5px 0 14px;font-size:19px}.batch-order-summary dl{display:grid;margin:0}.batch-order-summary dl>div{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #e8eae5;padding:11px 0}.batch-order-summary dt{color:#7d837b;font-size:11px}.batch-order-summary dd{margin:0;font-size:12px;font-weight:680}.batch-order-summary .is-total dd{color:#5f6900;font-size:21px}.batch-selected-preview{padding:18px 20px}.batch-selected-preview>div{display:flex;justify-content:space-between}.batch-selected-preview>div>span{font-size:13px;font-weight:700}.batch-selected-preview button{border:0;background:transparent;color:#687300;font-size:11px;cursor:pointer}.batch-selected-preview ul{display:grid;max-height:270px;overflow:auto;margin:12px 0 0;padding:0;list-style:none}.batch-selected-preview li{display:flex;justify-content:space-between;gap:18px;border-top:1px solid #eceee9;padding:9px 0;font-size:11px}.batch-selected-preview li span{color:#858b84}.batch-selected-preview p{margin:10px 0 0;color:#7d837b;font-size:11px}.batch-exception-summary{width:min(960px,100%);display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:14px auto 0;padding:17px 20px}.batch-exception-summary>div{display:grid;gap:4px;border-right:1px solid #e5e7e1;padding:0 16px}.batch-exception-summary>div:first-child{padding-left:0}.batch-exception-summary>div:nth-child(4){border:0}.batch-exception-summary span{color:#858b84;font-size:10px}.batch-exception-summary strong{font-size:18px}.batch-exception-summary p{grid-column:1/-1;margin:14px 0 0;border-top:1px solid #e7e9e4;padding-top:12px;color:#7b817a;font-size:11px}.batch-payment-context{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 19px}.batch-payment-context>div{display:flex;align-items:center;gap:12px}.batch-payment-context span{font-size:14px;font-weight:700}.batch-payment-context strong{color:#616b00;font-size:23px}.batch-payment-context small{color:#7d837b;font-size:11px}.batch-complete-card{width:min(760px,100%);display:grid;justify-items:center;margin:46px auto;padding:35px;text-align:center}.batch-complete-card>span{width:58px;height:58px;display:grid;place-items:center;border-radius:50%;background:#dfff00;color:#171917}.batch-complete-card>span svg{width:25px;stroke-width:3}.batch-complete-card>small{margin-top:14px;color:#858b84;font-size:10px}.batch-complete-card h2{margin:7px 0 4px;font-size:27px}.batch-complete-card>p{margin:0;color:#7b817a;font-size:12px}.batch-complete-card dl{width:100%;display:grid;grid-template-columns:1fr 1fr;margin:24px 0 0;border:1px solid #e0e2dc;border-radius:11px;text-align:left}.batch-complete-card dl>div{display:grid;gap:4px;border-bottom:1px solid #e9ebe6;padding:13px 15px}.batch-complete-card dt{color:#858b84;font-size:10px}.batch-complete-card dd{margin:0;font-size:12px;font-weight:680}.batch-complete-card dd.is-partial{color:#a15d43}.batch-partial-result{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;border-radius:10px;background:#fff7e8;color:#7d5b2b;padding:12px 14px;font-size:11px}.batch-partial-result button{display:flex;align-items:center;gap:5px;border:0;background:transparent;color:#72521e;font-size:10px;font-weight:700;cursor:pointer}.batch-partial-result button svg{width:13px}.batch-complete-actions{display:flex;gap:8px;margin-top:22px}.batch-complete-actions button{height:41px}.batch-order-items{display:grid;gap:12px;margin-top:14px}.batch-order-items>div:first-child{display:flex;justify-content:space-between;gap:12px}.batch-order-items span{color:#7b817a;font-size:10px}.batch-order-items-table{overflow:auto;border:1px solid #e1e3de;border-radius:9px}.batch-order-items-table table{width:100%;min-width:610px;border-collapse:collapse}.batch-order-items-table th,.batch-order-items-table td{border-bottom:1px solid #eceee9;padding:8px;color:#666c65;font-size:9px;text-align:left}.batch-order-items-table th{background:#f5f6f2}.batch-order-items>button{width:max-content;height:34px;font-size:10px}
 @media(max-width:980px){.recharge-workspace-header{grid-template-columns:auto 1fr}.recharge-mode-context{grid-column:1/-1;justify-items:start}.single-recharge-flow .session-submit-grid,.batch-confirm-grid{grid-template-columns:1fr}.batch-stat-grid{grid-template-columns:repeat(3,1fr)}.batch-exception-summary{grid-template-columns:repeat(2,1fr)}.batch-exception-summary>div{border-right:0}.batch-sticky-summary{position:static}}
-@media(max-width:720px){.recharge-workspace-inset .main-content{padding:14px 10px 40px}.recharge-workspace-header{grid-template-columns:1fr;padding:15px}.recharge-mode-select,.batch-flow{padding:24px 14px}.recharge-mode-grid{grid-template-columns:1fr}.batch-import-preview{grid-template-columns:1fr}.batch-stat-grid{grid-template-columns:repeat(2,1fr)}.batch-table-toolbar,.batch-sticky-summary,.batch-sticky-summary>div:last-child,.batch-payment-context{align-items:stretch;flex-direction:column}.batch-table-toolbar label,.batch-table-toolbar input{width:100%}.batch-complete-actions{width:100%;flex-direction:column}.batch-complete-actions button{width:100%}.batch-file-ready{grid-template-columns:auto 1fr}.batch-file-ready button{grid-column:2}.commerce-page-heading{grid-template-columns:auto 1fr}.batch-recharge-shortcut{grid-column:1/-1;margin-left:0}.single-recharge-flow .wizard-container{padding-inline:14px}.single-recharge-flow .session-submit-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.recharge-workspace-inset .main-content{padding:14px 10px 40px}.recharge-workspace-header{grid-template-columns:1fr;padding:15px}.recharge-mode-select,.batch-flow{padding:24px 14px}.recharge-mode-grid{grid-template-columns:1fr}.batch-import-preview{grid-template-columns:1fr}.batch-stat-grid{grid-template-columns:repeat(2,1fr)}.batch-table-toolbar,.batch-sticky-summary,.batch-sticky-summary>div:last-child,.batch-payment-context{align-items:stretch;flex-direction:column}.batch-table-toolbar label,.batch-table-toolbar input{width:100%}.batch-complete-actions{width:100%;flex-direction:column}.batch-complete-actions button{width:100%}.batch-file-ready{grid-template-columns:auto 1fr}.batch-file-ready button{grid-column:2}.batch-recharge-shortcut{grid-column:1/-1;margin-left:0}.single-recharge-flow .wizard-container{padding-inline:14px}.single-recharge-flow .session-submit-grid{grid-template-columns:1fr}}
 
 /* Public landing page */
 .public-landing-inset{background:#f2f3ef}.public-landing-inset .main-content{width:100%;max-width:none;padding:0}.public-landing{color:#202420}.landing-hero{min-height:680px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(480px,.95fr);align-items:center;gap:70px;border-bottom:1px solid #daddd5;background:radial-gradient(circle at 82% 12%,rgba(223,255,0,.13),transparent 25%),linear-gradient(180deg,#f8f9f6 0%,#eff1ec 100%);padding:76px max(var(--ds-page-gutter),calc((100vw - 1320px)/2))}.landing-hero-copy{max-width:720px}.landing-kicker{width:max-content;display:flex;align-items:center;gap:8px;border:1px solid #d9ddcd;border-radius:999px;background:rgba(255,255,255,.78);color:#626b1a;padding:8px 12px;font-size:13px;font-weight:720;letter-spacing:.035em}.landing-kicker svg{width:15px;height:15px}.landing-hero h1{margin:26px 0 20px;color:#151815;font-size:clamp(58px,6vw,88px);line-height:1.02;font-weight:780;letter-spacing:-.065em}.landing-hero h1 em{color:#687300;font-style:normal}.landing-hero-copy>p{max-width:650px;margin:0;color:#666d66;font-size:19px;line-height:1.75}.landing-hero-actions{display:flex;gap:11px;margin-top:31px}.landing-hero-actions button{height:48px;border-radius:10px;padding-inline:22px;font-size:15px;font-weight:720}.landing-hero-actions button:first-child{gap:8px;background:#17191c;color:#fff}.landing-hero-actions button:first-child:hover{background:#272a2e}.landing-hero-actions button:first-child svg{width:17px;color:#dfff00}.landing-hero-actions button:last-child{border-color:#cbd0c6;background:#fff;color:#2f342f}.landing-trust-points{display:flex;flex-wrap:wrap;gap:18px;margin:31px 0 0;padding:0;list-style:none;color:#6d746d;font-size:14px}.landing-trust-points li{display:flex;align-items:center;gap:6px}.landing-trust-points svg{width:15px;height:15px;border-radius:50%;background:#dfff00;color:#272b20;padding:3px;stroke-width:3}.landing-hero-console{overflow:hidden;border:1px solid #2d3034;border-radius:20px;background:#15171a;color:#fff;box-shadow:0 32px 80px rgba(20,22,24,.22)}.landing-hero-console>header{height:56px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #2d3034;padding:0 20px}.landing-hero-console>header>span{display:flex;gap:5px}.landing-hero-console>header i{width:7px;height:7px;border-radius:50%;background:#62666b}.landing-hero-console>header strong{font-size:12px;letter-spacing:.12em}.landing-hero-console>header small{margin-left:auto;border-radius:999px;background:#293024;color:#dfff00;padding:5px 8px;font-size:10px;font-weight:750}.landing-console-focus{display:grid;gap:6px;padding:28px 24px 18px}.landing-console-focus span{color:#8f959a;font-size:13px}.landing-console-focus strong{font-size:25px;letter-spacing:-.025em}.landing-console-grid{display:grid;gap:10px;padding:0 18px 20px}.landing-console-grid button{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:13px;border:1px solid #32363a;border-radius:13px;background:#1d2023;color:#fff;padding:18px;text-align:left;cursor:pointer;transition:border-color .18s ease,transform .18s ease}.landing-console-grid button:hover{transform:translateX(3px);border-color:#677300}.landing-console-grid button>svg:first-child{width:42px;height:42px;border-radius:10px;background:#dfff00;color:#171917;padding:11px}.landing-console-grid button>span{display:grid;gap:4px}.landing-console-grid button strong{font-size:15px}.landing-console-grid button small{color:#90969a;font-size:13px}.landing-console-grid button>svg:last-child{width:16px;color:#dfff00}.landing-hero-console>footer{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #2d3034;background:#111315}.landing-hero-console>footer span{padding:14px;color:#9ba1a5;font-size:12px;text-align:center}.landing-hero-console>footer span+span{border-left:1px solid #2d3034}
@@ -1275,10 +1263,10 @@ button{font:inherit}
 
 /* ===== v0.13.1 统一页头体系：二级页签高对比分段控件 + 三级页头带紧凑化 ===== */
 /* L2 二级页签：虚拟卡三页签 / 代充双页签 / 账单切换 / 钱包邀请页签 全局统一，激活=深色胶囊+品牌字 */
-.uc-tabs-list{height:48px!important;gap:4px!important;border:1px solid #dcddd8!important;border-radius:12px!important;background:#eef0ea!important;padding:4px!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-list]{background:transparent!important;border:0!important;border-radius:10px!important;height:40px!important;padding:0!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger]{height:40px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:#71766d!important;padding:0 18px!important;font-size:14px!important;font-weight:650!important;box-shadow:none!important}
-.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger] svg{width:16px!important;height:16px!important}
+.uc-tabs-list{height:40px!important;gap:3px!important;border:1px solid #dcddd8!important;border-radius:10px!important;background:#eef0ea!important;padding:3px!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-list]{background:transparent!important;border:0!important;border-radius:8px!important;height:34px!important;padding:0!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger]{height:34px!important;border:0!important;border-radius:7px!important;background:transparent!important;color:#71766d!important;padding:0 15px!important;font-size:13px!important;font-weight:650!important;box-shadow:none!important}
+.uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger] svg{width:14px!important;height:14px!important}
 .uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger][data-state=active]{background:#17181b!important;color:var(--color-brand)!important;box-shadow:0 3px 10px rgba(17,18,20,.25)!important}
 .uc-tabs-list[data-slot=tabs] [data-slot=tabs-trigger][data-state=active]:after{display:none!important}
 .orders-page .uc-tabs-list [data-slot=tabs-trigger][data-state=active]{background:#17181b!important;color:var(--color-brand)!important;box-shadow:0 3px 10px rgba(17,18,20,.25)!important}
@@ -1287,13 +1275,12 @@ button{font:inherit}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active] svg{color:var(--color-brand)!important}
 .wallet-tabs-list [data-slot=tabs-trigger][data-state=active]:after{display:none!important}
 .commerce-panel .biz-tabs{margin-bottom:0}
-/* L3 页头带：钱包/用户中心 uc-page-heading 与代充 commerce-page-heading 统一紧凑节奏 */
-.uc-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
-.uc-page-heading .uc-page-heading-icon,.commerce-page-icon{width:36px!important;height:36px!important;border-radius:10px!important;box-shadow:none!important}
-.uc-page-heading .uc-page-heading-icon svg,.commerce-page-icon svg{width:18px!important;height:18px!important}
-.uc-page-heading h1,.commerce-page-heading h1{font-size:20px!important;line-height:1.2!important;font-weight:720!important;letter-spacing:-.02em!important}
-.uc-page-heading p,.commerce-page-heading p{margin-top:2px!important;font-size:13px!important}
-.commerce-page-heading{min-height:0!important;padding:12px 16px!important;border-radius:14px!important}
+/* L3 页头带：全站页头统一「无容器」扁平排版——直接坐在页面底上，只留品牌图标块，不再套色卡 */
+.uc-page-heading{min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+.uc-page-heading .uc-page-heading-icon{width:34px!important;height:34px!important;border-radius:10px!important;box-shadow:none!important}
+.uc-page-heading .uc-page-heading-icon svg{width:17px!important;height:17px!important}
+.uc-page-heading h1{font-size:24px!important;line-height:1.2!important;font-weight:720!important;letter-spacing:-.025em!important}
+.uc-page-heading p{margin-top:5px!important;font-size:13px!important;color:#6B7268!important}
 .commerce-panel .panel-toolbar{margin-bottom:0!important}
 /* 账单页：跟随全站 12px 纵向节奏（压过 user-center-page 的 24px） */
 .orders-page{gap:12px}
@@ -1647,8 +1634,8 @@ button{font:inherit}
 .sb-nav{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 0 8px;scrollbar-width:none}
 .sb-nav::-webkit-scrollbar{width:0}
 .sb-group+.sb-group{margin-top:14px}
-.sb-group-title{margin:0 0 6px;padding:0 10px;color:#666c72;font-size:10.5px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
-.sb-item{position:relative;width:100%;height:38px;display:flex;align-items:center;gap:10px;border:0;border-radius:9px;background:transparent;color:#c3c8ce;padding:0 10px;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.sb-group-title{margin:0 0 6px;padding:0 10px;color:#666c72;font-size:11px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
+.sb-item{position:relative;width:100%;height:40px;display:flex;align-items:center;gap:10px;border:0;border-radius:9px;background:transparent;color:#c3c8ce;padding:0 10px;font-size:14.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .15s ease,color .15s ease}
 .sb-item:hover{background:rgba(255,255,255,.045);color:#eef1e8}
 .sb-item[data-active=true]{background:rgba(255,255,255,.075);color:#fff;font-weight:660}
 .sb-item[data-active=true]::before{content:"";position:absolute;left:-6px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--color-brand)}
@@ -1698,11 +1685,8 @@ button{font:inherit}
 /* 图标轨下版式弹层浮到侧栏右侧，否则选完「只留图标」就再也切不回来 */
 .app-sidebar[data-collapsed=true] .sb-layout-pop{left:calc(100% + 10px);right:auto;bottom:0;width:214px}
 
-/* 顶栏：让出侧栏、瘦到 60px，左侧改成面包屑 */
+/* 顶栏：让出侧栏、瘦到 60px，左侧只留菜单开关（页面名称已在侧栏高亮，不再重复面包屑） */
 .app-shell.has-sidebar .site-header{left:var(--sb-w);height:var(--sb-head);display:flex;justify-content:space-between;gap:24px;padding-inline:24px;border-bottom:1px solid #232528;box-shadow:none;transition:left .34s var(--sb-ease)}
-.header-crumb{display:flex;align-items:center;gap:8px;min-width:0;color:#6f757c;font-size:12.5px;white-space:nowrap}
-.header-crumb i{font-style:normal;color:#3d4147}
-.header-crumb strong{overflow:hidden;color:#f2f4ef;font-size:14px;font-weight:650;text-overflow:ellipsis}
 .sidebar-toggle{width:32px;height:32px;flex:none;display:grid;place-items:center;border:1px solid #2c2f33;border-radius:8px;background:transparent;color:#c4c9cf;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,color .15s ease}
 .sidebar-toggle:hover{border-color:#41444a;background:#1d1f22;color:#fff}
 .sidebar-toggle svg{width:16px;height:16px}
@@ -1736,7 +1720,6 @@ button{font:inherit}
   .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-item[data-active=true]::before{left:-6px}
   .app-shell.has-sidebar.mobile-nav-open .sb-backdrop{display:block;position:fixed;inset:0;z-index:45;border:0;background:rgba(8,9,11,.46);cursor:pointer}
   .app-shell.has-sidebar .site-header{left:0;padding-inline:16px;gap:12px}
-  .header-crumb>span,.header-crumb>i{display:none}
   .app-shell.has-sidebar .app-sidebar .sb-layout-pop{left:0;right:0;bottom:calc(100% + 8px);width:auto}
   .app-shell.has-sidebar .app-sidebar .sb-collapse{display:none}
 }
@@ -1744,7 +1727,6 @@ button{font:inherit}
   .app-shell.has-sidebar{--sb-head:56px}
   .app-shell.has-sidebar .site-header{height:56px}
   .app-shell.has-sidebar .content-inset{padding-top:56px}
-  .app-shell.has-sidebar .header-crumb{display:none}
 }
 
 /* 侧栏下的卡片网格断点：宽度少了 244px，4 列门槛按可用宽重算 */
@@ -1761,15 +1743,15 @@ button{font:inherit}
    二级项用左侧小圆点做视觉层级，选中时点亮成荧光绿。 */
 .sb-item-row{display:flex;align-items:center;gap:2px}
 .sb-item-row .sb-item{flex:1;min-width:0}
-.sb-caret{width:26px;height:26px;flex:none;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#6d737a;cursor:pointer;transition:color .15s ease,background-color .15s ease}
-.sb-caret:hover{background:rgba(255,255,255,.06);color:#dfe3da}
-.sb-caret svg{width:13px;height:13px;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
+.sb-caret{width:28px;height:28px;flex:none;display:grid;place-items:center;border:0;border-radius:7px;background:transparent;color:#b7bdc4;cursor:pointer;transition:color .15s ease,background-color .15s ease}
+.sb-caret:hover{background:rgba(255,255,255,.08);color:#f0f3ec}
+.sb-caret svg{width:15px;height:15px;stroke-width:2.4;transform:rotate(-90deg);transition:transform .24s var(--sb-ease)}
 .sb-caret[aria-expanded=true] svg{transform:rotate(0deg)}
 .sb-item[data-child-active=true]{color:#eef1e8}
 .sb-item[data-child-active=true] .sb-item-icon{color:var(--color-brand);opacity:1}
 
 .sb-sub{display:grid;gap:1px;padding:2px 0 5px;animation:sb-sub-in .2s ease both}
-.sb-subitem{position:relative;width:100%;height:31px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#969ca3;padding:0 10px 0 34px;font-size:12.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
+.sb-subitem{position:relative;width:100%;height:33px;display:flex;align-items:center;border:0;border-radius:8px;background:transparent;color:#9ba1a8;padding:0 10px 0 34px;font-size:13.5px;font-weight:560;text-align:left;cursor:pointer;transition:background-color .14s ease,color .14s ease}
 .sb-subitem::before{content:"";position:absolute;left:17px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#4b5057;transition:background-color .14s ease,box-shadow .14s ease}
 .sb-subitem:hover{background:rgba(255,255,255,.045);color:#e7ebe2}
 .sb-subitem:hover::before{background:#8b9299}
@@ -1782,21 +1764,146 @@ button{font:inherit}
 .app-sidebar[data-collapsed=true] .sb-caret,
 .app-sidebar[data-collapsed=true] .sb-sub{display:none}
 
-/* 左侧已经有二级菜单，页面里原来的页签只在窄屏抽屉模式露出 */
-.has-sidebar .card-module .card-tabs,
-.has-sidebar .commerce-panel .biz-tabs{display:none}
+/* 侧栏已扁平化（无卡片/商城二级项），页内页签是唯一切换入口，桌面端也始终显示 */
 
 @media(max-width:1024px){
   .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-caret{display:grid}
   .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-sub{display:grid}
-  .has-sidebar .card-module .card-tabs,
-  .has-sidebar .commerce-panel .biz-tabs{display:block}
 }
 
 /* ---------- v0.21.1：我的账单流水表窄宽优化（侧栏占宽后 1280 左右说明列与金额列挤在一起） ---------- */
 /* 说明列限宽省略，金额列左侧留出呼吸空隙；1240 以下藏掉单号列（单号在订单详情抽屉里仍可查） */
-.bill-flow-table .flow-desc{display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.bill-flow-table th:nth-child(3){width:38%}
+.bill-flow-table .flow-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:520px;overflow:hidden;white-space:normal;line-height:1.55}
 .bill-flow-table td.is-amount{padding-left:28px}
 @media(max-width:1240px){
   .bill-flow-table th:nth-child(6),.bill-flow-table td:nth-child(6){display:none}
 }
+
+/* ============================================================
+   .shell-v2 设计令牌层（P2 视觉统一基础）
+   按《菜单与界面大改方案》5.2/5.3：中性色板 + 统一字号/圆角/间距。
+   仅新增作用域，不修改旧规则；旧页面稳定后再逐步迁移。
+   ============================================================ */
+.shell-v2{
+  --v2-bg-page:#F6F7F2;
+  --v2-surface:#FFFFFF;
+  --v2-border:#E3E5DC;
+  --v2-border-strong:#CFD1CA;
+  --v2-text:#17191C;
+  --v2-text-2:#6B7268;
+  --v2-text-3:#9AA09A;
+  --v2-accent:#C8D43D;            /* 荧光绿：仅用于主按钮 / 当前导航 / 关键数字 */
+  --v2-accent-ink:#151713;
+  --v2-radius-lg:14px;
+  --v2-radius-ctl:10px;
+  --v2-gap-section:24px;
+  --v2-gap-card:20px;
+  --v2-pad-page:32px;
+  --v2-fs-title:28px;
+  --v2-fs-section:18px;
+  --v2-fs-body:14px;
+  --v2-fs-aux:12px;
+}
+
+/* 统一页头右侧操作区 + 主操作按钮（供 PageHeading 的 actions 使用） */
+.uc-page-heading-aside{display:flex;align-items:center;gap:10px;flex:none}
+.uc-page-heading-aside .ph-btn{
+  height:40px;display:inline-flex;align-items:center;gap:7px;border-radius:var(--v2-radius-ctl,10px);
+  padding:0 16px;font-size:13.5px;font-weight:700;white-space:nowrap;cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease,transform .15s ease;
+}
+.uc-page-heading-aside .ph-btn svg{width:15px;height:15px;flex:none}
+.uc-page-heading-aside .ph-btn.is-primary{border:1px solid var(--v2-accent,#C8D43D);background:var(--v2-accent,#C8D43D);color:var(--v2-accent-ink,#151713)}
+.uc-page-heading-aside .ph-btn.is-primary:hover{background:var(--color-brand-hover,#d6e85a);transform:translateY(-1px)}
+.uc-page-heading-aside .ph-btn.is-ghost{border:1px solid var(--v2-border-strong,#CFD1CA);background:#fff;color:#3b4039}
+.uc-page-heading-aside .ph-btn.is-ghost:hover{border-color:#aeb4a8;background:#fafbf7}
+
+/* 页内页签条：统一整站页头节奏（供 PageHeading 的 tabs 使用） */
+.uc-page-heading-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.uc-page-heading-tabs .ph-tab{
+  height:34px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--v2-border,#E3E5DC);
+  border-radius:999px;background:#fff;color:var(--v2-text-2,#6B7268);padding:0 14px;font-size:13px;font-weight:650;cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease,color .15s ease;
+}
+.uc-page-heading-tabs .ph-tab svg{width:15px;height:15px}
+.uc-page-heading-tabs .ph-tab[data-active="true"]{border-color:var(--v2-accent,#C8D43D);background:rgba(200,212,61,.12);color:var(--v2-text,#17191C)}
+
+/* 页头内的 shadcn 页签（biz-tabs / card-tabs / orders-view-tabs）去掉自带下边距，统一由页头节奏控制 */
+.uc-page-heading-tabs .uc-tabs-list{margin-bottom:0}
+
+/* 窄屏下页头操作区换行，避免两个按钮挤在一行溢出 */
+@media (max-width:640px){
+  .uc-page-heading-aside{flex-wrap:wrap;justify-content:flex-start;width:100%}
+}
+
+/* ===== L4 框架收口（v0.27.0） =====
+   1) 顶栏右侧补常驻「充值」入口（页头 h1 已是唯一标题，顶栏不再重复页名）；
+   2) 侧栏加分组标题，把 5 个一级项分成 3 段；
+   3) 首页页头并入全站扁平页头，内容区上边距收紧。
+   只调整结构与间距，品牌色保持 #C8D43D / #17191C / #F6F7F2 不变。 */
+
+/* 顶栏常驻充值入口：余额是「看」，充值是「做」，两个动作分开 */
+.header-recharge{
+  height:38px;display:inline-flex;align-items:center;gap:5px;
+  border:1px solid #bcc72f;border-radius:10px;background:#c8d43d;
+  color:#151713;padding:0 13px;font-size:13px;font-weight:740;cursor:pointer;
+  transition:background-color .15s ease,transform .15s ease;
+}
+.header-recharge:hover{background:#d6e85a;transform:translateY(-1px)}
+.header-recharge svg{width:14px;height:14px}
+
+/* 侧栏：分组标题（中文不吃大字号字距）+ 组间距 */
+.sb-group-title{
+  margin:0 0 6px;padding:0 10px;
+  color:#7c828a;font-size:11px;font-weight:700;letter-spacing:.03em;
+}
+.sb-group+.sb-group{margin-top:18px}
+.sb-nav{padding-top:6px}
+
+/* 桌面端只保留侧栏自带的折叠箭头，顶栏那个按钮留给窄屏开抽屉，避免两个折叠入口并排 */
+@media(min-width:1025px){
+  .site-header .header-left .sidebar-toggle{display:none}
+}
+
+/* 首页页头：与全站一致的扁平页头 */
+.dash-heading{gap:20px}
+.dash-heading .uc-page-heading-copy p{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px}
+.dash-updated{
+  display:inline-flex;align-items:center;gap:5px;
+  color:#9a9e94;font-size:12px;font-style:normal;white-space:nowrap;
+}
+.dash-updated::before{
+  content:"";width:5px;height:5px;border-radius:50%;background:#9fbf3d;
+  box-shadow:0 0 0 2px rgba(159,191,61,.16);
+}
+.dash-heading-actions{flex-wrap:wrap;gap:8px}
+.dash-heading-actions .dash-range{height:40px;align-items:center}
+.dash-heading-actions .dash-refresh{height:40px}
+
+/* 内容区上边距：页头直接接在顶栏下方，少一层灰底空隙 */
+.app-shell.has-sidebar .dashboard-inset .main-content{padding-top:26px}
+
+@media(max-width:760px){
+  .header-recharge{height:34px;padding:0 10px;font-size:12px}
+  .app-shell.has-sidebar .dashboard-inset .main-content{padding-top:20px}
+}
+
+/* ===== v0.28.0 顶栏钱包入口 =====
+   钱包不再占菜单，余额胶囊成为唯一入口：点开抽屉，余额、充值、最近流水都在里面。 */
+.header-wallet{
+  gap:6px;padding:0 10px 0 9px;
+  font-variant-numeric:tabular-nums;
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.header-wallet:hover{background:#24262a;border-color:#4a4d52}
+.header-wallet[aria-expanded="true"]{background:#24262a;border-color:#4a4d52}
+.header-wallet-caret{
+  width:13px!important;height:13px;margin-left:1px;
+  color:#8f958b!important;transition:transform .15s ease;
+}
+.header-wallet[aria-expanded="true"] .header-wallet-caret{transform:rotate(180deg)}
+
+/* 侧栏只剩一组一级入口：去掉分组标题残留的上下间距 */
+.app-sidebar .sb-group+.sb-group{margin-top:0}
+.app-sidebar .sb-nav{padding-top:8px}

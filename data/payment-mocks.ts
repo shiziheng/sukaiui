@@ -77,6 +77,16 @@ export function getPaymentMode(orderAmount: number, availableBalance: number): P
   return getPaymentStrategy(orderAmount, availableBalance) === "balance_only" ? "balance_payment" : "order_payment";
 }
 
+/**
+ * 钱包充值的应付金额精确到小数点后 3 位，尾数只用于匹配支付单。
+ * 第三位故意不为 0，避免出现 100.010 这种会被用户当成两位小数抄走的金额。
+ */
+function withUniqueTail(amount: number): number {
+  let thousandths = 1 + Math.floor(Math.random() * 999);
+  if (thousandths % 10 === 0) thousandths += 1;
+  return Number((amount + thousandths / 1000).toFixed(3));
+}
+
 export function createPaymentIntent({
   mode,
   amount,
@@ -99,7 +109,8 @@ export function createPaymentIntent({
     totalAmount: amount,
     balanceApplied,
     cryptoAmount,
-    uniquePayableAmount: cryptoAmount,
+    // 订单补差额不需要尾数：订单号已经能定位这笔付款。
+    uniquePayableAmount: mode === "wallet_recharge" ? withUniqueTail(cryptoAmount) : cryptoAmount,
     network,
     status: "pending",
     receivedAmount: 0,

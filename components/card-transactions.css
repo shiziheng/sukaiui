@@ -1,0 +1,51 @@
+/* 卡流水页：周期 + 卡内余额对账 + 按天分组。只服务 CardTransactions。 */
+
+.ctxn-page{display:block}
+.ctxn-summary{margin-bottom:18px}
+.ctxn-panel{overflow:hidden;border-color:#d4d6cf;box-shadow:0 9px 25px rgba(24,27,32,.055)}
+
+.ctxn-table{width:100%;min-width:1000px;table-layout:fixed}
+.ctxn-table th{height:44px;background:#eef0eb;color:#5d635b;padding-inline:14px;font-size:12.5px;font-weight:720;white-space:nowrap}
+.ctxn-table td{height:62px;padding-inline:14px;font-size:13px;color:#30342f;vertical-align:middle}
+.ctxn-table th:first-child,.ctxn-table td:first-child{padding-left:20px}
+.ctxn-table th:last-child,.ctxn-table td:last-child{padding-right:20px}
+.ctxn-table .is-amount{text-align:right;font-variant-numeric:tabular-nums}
+.ctxn-table .ctxn-col-time{width:90px}
+.ctxn-table .ctxn-col-txno{width:132px}
+.ctxn-table th:nth-child(2){width:108px}
+.ctxn-table th:nth-child(3){width:100px}
+.ctxn-table th:nth-child(5){width:118px}
+.ctxn-table th:nth-child(6){width:106px}
+.ctxn-table th:nth-child(7){width:92px}
+
+.ctxn-time{font-size:12.5px;color:#6f757d;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ctxn-card{color:#4a4f48;font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}
+.ctxn-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:100%;overflow:hidden;white-space:normal;line-height:1.5}
+.ctxn-fee{display:block;margin-top:2px;color:#8a9098;font-size:11.5px}
+.ctxn-table code{font-family:Consolas,"SFMono-Regular",monospace;font-size:12px;color:#8a9098}
+
+/* 日期条：整行跨列，点一下收起当天明细 */
+.ctxn-table .ctxn-day-row td{padding:0;background:#f7f8f2;border-top:1px solid #eef0e8;border-bottom:1px solid #eef0e8}
+.ctxn-table .ctxn-day-row:first-child td{border-top:0}
+.ctxn-day-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 20px;border:0;background:none;font-family:inherit;font-size:12.5px;font-weight:500;color:#5f645c;text-align:left;cursor:pointer}
+.ctxn-day-toggle:hover{background:#f1f3e9}
+.ctxn-day-toggle small{font-size:12px;font-weight:400;color:#8a9098;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctxn-day-label{display:inline-flex;align-items:center;gap:6px}
+.ctxn-day-label svg{width:13px;height:13px;flex:none;color:#8a9098}
+
+/* 卡类型补两个原有标签缺的底色：转出、手续费 */
+.vcard-flow-type.is-cashout{background:#f3eefb;color:#6a4f9b}
+.vcard-flow-type.is-fee{background:#f1f1ec;color:#7a7c72}
+
+@media (max-width:1240px){
+  .ctxn-table .ctxn-col-txno{display:none}
+}
+@media (max-width:900px){
+  .ctxn-table{min-width:860px}
+  .ctxn-table th:nth-child(2){width:100px}
+  .ctxn-table th:nth-child(3){width:92px}
+}
+@media (max-width:560px){
+  .ctxn-table{min-width:760px}
+  .ctxn-summary .bill-summary-cell>strong{font-size:19px}
+}
