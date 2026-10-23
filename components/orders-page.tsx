@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag, WalletCards } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
+import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, CircleEllipsis, Clock3, Copy, MoreHorizontal, PackageCheck, ReceiptText, RotateCcw, Search, ShoppingBag, WalletCards } from "lucide-react";
 import { toast } from "sonner";
+
+import "./bill-page.css";
 
 import { EditableText } from "@/components/editable-text";
 import { ManagedStatusTag, OrderDetailDrawer, type OrderDrawerFocus } from "@/components/order-detail-drawer";
@@ -30,9 +32,43 @@ type BillMode = "orders" | "flows";
 /** 资金流水分类：平台余额的进和出。卡内消费属于「卡流水」，不在这里。 */
 type FlowCategory = "topup" | "recharge_service" | "account_service" | "commission" | "card";
 type FlowFilter = "all" | "topup" | "recharge_service" | "account_service" | "refund" | "card";
+/** 账单周期：按自然月对账，本月 / 上月 / 近 3 个自然月 / 全部。 */
+type BillPeriod = "month" | "lastMonth" | "quarter" | "all";
 
 const PAGE_SIZE = 10;
 const DEMO_NOW = new Date("2026-09-15T23:59:59");
+
+const PERIOD_LABEL: Record<BillPeriod, string> = {
+  month: "本月",
+  lastMonth: "上月",
+  quarter: "近 3 个月",
+  all: "全部",
+};
+
+function parseFlowTime(time: string) {
+  return new Date(time.replace(" ", "T"));
+}
+
+function formatDate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+/** 周期边界：自然月，含首尾两天。全部周期返回 null。 */
+function billPeriodRange(period: BillPeriod): { start: Date | null; end: Date | null } {
+  if (period === "all") return { start: null, end: null };
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  if (period === "month") return { start: new Date(year, month, 1), end: new Date(year, month + 1, 0, 23, 59, 59) };
+  if (period === "lastMonth") return { start: new Date(year, month - 1, 1), end: new Date(year, month, 0, 23, 59, 59) };
+  return { start: new Date(year, month - 2, 1), end: new Date(year, month + 1, 0, 23, 59, 59) };
+}
+
+function formatDayLabel(day: string) {
+  const date = new Date(`${day}T00:00:00`);
+  const week = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${week}`;
+}
 
 function actionLabel(id: OrderActionId, content: DemoContent) {
   if (id === "cancel") return content.cancelOrder;
@@ -70,6 +106,7 @@ export function OrdersPage({
   const [orders, setOrders] = useState(() => [...extraOrders.map((order) => ({ ...order })), ...orderManagementMock.map((order) => ({ ...order }))]);
   const [billFlows] = useState<BillFlowItem[]>(() => defaultBillFlows.map((flow) => ({ ...flow })));
   const [flowFilter, setFlowFilter] = useState<FlowFilter>("all");
+  const [period, setPeriod] = useState<BillPeriod>("month");
   const [tab, setTab] = useState<OrderTab>("all");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -180,21 +217,64 @@ export function OrdersPage({
     [...platformRows, ...billRows].sort((a, b) => (a.time < b.time ? 1 : -1))
   ), [platformRows, billRows]);
 
-  const filteredFlowRows = flowFilter === "all"
-    ? allFlowRows
-    : flowFilter === "refund"
-      ? allFlowRows.filter((row) => row.category === "commission" || (row.category === "card" && row.amount > 0))
-      : allFlowRows.filter((row) => row.category === flowFilter);
+  // 账单周期：先按自然月切，再按类型筛。周期内的汇总永远按全量算，不跟着类型筛选变，否则对不上账。
+  const periodRange = useMemo(() => billPeriodRange(period), [period]);
 
-  // 资金流水页顶部三数：进来了多少、出去多少、净变动
+  const periodRows = useMemo(() => allFlowRows.filter((row) => {
+    if (!periodRange.start || !periodRange.end) return true;
+    const time = parseFlowTime(row.time);
+    return time >= periodRange.start && time <= periodRange.end;
+  }), [allFlowRows, periodRange]);
+
+  const filteredFlowRows = flowFilter === "all"
+    ? periodRows
+    : flowFilter === "refund"
+      ? periodRows.filter((row) => row.category === "commission" || (row.category === "card" && row.amount > 0))
+      : periodRows.filter((row) => row.category === flowFilter);
+
+  /** 期初 = 周期开始前最后一笔的变动后余额；期末 = 周期内最后一笔的变动后余额。 */
   const flowSummary = useMemo(() => {
-    const income = allFlowRows.reduce((sum, row) => sum + (row.amount > 0 ? row.amount : 0), 0);
-    const expense = allFlowRows.reduce((sum, row) => sum + (row.amount < 0 ? Math.abs(row.amount) : 0), 0);
-    return { income, expense, net: income - expense };
-  }, [allFlowRows]);
+    const ascending = [...allFlowRows].sort((a, b) => (a.time < b.time ? -1 : 1));
+    const income = periodRows.reduce((sum, row) => sum + (row.amount > 0 ? row.amount : 0), 0);
+    const expense = periodRows.reduce((sum, row) => sum + (row.amount < 0 ? Math.abs(row.amount) : 0), 0);
+    const first = ascending[0];
+    const openingRow = periodRange.start
+      ? [...ascending].reverse().find((row) => parseFlowTime(row.time) < periodRange.start!)
+      : undefined;
+    const closingRow = periodRange.end
+      ? [...ascending].reverse().find((row) => parseFlowTime(row.time) <= periodRange.end!)
+      : ascending[ascending.length - 1];
+    const opening = openingRow?.balanceAfter ?? (first ? Number((first.balanceAfter - first.amount).toFixed(2)) : 0);
+    const closing = closingRow?.balanceAfter ?? opening;
+    const incomeCount = periodRows.filter((row) => row.amount > 0).length;
+    return {
+      income, expense, incomeCount, expenseCount: periodRows.length - incomeCount,
+      net: income - expense, opening, closing, count: periodRows.length,
+    };
+  }, [allFlowRows, periodRange, periodRows]);
+
+  /** 明细按天分组：账单是一天一段，不是一条一整页。 */
+  const flowGroups = useMemo(() => {
+    const groups: { day: string; rows: typeof filteredFlowRows; net: number }[] = [];
+    filteredFlowRows.forEach((row) => {
+      const day = row.time.slice(0, 10);
+      const last = groups[groups.length - 1];
+      if (last && last.day === day) {
+        last.rows.push(row);
+        last.net += row.amount;
+      } else {
+        groups.push({ day, rows: [row], net: row.amount });
+      }
+    });
+    return groups;
+  }, [filteredFlowRows]);
+
+  const periodRangeText = periodRange.start && periodRange.end
+    ? `${formatDate(periodRange.start)} – ${formatDate(periodRange.end)}`
+    : "全部时间";
 
   const heading = mode === "flows"
-    ? { titleKey: "walletFlowTitle" as const, subtitleKey: "walletFlowSubtitle" as const, icon: <WalletCards />, aside: <span className="orders-period-summary">平台余额 · 共 {allFlowRows.length} 条</span> }
+    ? { titleKey: "walletFlowTitle" as const, subtitleKey: "walletFlowSubtitle" as const, icon: <WalletCards />, aside: <span className="orders-period-summary">{PERIOD_LABEL[period]} · {flowSummary.count} 笔</span> }
     : { titleKey: "ordersPageTitle" as const, subtitleKey: "ordersPageSubtitle" as const, icon: <ReceiptText />, aside: <span className="orders-period-summary">近30天 · {recentCount}个订单</span> };
 
   return (
@@ -211,15 +291,41 @@ export function OrdersPage({
 
       {mode === "flows" ? (
         <>
-        <div className="uc-light-stats order-stat-filters is-three" aria-label="资金流水汇总">
-          <div><ArrowDownLeft aria-hidden="true" /><span>累计入账</span><strong>+{money(flowSummary.income)}</strong></div>
-          <div><ArrowUpRight aria-hidden="true" /><span>累计支出</span><strong>−{money(flowSummary.expense)}</strong></div>
-          <div><WalletCards aria-hidden="true" /><span>净变动</span><strong>{flowSummary.net >= 0 ? "+" : "−"}{money(Math.abs(flowSummary.net))}</strong></div>
+        <div className="bill-period-bar">
+          <div className="bill-period-tabs" role="group" aria-label="账单周期">
+            {(["month", "lastMonth", "quarter", "all"] as const).map((value) => (
+              <button key={value} type="button" className="bill-period-tab" data-active={period === value} onClick={() => setPeriod(value)}>{PERIOD_LABEL[value]}</button>
+            ))}
+          </div>
+          <span className="bill-period-range">{periodRangeText}</span>
+        </div>
+
+        <div className="bill-summary" aria-label="账单汇总">
+          <div className="bill-summary-cell">
+            <span><WalletCards aria-hidden="true" />期初余额</span>
+            <strong>{money(flowSummary.opening)}</strong>
+            <small>{periodRange.start ? `${formatDate(periodRange.start)} 之前` : "最早记录之前"}</small>
+          </div>
+          <div className="bill-summary-cell is-income">
+            <span><ArrowDownLeft aria-hidden="true" />本期入账</span>
+            <strong>+{money(flowSummary.income)}</strong>
+            <small>{flowSummary.incomeCount} 笔</small>
+          </div>
+          <div className="bill-summary-cell is-expense">
+            <span><ArrowUpRight aria-hidden="true" />本期支出</span>
+            <strong>−{money(flowSummary.expense)}</strong>
+            <small>{flowSummary.expenseCount} 笔</small>
+          </div>
+          <div className="bill-summary-cell is-closing">
+            <span><ReceiptText aria-hidden="true" />期末余额</span>
+            <strong>{money(flowSummary.closing)}</strong>
+            <small>净变动 {flowSummary.net >= 0 ? "+" : "−"}{money(Math.abs(flowSummary.net))}</small>
+          </div>
         </div>
 
         <section className="uc-card order-management-panel bill-flow-panel">
           <div className="order-tabs-row">
-            <div className="bill-type-tabs" role="group" aria-label="流水类型筛选">
+            <div className="bill-type-tabs" role="group" aria-label="账单类型筛选">
               {([
                 ["all", content.billAllTypes],
                 ["topup", content.flowTypeTopup],
@@ -231,30 +337,46 @@ export function OrdersPage({
                 <button key={value} type="button" className="bill-type-tab" data-active={flowFilter === value} onClick={() => setFlowFilter(value)}>{label}</button>
               ))}
             </div>
-            <span className="order-result-count">共 <strong>{filteredFlowRows.length}</strong> 条流水</span>
+            <span className="order-result-count">共 <strong>{filteredFlowRows.length}</strong> 条</span>
           </div>
 
           {filteredFlowRows.length ? (
             <div className="uc-table-wrap order-table-wrap">
               <table className="uc-table order-management-table bill-flow-table">
-                <thead><tr><th>时间</th><th>类型</th><th>说明</th><th className="is-amount">金额</th><th>变动后余额</th><th>单号 / 交易号</th><th>状态</th></tr></thead>
+                <thead><tr><th className="bill-col-time">时间</th><th>类型</th><th>说明</th><th className="is-amount">金额</th><th>变动后余额</th><th>单号 / 交易号</th><th>状态</th></tr></thead>
                 <tbody>
-                  {filteredFlowRows.map((row) => (
-                    <tr key={row.key}>
-                      <td><time>{row.time}</time></td>
-                      <td><span className={`uc-kind-tag vcard-flow-type is-${row.typeClass}`}>{row.typeLabel}</span></td>
-                      <td><span className="flow-desc">{row.title}</span></td>
-                      <td className={`is-amount vcard-flow-amount ${row.amount > 0 ? "is-income" : "is-expense"}`}>{row.amount > 0 ? "+" : "−"}{money(Math.abs(row.amount))}</td>
-                      <td>{money(row.balanceAfter)}</td>
-                      <td><code>{row.orderNo}</code></td>
-                      <td><span className={`vcard-flow-status is-${row.status}`}>{row.status === "success" ? "成功" : row.status === "processing" ? "处理中" : "失败"}</span></td>
-                    </tr>
+                  {flowGroups.map((group) => (
+                    <Fragment key={group.day}>
+                      <tr className="bill-day-row">
+                        <td colSpan={7}>
+                          <div>
+                            <span>{formatDayLabel(group.day)}</span>
+                            <small>{group.rows.length} 笔 · 净 {group.net >= 0 ? "+" : "−"}{money(Math.abs(group.net))}</small>
+                          </div>
+                        </td>
+                      </tr>
+                      {group.rows.map((row) => (
+                        <tr key={row.key}>
+                          <td><time className="bill-time">{row.time.slice(11)}</time></td>
+                          <td><span className={`uc-kind-tag vcard-flow-type is-${row.typeClass}`}>{row.typeLabel}</span></td>
+                          <td><span className="flow-desc">{row.title}</span></td>
+                          <td className={`is-amount vcard-flow-amount ${row.amount > 0 ? "is-income" : "is-expense"}`}>{row.amount > 0 ? "+" : "−"}{money(Math.abs(row.amount))}</td>
+                          <td>{money(row.balanceAfter)}</td>
+                          <td><code>{row.orderNo}</code></td>
+                          <td><span className={`vcard-flow-status is-${row.status}`}>{row.status === "success" ? "成功" : row.status === "processing" ? "处理中" : "失败"}</span></td>
+                        </tr>
+                      ))}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div className="uc-empty order-filter-empty"><Search aria-hidden="true" /><strong>暂无相关流水</strong><p>切换类型或完成新的交易后，流水会显示在这里。</p></div>
+            <div className="uc-empty order-filter-empty">
+              <CalendarDays aria-hidden="true" />
+              <strong>{periodRows.length ? "这个类型本期没有记录" : "这个周期还没有资金变动"}</strong>
+              <p>{periodRows.length ? "换一个类型看看，或把周期切到「全部」。" : "换一个周期看看，或去充值页完成一笔充值。"}</p>
+            </div>
           )}
         </section>
         </>

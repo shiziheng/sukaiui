@@ -1,0 +1,44 @@
+/* 账户账单页：周期切换 + 期初/期末对账 + 按天分组的明细。只服务 .orders-page 的账单模式。 */
+
+.bill-period-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px}
+.bill-period-tabs{display:inline-flex;gap:2px;padding:3px;border-radius:10px;background:#f1f2ec}
+.bill-period-tab{height:32px;padding:0 15px;border:0;border-radius:8px;background:none;font-family:inherit;font-size:13px;font-weight:500;color:#6f757d;cursor:pointer;transition:background .16s ease,color .16s ease}
+.bill-period-tab:hover{color:#17181b}
+.bill-period-tab[data-active="true"]{background:#17181b;color:#c8d43d;font-weight:600}
+.bill-period-range{font-size:12.5px;color:#8a9098;font-variant-numeric:tabular-nums}
+
+.bill-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 18px;border:1px solid #e3e5dc;border-radius:16px;background:#fff;overflow:hidden}
+.bill-summary-cell{min-width:0;padding:18px 20px;border-left:1px solid #eef0e8}
+.bill-summary-cell:first-child{border-left:0}
+.bill-summary-cell>span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6f757d}
+.bill-summary-cell>span svg{width:14px;height:14px;flex:none}
+.bill-summary-cell>strong{display:block;margin-top:8px;font-size:22px;font-weight:650;letter-spacing:-.01em;line-height:1.2;color:#17181b;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bill-summary-cell>small{display:block;margin-top:4px;font-size:12px;color:#8a9098;font-variant-numeric:tabular-nums}
+.bill-summary-cell.is-income>strong{color:var(--color-success)}
+.bill-summary-cell.is-closing{background:#fafbf5}
+
+.bill-flow-table .bill-col-time{width:96px}
+.bill-flow-table .bill-time{font-size:12.5px;color:#6f757d;font-variant-numeric:tabular-nums}
+
+/* 按天分组：整行跨列的日期条 */
+.bill-flow-table .bill-day-row td{padding:0;background:#f7f8f2;border-top:1px solid #eef0e8;border-bottom:1px solid #eef0e8}
+.bill-flow-table .bill-day-row td>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;font-size:12.5px;font-weight:500;color:#5f645c}
+.bill-flow-table .bill-day-row:first-child td{border-top:0}
+.bill-flow-table .bill-day-row small{font-size:12px;font-weight:400;color:#8a9098;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* 类型列定宽，别把标签和说明挤成一串 */
+.bill-flow-table th:nth-child(2),.bill-flow-table td:nth-child(2){width:112px;padding-right:14px}
+
+@media (max-width:900px){
+  .bill-period-bar{flex-wrap:wrap;gap:8px}
+  .bill-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bill-summary-cell:nth-child(3){border-left:0;border-top:1px solid #eef0e8}
+  .bill-summary-cell:nth-child(4){border-top:1px solid #eef0e8}
+  .bill-summary-cell>strong{font-size:20px}
+}
+
+@media (max-width:560px){
+  .bill-period-tabs{width:100%}
+  .bill-period-tab{flex:1;padding:0 8px}
+  .bill-period-range{width:100%}
+}
