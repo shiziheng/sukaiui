@@ -974,7 +974,6 @@ export default function Home() {
       title: "",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
-        { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
         {
           id: "card-parent",
           label: content.navCard,
@@ -998,6 +997,7 @@ export default function Home() {
             { id: "orders", label: content.navOrders, onLabelChange: (value) => updateContent("navOrders", value) },
           ],
         },
+        { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
         { id: "flows", label: content.navFlows, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navFlows", value) },
         { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
       ],

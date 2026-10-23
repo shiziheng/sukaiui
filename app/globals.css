@@ -1610,7 +1610,7 @@ button{font:inherit}
    窄屏：侧栏变抽屉，内容区不再让位。
    新样式统一走 .app-sidebar / .sb-* 前缀，不动上面的共享 @media 块。 */
 .app-shell{--sb-w:244px;--sb-head:60px;--sb-ease:cubic-bezier(.3,.9,.25,1)}
-.app-shell.has-sidebar.sidebar-collapsed{--sb-w:72px}
+.app-shell.has-sidebar.sidebar-collapsed{--sb-w:84px}
 
 .app-sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;width:var(--sb-w);display:flex;flex-direction:column;overflow:hidden;background:#111214;color:#e9ede3;padding:0 12px 14px;transition:width .34s var(--sb-ease)}
 .app-sidebar::after{content:"";position:absolute;inset:0 0 0 auto;width:1px;background:#232528}
@@ -1674,7 +1674,7 @@ button{font:inherit}
 .app-sidebar[data-collapsed=true] .sb-collapse{width:100%;height:20px;border-radius:6px}
 .app-sidebar[data-collapsed=true] .sb-group-title{display:none}
 .app-sidebar[data-collapsed=true] .sb-group+.sb-group{margin-top:10px;border-top:1px solid #232528;padding-top:10px}
-.app-sidebar[data-collapsed=true] .sb-item{justify-content:center;padding:0;gap:0}
+.app-sidebar[data-collapsed=true] .sb-item{justify-content:center;padding:0;gap:0;height:46px}
 .app-sidebar[data-collapsed=true] .sb-item[data-active=true]::before{left:-8px}
 .app-sidebar[data-collapsed=true] .sb-item-label,.app-sidebar[data-collapsed=true] .sb-item-new{display:none}
 .app-sidebar[data-collapsed=true] .sb-item[data-new=true]::after{content:"";position:absolute;top:9px;right:13px;width:5px;height:5px;border-radius:50%;background:var(--color-brand)}
@@ -1682,6 +1682,10 @@ button{font:inherit}
 .app-sidebar[data-collapsed=true] .sb-user-text{display:none}
 .app-sidebar[data-collapsed=true] .sb-layout-button{justify-content:center;padding:0}
 .app-sidebar[data-collapsed=true] .sb-layout-button span{display:none}
+.app-sidebar[data-collapsed=true] .sb-nav{justify-content:center}
+.app-sidebar[data-collapsed=true] .sb-item-block{margin-bottom:7px}
+.app-sidebar[data-collapsed=true] .sb-item-icon{width:21px;height:21px}
+.app-sidebar[data-collapsed=true] .sb-item-icon svg{width:21px;height:21px}
 /* 图标轨下版式弹层浮到侧栏右侧，否则选完「只留图标」就再也切不回来 */
 .app-sidebar[data-collapsed=true] .sb-layout-pop{left:calc(100% + 10px);right:auto;bottom:0;width:214px}
 
