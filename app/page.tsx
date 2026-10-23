@@ -26,6 +26,7 @@ import { OrdersPage } from "@/components/orders-page";
 import { type PaymentRequest } from "@/components/payment-experience";
 import { PublicLandingPage } from "@/components/public-landing-page";
 import { RechargeWizard, type RechargeMode } from "@/components/recharge-wizard";
+import { RechargeDialog } from "@/components/recharge-dialog";
 import { WalletPage } from "@/components/wallet-page";
 import { WalletRechargePage } from "@/components/wallet-recharge-page";
 import { CardModule, type PlatformFlowInput } from "@/components/card-module";
@@ -506,6 +507,7 @@ export default function Home() {
   const [resetOpen, setResetOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuId>("home");
   // 虚拟卡的页签由左侧二级菜单驱动：常规进入看卡包，未登录点「登录后开卡」则直达卡段市场。
   const [cardTab, setCardTab] = useState<"cards" | "market" | "transactions">("cards");
@@ -750,7 +752,13 @@ export default function Home() {
     setSelectedMenu(destination);
   };
   const openWalletRecharge = () => {
-    navigateTo("topup");
+    // 有待支付订单时仍走完整充值页：那条链路要保留「返回订单继续支付」。
+    if (pendingOrder) {
+      navigateTo("topup", { keepPendingOrder: true });
+      return;
+    }
+    // 其它场景一律走轻量弹窗，不再把用户从当前页面带走。
+    setRechargeOpen(true);
   };
   // 余额不足：挂起本单并跳转充值页，充值完成后可由「返回订单继续支付」接回。
   const goTopupForOrder = (productId: string, nextQuantity: number) => {
@@ -947,13 +955,24 @@ export default function Home() {
    */
   const sidebarGroups: SidebarGroup[] = [
     {
-      title: "",
+      title: "工作台",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
         { id: "recharge", label: content.navRecharge, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navRecharge", value) },
         { id: "card", label: content.navCard, icon: <CreditCard aria-hidden="true" />, onLabelChange: (value) => updateContent("navCard", value) },
+      ],
+    },
+    {
+      title: "资产与记录",
+      items: [
         { id: "wallet", label: content.walletMenu, icon: <Wallet aria-hidden="true" />, onLabelChange: (value) => updateContent("walletMenu", value) },
         { id: "orders", label: content.navOrders, icon: <ClipboardList aria-hidden="true" />, onLabelChange: (value) => updateContent("navOrders", value) },
+      ],
+    },
+    {
+      title: "支持",
+      items: [
+        { id: "help", label: "帮助中心", icon: <Headphones aria-hidden="true" /> },
       ],
     },
   ];
@@ -1065,7 +1084,8 @@ export default function Home() {
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
           ) : null}
-          {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包/充值" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-balance" type="button" title="平台余额 · 点击前往钱包" onClick={() => navigateTo("wallet")}><WalletCards aria-hidden="true" /><span className="header-balance-tag">平台</span>${walletBalance.toFixed(2)}</button> : null}
+          {isLoggedIn ? <button className="header-recharge" type="button" onClick={openWalletRecharge}><Plus aria-hidden="true" />充值</button> : null}
           {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"
@@ -1334,6 +1354,15 @@ export default function Home() {
         content={content}
         editMode={editMode}
         updateContent={updateContent}
+      />
+
+      <RechargeDialog
+        open={rechargeOpen}
+        onOpenChange={setRechargeOpen}
+        availableBalance={effectiveBalance}
+        initialAmount={pendingOrderGapAmount}
+        onComplete={applyPaymentCompletion}
+        onViewRecords={() => navigateTo("wallet")}
       />
 
       <Sheet open={Boolean(editorProduct)} onOpenChange={(open) => !open && setEditorProductId(null)}>

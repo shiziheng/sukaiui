@@ -65,25 +65,24 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
 
   return (
     <section className="user-center-page business-dashboard home-ops-dashboard">
-      <header className="dash-hero">
-        <div className="dash-hero-copy">
-          <span className="dash-hero-icon" aria-hidden="true"><LayoutDashboard /></span>
+      <header className="uc-page-heading dash-heading">
+        <div className="uc-page-heading-copy">
+          <span className="uc-page-heading-icon" aria-hidden="true"><LayoutDashboard /></span>
           <div>
-            <span className="dash-hero-eyebrow">{copy.eyebrow}</span>
             <h1>{copy.title}</h1>
-            <p>{copy.subtitle}<em>{copy.updatedPrefix} {updatedAt}</em></p>
+            <p>{copy.subtitle}<em className="dash-updated">{copy.updatedPrefix} {updatedAt}</em></p>
           </div>
         </div>
-        <div className="dash-hero-actions">
+        <div className="uc-page-heading-aside dash-heading-actions">
           <div className="dash-range" role="group" aria-label={copy.rangeLabel}>
             {copy.ranges.map((item) => (
               <button key={item.id} type="button" data-active={range === item.id} onClick={() => setRange(item.id as DashboardRange)}>{item.label}</button>
             ))}
           </div>
-          <button className="dash-refresh" type="button" onClick={refresh} data-loading={refreshing}>
-            <RefreshCw aria-hidden="true" />{copy.refresh}
+          <button className="dash-refresh" type="button" onClick={refresh} data-loading={refreshing} aria-label={copy.refresh}>
+            <RefreshCw aria-hidden="true" /><span>{copy.refresh}</span>
           </button>
-          <button className="dash-cta" type="button" onClick={onOpenRecharge}>
+          <button className="ph-btn is-primary" type="button" onClick={onOpenRecharge}>
             {copy.openRecharge}<ArrowRight aria-hidden="true" />
           </button>
         </div>
@@ -93,7 +92,6 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
         <article className="dash-kpi is-hero">
           <div className="dash-kpi-top">
             <span className="dash-kpi-label">{copy.kpi.monthSpend.label}</span>
-            <span className="dash-dot is-brand" aria-hidden="true" />
           </div>
           <strong className="dash-kpi-value">{money2(monthCap.amount)}</strong>
           <div className="dash-kpi-foot">
@@ -107,7 +105,6 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
         <article className="dash-kpi">
           <div className="dash-kpi-top">
             <span className="dash-kpi-label">{copy.kpi.todaySuccess.label}</span>
-            <span className="dash-dot is-success" aria-hidden="true" />
           </div>
           <strong className="dash-kpi-value">{money2(todaySuccess.amount)}</strong>
           <div className="dash-kpi-foot">
@@ -120,7 +117,6 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
         <article className="dash-kpi">
           <div className="dash-kpi-top">
             <span className="dash-kpi-label">{copy.kpi.todayFailed.label}</span>
-            <span className="dash-dot is-danger" aria-hidden="true" />
           </div>
           <strong className="dash-kpi-value">{money2(todayFailed.amount)}</strong>
           <div className="dash-kpi-foot">
@@ -135,7 +131,6 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance,
         <article className="dash-kpi">
           <div className="dash-kpi-top">
             <span className="dash-kpi-label">{copy.kpi.chargebackRate.label}</span>
-            <span className="dash-dot is-warning" aria-hidden="true" />
           </div>
           <strong className="dash-kpi-value">{chargeback.value}<small>%</small></strong>
           <div className="dash-kpi-foot">
