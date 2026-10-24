@@ -2105,3 +2105,9 @@ button{font:inherit}
 /* 操作行里的视图切换保持和按钮同高。 */
 .uc-page-toolbar .vcard-view-toggle{padding:2px}
 .uc-page-toolbar .vcard-view-toggle button{height:30px}
+
+/* 标题行底边与第一个区块的顶边不要叠成双线。 */
+.hp-head + .hp-block{border-top:0}
+
+/* 钱包页去掉操作行后，标题与概览之间补回间距（原来由操作行的下外边距提供）。 */
+.wallet-page .uc-page-heading{margin-bottom:20px}

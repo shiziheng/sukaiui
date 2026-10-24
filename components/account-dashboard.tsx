@@ -65,28 +65,25 @@ export function AccountDashboard({ onNavigate, onOpenRecharge, availableBalance 
         <span className="hp-head-icon" aria-hidden="true"><LayoutDashboard /></span>
         <div>
           <h1>你好，{data.user.name}</h1>
-          <p>今天的情况和账户整体，一屏看完。<em>更新于 {updatedAt}</em></p>
+          <p>
+            今天的情况和账户整体，一屏看完。<em>更新于 {updatedAt}</em>
+            <button className="hp-refresh-inline" type="button" onClick={refresh} aria-label="刷新数据" data-loading={refreshing || undefined}>
+              <RefreshCw aria-hidden="true" />
+            </button>
+          </p>
         </div>
       </div>
     </header>
-
-    {/* 本页操作独立成行：刷新在左，充值与办卡在右，与右上角的全局工具分离。 */}
-    <div className="uc-page-toolbar">
-      <div className="uc-toolbar-group">
-        <button className="hp-icon-button" type="button" onClick={refresh} aria-label="刷新数据" data-loading={refreshing || undefined}>
-          <RefreshCw aria-hidden="true" />
-        </button>
-      </div>
-      <div className="uc-toolbar-group">
-        <button className="hp-ghost" type="button" onClick={onOpenRecharge}>充值</button>
-        <button className="hp-primary" type="button" onClick={() => onNavigate("card")}>去办卡<ArrowRight aria-hidden="true" /></button>
-      </div>
-    </div>
 
     {/* 核心指标：本月消费额（主卡）+ 今日成功 / 今日失败 / 拒付率 */}
     <section className="hp-block">
       <header className="hp-block-head">
         <div><h2>本月与今日</h2><p>成功与失败订单分开统计，不含历史</p></div>
+        {/* 本页主操作跟着第一个区块走，不再单起一条只有两个按钮的空操作行。 */}
+        <div className="hp-block-actions">
+          <button className="hp-ghost" type="button" onClick={onOpenRecharge}>充值</button>
+          <button className="hp-primary" type="button" onClick={() => onNavigate("card")}>去办卡<ArrowRight aria-hidden="true" /></button>
+        </div>
       </header>
       <div className="hp-stats is-four">
         <div className="hp-stat is-primary">

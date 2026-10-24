@@ -81,7 +81,6 @@ export function WalletPage({
       editMode={editMode}
       updateContent={updateContent}
       icon={<WalletCards />}
-      toolbar={<Button className="wallet-recharge-button" onClick={openRecharge}><PlusCircle /><EditableText active={editMode} value={content.walletRecharge} onChange={(value) => updateContent("walletRecharge", value)} /></Button>}
     />
 
     <section className="wallet-overview" aria-label="资金概览">

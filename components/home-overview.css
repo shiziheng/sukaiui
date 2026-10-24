@@ -837,3 +837,30 @@
     display: none;
   }
 }
+
+
+/* ===== v0.36.1 首页操作归位 ===== */
+/* 副标题一行内放「更新于 + 刷新」，用 flex 避免小图标撑高行高。 */
+.hp-head-copy p{display:flex;align-items:center;flex-wrap:wrap}
+.hp-refresh-inline{
+  display:inline-grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  margin-left:5px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:#a0a69b;
+  cursor:pointer;
+  transition:background-color .15s ease,color .15s ease;
+}
+.hp-refresh-inline:hover{background:#eceee5;color:#17191c}
+.hp-refresh-inline svg{width:13px;height:13px}
+.hp-refresh-inline[data-loading="true"] svg{animation:hp-spin .8s linear infinite}
+/* 本页主操作并入第一个区块头右侧。 */
+.hp-block-actions{display:flex;align-items:center;gap:8px;flex:none}
+
+@media (max-width:760px){
+  .hp-block-actions{width:100%}
+}

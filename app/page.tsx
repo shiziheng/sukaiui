@@ -807,17 +807,6 @@ export default function Home() {
     setCardTab("cards");
     setCardMarketOnLogin(true);
   };
-  const openBatchRecharge = () => {
-    // 批量代充同样「下单即登录」，入口先过纯登录动作，不动向导内部的 5 步结构。
-    if (!isLoggedIn) signInDemo();
-    const product = visibleProducts.find((item) => item.businessType === "recharge" && item.status === "available");
-    if (!product || product.brand !== "chatgpt") {
-      toast.info("请先选择一个支持批量办理的 ChatGPT 代充商品");
-      return;
-    }
-    setWizardInitialMode("batch");
-    setWizardProduct(product);
-  };
   const addBatchOrder = (task: BatchTask) => {
     setGeneratedOrders((current) => current.some((order) => order.id === task.orderId) ? current : [{
       id: task.orderId,
@@ -1264,7 +1253,6 @@ export default function Home() {
                   editMode={editMode}
                   updateContent={updateContent}
                   icon={productsBiz === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
-                  toolbar={productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
                 />
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">
