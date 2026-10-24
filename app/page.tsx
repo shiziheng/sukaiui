@@ -1064,13 +1064,11 @@ export default function Home() {
             editMode={editMode}
             brandText={content.logoText}
             onBrandChange={(value) => updateContent("logoText", value)}
-            userInitials={accountDashboardMock.user.initials}
-            userName={accountDashboardMock.user.name}
-            userMeta={accountDashboardMock.user.email}
             onNavigate={handleSidebarNavigate}
             onHome={() => handleSidebarNavigate("home")}
             onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
             walletBalance={walletBalance}
+            walletOpen={walletOpen}
             onOpenWallet={() => setWalletOpen(true)}
           />
           <button className="sb-backdrop" type="button" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} />

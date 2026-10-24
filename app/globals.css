@@ -1911,3 +1911,47 @@ button{font:inherit}
 /* 侧栏只剩一组一级入口：去掉分组标题残留的上下间距 */
 .app-sidebar .sb-group+.sb-group{margin-top:0}
 .app-sidebar .sb-nav{padding-top:8px}
+
+/* ===== Shell finish: one continuous workspace surface ===== */
+:root{--color-bg-page:#f1f2ec}
+.app-shell,.content-inset,.dashboard-inset,.public-landing-inset{background:var(--color-bg-page)}
+.site-header{background:var(--color-bg-page);border-bottom:0;box-shadow:none}
+.app-shell.has-sidebar .site-header{background:var(--color-bg-page);border-bottom:0;box-shadow:none}
+.site-header .login-link{color:#434a40}
+.site-header .login-link:hover{color:#17191c}
+@media(max-width:650px){.business-nav{border-top:0}}
+
+/* 侧栏底部只保留钱包入口，账户身份统一由右上角菜单承载。 */
+.sb-foot{gap:0;border-top:0;padding-top:10px}
+.sb-balance{width:100%;min-height:91px;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;border:1px solid #2a2d31;border-radius:13px;background:linear-gradient(145deg,#1c1e21 0%,#17191b 100%);padding:12px 13px;text-align:left;box-shadow:0 8px 20px rgba(0,0,0,.16);transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.sb-balance:hover{border-color:#424a35;background:linear-gradient(145deg,#202326 0%,#191c1d 100%);transform:translateY(-1px)}
+.sb-balance-copy{display:grid;gap:3px;min-width:0}
+.sb-balance-label{color:#969d91;font-size:10px;font-weight:650;letter-spacing:.04em}
+.sb-balance-amount{gap:2px;color:#f5f7f0;font-size:17px;line-height:1.1;font-weight:740;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sb-balance-amount .cur{color:#b8c36a;font-size:12px;font-weight:650}
+.sb-balance-hint{color:#828980;font-size:10px}
+.sb-balance-icon-wrap{width:30px;height:30px;flex:none;display:grid;place-items:center;border:1px solid rgba(223,255,0,.16);border-radius:9px;background:rgba(223,255,0,.08);color:#dfff00;transition:background-color .16s ease,transform .16s ease}
+.sb-balance-icon{width:15px;height:15px;stroke-width:1.8}
+.sb-balance:hover .sb-balance-icon-wrap{background:rgba(223,255,0,.14);transform:translateY(-1px)}
+.app-sidebar[data-collapsed=true] .sb-balance{justify-content:center;min-height:47px;padding:8px 0;border-radius:11px}
+.app-sidebar[data-collapsed=true] .sb-balance-copy{display:none}
+.app-sidebar[data-collapsed=true] .sb-balance-icon-wrap{width:26px;height:26px}
+@media(max-width:1024px){
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-balance{justify-content:space-between;min-height:91px;padding:12px 13px;border-radius:13px}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-balance-copy{display:grid}
+  .app-shell.has-sidebar .app-sidebar[data-collapsed=true] .sb-balance-icon-wrap{width:30px;height:30px}
+}
+
+/* 访客落地页使用深色首屏，导航保持同一暗色基底，避免浅色横条截断首屏。 */
+.app-shell:has(.compact-home) .site-header{background:#111614;border-bottom:0;box-shadow:none;color:#eef4ec}
+.app-shell:has(.compact-home) .site-header .brand-name{color:#eef4ec}
+.app-shell:has(.compact-home) .business-nav-item{color:#9ba79e}
+.app-shell:has(.compact-home) .business-nav-item:hover{color:#f3f7ef}
+.app-shell:has(.compact-home) .business-nav-item[data-active=true]{color:#f3f7ef}
+.app-shell:has(.compact-home) .business-nav-item[data-active=true]:after{height:2px;background:#dfff00;box-shadow:0 0 12px rgba(223,255,0,.28)}
+.app-shell:has(.compact-home) .site-header .top-support-button{border-color:#35413a;background:rgba(255,255,255,.035);color:#d0d8d1}
+.app-shell:has(.compact-home) .site-header .top-support-button:hover,.app-shell:has(.compact-home) .site-header .top-support-button[aria-expanded=true]{border-color:#59684f;background:rgba(255,255,255,.08);color:#f5f8f2}
+.app-shell:has(.compact-home) .site-header .login-link{color:#c7d0c8}
+.app-shell:has(.compact-home) .site-header .login-link:hover{color:#fff}
+.app-shell:has(.compact-home) .site-header .register-button{border-color:#dfff00;background:#dfff00;color:#151a16;font-weight:750}
+.app-shell:has(.compact-home) .site-header .register-button:hover{background:#d3f000}

@@ -55,3 +55,5 @@ dev-server.log
 dev-server.pid
 _package*
 _package_report.txt
+build.log
+dev.log
