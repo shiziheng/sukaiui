@@ -305,6 +305,7 @@ export function CardModule({
           editMode={editMode}
           updateContent={updateContent}
           embedded
+          onOpenMarket={() => setMarketOpen(true)}
         />
       )}
 

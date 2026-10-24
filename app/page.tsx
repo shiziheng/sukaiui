@@ -974,7 +974,6 @@ export default function Home() {
       title: "",
       items: [
         { id: "home", label: content.navHome, icon: <House aria-hidden="true" />, onLabelChange: (value) => updateContent("navHome", value) },
-        { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
         {
           id: "card-parent",
           label: content.navCard,
@@ -998,6 +997,7 @@ export default function Home() {
             { id: "orders", label: content.navOrders, onLabelChange: (value) => updateContent("navOrders", value) },
           ],
         },
+        { id: "topup", label: content.navTopup, icon: <Zap aria-hidden="true" />, onLabelChange: (value) => updateContent("navTopup", value) },
         { id: "flows", label: content.navFlows, icon: <WalletCards aria-hidden="true" />, onLabelChange: (value) => updateContent("navFlows", value) },
         { id: "invite", label: content.navInvite, icon: <Gift aria-hidden="true" />, onLabelChange: (value) => updateContent("navInvite", value) },
       ],
@@ -1064,12 +1064,12 @@ export default function Home() {
             editMode={editMode}
             brandText={content.logoText}
             onBrandChange={(value) => updateContent("logoText", value)}
-            userInitials={accountDashboardMock.user.initials}
-            userName={accountDashboardMock.user.name}
-            userMeta={accountDashboardMock.user.email}
             onNavigate={handleSidebarNavigate}
             onHome={() => handleSidebarNavigate("home")}
             onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
+            walletBalance={walletBalance}
+            walletOpen={walletOpen}
+            onOpenWallet={() => setWalletOpen(true)}
           />
           <button className="sb-backdrop" type="button" aria-label="关闭菜单" onClick={() => setMobileNavOpen(false)} />
         </>
@@ -1118,7 +1118,7 @@ export default function Home() {
               <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={importConfig} />
             </div>
           ) : null}
-          {isLoggedIn ? <button className="header-balance header-wallet" type="button" title="平台余额 · 点击查看钱包" aria-expanded={walletOpen} onClick={() => setWalletOpen(true)}><WalletCards aria-hidden="true" /><span className="header-balance-tag">余额</span>${walletBalance.toFixed(2)}<ChevronDown className="header-wallet-caret" aria-hidden="true" /></button> : null}
+          {isLoggedIn ? <button className="header-balance header-wallet top-balance-mobile" type="button" title="平台余额 · 点击查看钱包" aria-expanded={walletOpen} onClick={() => setWalletOpen(true)}><WalletCards aria-hidden="true" /><span className="header-balance-tag">余额</span>${walletBalance.toFixed(2)}<ChevronDown className="header-wallet-caret" aria-hidden="true" /></button> : null}
           {isLoggedIn ? <SiteMessages open={messageOpen} onOpenChange={setMessageOpen} /> : null}
           <div
             className="top-support"

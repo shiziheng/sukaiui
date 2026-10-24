@@ -48,4 +48,13 @@
 @media (max-width:560px){
   .ctxn-table{min-width:760px}
   .ctxn-summary .bill-summary-cell>strong{font-size:19px}
+  .ctxn-period-actions{width:100%;justify-content:space-between;gap:10px}
+  .ctxn-period-actions .bill-period-range{width:auto}
+  .ctxn-open-market{height:34px;padding:0 12px}
 }
+
+/* 周期条右侧：开通虚拟卡入口，配色复用卡片列表页 vcard-open-entry */
+.ctxn-period-actions{display:inline-flex;align-items:center;gap:14px}
+.ctxn-open-market{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid #25282c;border-radius:9px;background:#181a1d;color:#fff;font-family:inherit;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.ctxn-open-market:hover{background:#111214;border-color:#dfff00;color:#dfff00}
+.ctxn-open-market svg{width:15px;height:15px;flex:none}

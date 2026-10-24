@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import {
   ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronDown, ChevronRight,
-  ReceiptText, RotateCcw, Search, WalletCards,
+  PlusCircle, ReceiptText, RotateCcw, Search, WalletCards,
 } from "lucide-react";
 
 import "./bill-page.css";
@@ -84,6 +84,7 @@ function cardBookends(rows: CardFlowItem[], start: Date | null, end: Date | null
 
 export function CardTransactions({
   cards, closedCards = [], flows, content, editMode, updateContent, embedded = false,
+  onOpenMarket,
 }: {
   cards: VirtualCard[];
   /** 已销卡的卡片快照：流水保留，卡列显示「已销卡」。 */
@@ -94,6 +95,8 @@ export function CardTransactions({
   updateContent: Editable;
   /** 作为一级页面（侧栏「卡流水」）时，标题交给页头，只留条数和筛选。 */
   embedded?: boolean;
+  /** 点击「开通虚拟卡」时拉起开卡中心（由 CardModule 注入 setMarketOpen(true)）。 */
+  onOpenMarket?: () => void;
 }) {
   const [cardId, setCardId] = useState<string>("all");
   const [type, setType] = useState<"all" | CardFlowType>("all");
@@ -216,7 +219,15 @@ export function CardTransactions({
             <button key={value} type="button" className="bill-period-tab" data-active={period === value} onClick={() => setPeriod(value)}>{PERIOD_LABEL[value]}</button>
           ))}
         </div>
-        <span className="bill-period-range">{rangeText}</span>
+        <div className="ctxn-period-actions">
+          <span className="bill-period-range">{rangeText}</span>
+          {onOpenMarket ? (
+            <button type="button" className="ctxn-open-market" onClick={onOpenMarket}>
+              <PlusCircle aria-hidden="true" />
+              {editable("cardOpenAction")}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="bill-summary ctxn-summary" aria-label="卡内余额对账">

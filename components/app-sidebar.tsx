@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, WalletCards } from "lucide-react";
 import { EditableText } from "@/components/editable-text";
 
 /** 二级菜单：点一下直接切到对应子页。 */
@@ -37,12 +37,12 @@ export function AppSidebar({
   editMode,
   brandText,
   onBrandChange,
-  userInitials,
-  userName,
-  userMeta,
   onNavigate,
   onHome,
   onToggleCollapse,
+  walletBalance,
+  walletOpen,
+  onOpenWallet,
 }: {
   groups: SidebarGroup[];
   activeId: string;
@@ -50,12 +50,12 @@ export function AppSidebar({
   editMode: boolean;
   brandText: string;
   onBrandChange: (value: string) => void;
-  userInitials: string;
-  userName: string;
-  userMeta: string;
   onNavigate: (id: string) => void;
   onHome: () => void;
   onToggleCollapse: () => void;
+  walletBalance: number;
+  walletOpen: boolean;
+  onOpenWallet: () => void;
 }) {
   // 二级菜单默认全展开，用户手动收起才记成 closed。
   const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
@@ -180,20 +180,22 @@ export function AppSidebar({
 
       <div className="sb-foot">
         <button
-          className="sb-user"
-          data-active={activeId === "my"}
-          aria-current={activeId === "my" ? "page" : undefined}
+          className="sb-balance"
           type="button"
-          onClick={() => onNavigate("my")}
-          title={collapsed ? `${userName} · 我的` : undefined}
-          aria-label="打开我的"
+          onClick={onOpenWallet}
+          title={`平台余额 $${walletBalance.toFixed(2)} · 点击查看钱包`}
+          aria-label={`查看平台余额，${walletBalance.toFixed(2)} 美元`}
+          aria-expanded={walletOpen}
+          aria-controls="wallet-drawer"
         >
-          <span className="sb-user-avatar" aria-hidden="true">{userInitials}</span>
-          <span className="sb-user-text">
-            <strong>{userName}</strong>
-            <small>{userMeta}</small>
+          <span className="sb-balance-copy">
+            <span className="sb-balance-label">平台余额</span>
+            <span className="sb-balance-amount"><span className="cur">$</span>{walletBalance.toFixed(2)}</span>
+            <span className="sb-balance-hint">查看钱包与充值</span>
           </span>
-          <ChevronRight className="sb-user-chevron" aria-hidden="true" />
+          <span className="sb-balance-icon-wrap" aria-hidden="true">
+            <WalletCards className="sb-balance-icon" />
+          </span>
         </button>
       </div>
     </aside>

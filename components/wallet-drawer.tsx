@@ -39,7 +39,7 @@ export function WalletDrawer({
   const recent = records.slice(0, 5);
 
   return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent className="wallet-drawer" side="right">
+    <SheetContent id="wallet-drawer" className="wallet-drawer" side="bottom">
       <SheetTitle className="wallet-drawer-title">钱包</SheetTitle>
       <SheetDescription className="wallet-drawer-desc">平台余额与最近流水，充值不跳页。</SheetDescription>
 
