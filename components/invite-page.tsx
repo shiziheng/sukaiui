@@ -34,7 +34,7 @@ export function InvitePage({ content, editMode, updateContent, embedded = false 
 
   return (
     <section className={embedded ? "my-embedded invite-page" : "user-center-page invite-page"}>
-      {embedded ? null : <PageHeading titleKey="invitePageTitle" subtitleKey="invitePageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<Gift />} aside={<span className="uc-rate-badge">{data.invite.rate}</span>} />}
+      {embedded ? null : <PageHeading titleKey="invitePageTitle" subtitleKey="invitePageSubtitle" content={content} editMode={editMode} updateContent={updateContent} icon={<Gift />} meta={<span className="uc-rate-badge">{data.invite.rate}</span>} />}
 
       <section className="uc-card invite-core-card">
         <div className="invite-core-copy">

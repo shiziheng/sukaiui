@@ -162,28 +162,30 @@ export function CardList({
               : `共 ${filtered.length} 张 · 卡内可用 ${money(filtered.reduce((sum, card) => sum + card.balance, 0))}`}
           </span>
         )}
-        actions={(
-          <div className="vcard-head-tools">
-            <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
-              <Download aria-hidden="true" />{editable("cardExport")}
-            </button>
-            <div className="vcard-view-toggle" role="group" aria-label="展示方式">
-              <button
-                type="button"
-                className={view === "cards" ? "is-active" : ""}
-                onClick={() => setView("cards")}
-                aria-pressed={view === "cards"}
-              >
-                <LayoutGrid aria-hidden="true" />{editable("cardViewCard")}
+        toolbar={(
+          <>
+            <div className="uc-toolbar-group">
+              <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
+                <Download aria-hidden="true" />{editable("cardExport")}
               </button>
-              <button
-                type="button"
-                className={view === "table" ? "is-active" : ""}
-                onClick={() => setView("table")}
-                aria-pressed={view === "table"}
-              >
-                <Table aria-hidden="true" />{editable("cardViewTable")}
-              </button>
+              <div className="vcard-view-toggle" role="group" aria-label="展示方式">
+                <button
+                  type="button"
+                  className={view === "cards" ? "is-active" : ""}
+                  onClick={() => setView("cards")}
+                  aria-pressed={view === "cards"}
+                >
+                  <LayoutGrid aria-hidden="true" />{editable("cardViewCard")}
+                </button>
+                <button
+                  type="button"
+                  className={view === "table" ? "is-active" : ""}
+                  onClick={() => setView("table")}
+                  aria-pressed={view === "table"}
+                >
+                  <Table aria-hidden="true" />{editable("cardViewTable")}
+                </button>
+              </div>
             </div>
             {!showClosed ? (
               <Button className="vcard-open-entry" onClick={onOpenMarket}>
@@ -191,7 +193,7 @@ export function CardList({
                 {editable("cardOpenAction")}
               </Button>
             ) : null}
-          </div>
+          </>
         )}
       />
 

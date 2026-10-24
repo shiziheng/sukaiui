@@ -294,9 +294,10 @@ export function OrdersPage({
     ? `${formatDate(periodRange.start)} – ${formatDate(periodRange.end)}`
     : "全部时间";
 
+  // 数量与周期口径属于「信息」，不再挂在标题行冒充操作：账单并入周期条，订单并入列表计数。
   const heading = mode === "flows"
-    ? { titleKey: "walletFlowTitle" as const, subtitleKey: "walletFlowSubtitle" as const, icon: <WalletCards />, aside: <span className="orders-period-summary">{PERIOD_LABEL[period]} · {flowSummary.count} 笔</span> }
-    : { titleKey: "ordersPageTitle" as const, subtitleKey: "ordersPageSubtitle" as const, icon: <ReceiptText />, aside: <span className="orders-period-summary">近30天 · {recentCount}个订单</span> };
+    ? { titleKey: "walletFlowTitle" as const, subtitleKey: "walletFlowSubtitle" as const, icon: <WalletCards /> }
+    : { titleKey: "ordersPageTitle" as const, subtitleKey: "ordersPageSubtitle" as const, icon: <ReceiptText /> };
 
   return (
     <section className="user-center-page orders-page">
@@ -307,7 +308,6 @@ export function OrdersPage({
         editMode={editMode}
         updateContent={updateContent}
         icon={heading.icon}
-        aside={heading.aside}
       />
 
       {mode === "flows" ? (
@@ -318,7 +318,7 @@ export function OrdersPage({
               <button key={value} type="button" className="bill-period-tab" data-active={period === value} onClick={() => setPeriod(value)}>{PERIOD_LABEL[value]}</button>
             ))}
           </div>
-          <span className="bill-period-range">{periodRangeText}</span>
+          <span className="bill-period-range">{periodRangeText} · 本期 {flowSummary.count} 笔</span>
         </div>
 
         <div className="bill-summary" aria-label="账单汇总">

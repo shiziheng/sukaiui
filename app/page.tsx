@@ -1264,7 +1264,7 @@ export default function Home() {
                   editMode={editMode}
                   updateContent={updateContent}
                   icon={productsBiz === "account" ? <PackageOpen aria-hidden="true" /> : <Zap aria-hidden="true" />}
-                  actions={productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
+                  toolbar={productsBiz === "recharge" ? <button className="batch-recharge-shortcut" type="button" onClick={openBatchRecharge}>批量办理</button> : null}
                 />
                 <div className="panel-toolbar">
                   <Tabs value={selectedBrand} onValueChange={(value) => setSelectedBrand(value as BrandId)} className="brand-tabs">

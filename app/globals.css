@@ -2072,3 +2072,36 @@ button{font:inherit}
   .app-shell.has-sidebar .vcard-head-tools{width:100%;gap:7px}
   .app-shell.has-sidebar .vcard-head-tools .vcard-view-toggle{margin-left:auto}
 }
+
+
+/* ===== v0.36.0 页头分层：标题行只留身份，本页操作落到独立工具行 ===== */
+/* 右上角全局工具退成「浏览器 chrome」：去掉容器底 / 描边 / 阴影，只在单项 hover 时给一层浅底。 */
+.app-shell.has-sidebar .header-actions{
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  padding:0;
+  border-radius:0;
+  gap:2px;
+}
+/* 本页操作行：与标题同一条左引导线，右端放本页主操作。 */
+.uc-page-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:14px;
+  margin-bottom:20px;
+}
+.uc-toolbar-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.uc-page-toolbar .uc-secondary-action{margin-left:0}
+.uc-page-toolbar .batch-recharge-shortcut,
+.uc-page-toolbar .vcard-open-entry,
+.uc-page-toolbar .wallet-recharge-button{margin-left:auto}
+/* 标题行后面紧跟操作行时，去掉标题原下外边距，避免两层空隙叠在一起。 */
+.uc-page-heading:has(+.uc-page-toolbar),
+.hp-head:has(+.uc-page-toolbar){margin-bottom:0!important}
+/* 操作行里的视图切换保持和按钮同高。 */
+.uc-page-toolbar .vcard-view-toggle{padding:2px}
+.uc-page-toolbar .vcard-view-toggle button{height:30px}

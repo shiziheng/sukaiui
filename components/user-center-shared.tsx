@@ -15,7 +15,7 @@ export function formatMoney(value: number) {
 }
 
 export function PageHeading({
-  titleKey, subtitleKey, content, editMode, updateContent, aside, icon, titleSuffix, actions, tabs, meta,
+  titleKey, subtitleKey, content, editMode, updateContent, aside, icon, titleSuffix, actions, tabs, meta, toolbar,
 }: {
   titleKey: keyof DemoContent;
   subtitleKey: keyof DemoContent;
@@ -32,22 +32,30 @@ export function PageHeading({
   tabs?: ReactNode;
   /** 说明文字下方的轻量补充信息，如列表数量或统计口径。 */
   meta?: ReactNode;
+  /**
+   * 本页操作行：渲染在标题行下方，与标题同一条左引导线，右侧放主操作。
+   * 与标题行分开是为了把「本页操作」和右上角「全局工具」从同一行里解开。
+   */
+  toolbar?: ReactNode;
 }) {
   return (
-    <header className="uc-page-heading">
-      <div className="uc-page-heading-copy">
-        {icon ? <span className="uc-page-heading-icon" aria-hidden="true">{icon}</span> : null}
-        <div>
-          <h1><EditableText active={editMode} value={content[titleKey]} onChange={(value) => updateContent(titleKey, value)} />{titleSuffix}</h1>
-          <p><EditableText active={editMode} value={content[subtitleKey]} onChange={(value) => updateContent(subtitleKey, value)} /></p>
-          {meta ? <div className="uc-page-heading-meta">{meta}</div> : null}
-          {tabs ? <div className="uc-page-heading-tabs">{tabs}</div> : null}
+    <>
+      <header className="uc-page-heading">
+        <div className="uc-page-heading-copy">
+          {icon ? <span className="uc-page-heading-icon" aria-hidden="true">{icon}</span> : null}
+          <div>
+            <h1><EditableText active={editMode} value={content[titleKey]} onChange={(value) => updateContent(titleKey, value)} />{titleSuffix}</h1>
+            <p><EditableText active={editMode} value={content[subtitleKey]} onChange={(value) => updateContent(subtitleKey, value)} /></p>
+            {meta ? <div className="uc-page-heading-meta">{meta}</div> : null}
+            {tabs ? <div className="uc-page-heading-tabs">{tabs}</div> : null}
+          </div>
         </div>
-      </div>
-      {actions || aside ? (
-        <div className="uc-page-heading-aside">{actions}{aside}</div>
-      ) : null}
-    </header>
+        {actions || aside ? (
+          <div className="uc-page-heading-aside">{actions}{aside}</div>
+        ) : null}
+      </header>
+      {toolbar ? <div className="uc-page-toolbar">{toolbar}</div> : null}
+    </>
   );
 }
 

@@ -67,7 +67,7 @@ export function MyPage({
         editMode={editMode}
         updateContent={updateContent}
         icon={<UserRound />}
-        aside={<span className="my-status-badge">{user.status}</span>}
+        meta={<span className="my-status-badge">{user.status}</span>}
       />
 
       <div className="my-layout">
