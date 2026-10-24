@@ -1955,3 +1955,120 @@ button{font:inherit}
 .app-shell:has(.compact-home) .site-header .login-link:hover{color:#fff}
 .app-shell:has(.compact-home) .site-header .register-button{border-color:#dfff00;background:#dfff00;color:#151a16;font-weight:750}
 .app-shell:has(.compact-home) .site-header .register-button:hover{background:#d3f000}
+
+/* 登录后的全局工具并入页面标题行：桌面端不再保留一整行空顶栏。 */
+/* 四个量一起决定「标题行」的高度与工具组落点，后续微调只改这里。 */
+.app-shell.has-sidebar{position:relative;--shell-top-pad:36px;--shell-head-h:84px;--shell-head-pad-b:20px;--shell-tools-h:46px}
+.app-shell.has-sidebar .site-header{
+  position:absolute;
+  inset:0 0 auto var(--sb-w);
+  z-index:40;
+  height:0;
+  overflow:visible;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  padding:0;
+  pointer-events:none;
+  transition:left .34s var(--sb-ease);
+}
+.app-shell.has-sidebar .site-header .header-left{display:none}
+.app-shell.has-sidebar .header-actions{
+  position:absolute;
+  top:calc(var(--shell-top-pad) + (var(--shell-head-h) - var(--shell-head-pad-b)) * 0.5 - var(--shell-tools-h) * 0.5);
+  right:clamp(20px,2vw,40px);
+  min-height:var(--shell-tools-h);
+  gap:5px;
+  border:1px solid rgba(211,215,204,.78);
+  border-radius:15px;
+  background:rgba(255,255,255,.58);
+  padding:5px;
+  box-shadow:0 2px 10px rgba(27,32,22,.04);
+  pointer-events:auto;
+}
+.app-shell.has-sidebar .site-bell-button{border-radius:9px;color:#747b70}
+.app-shell.has-sidebar .site-bell-button:hover,
+.app-shell.has-sidebar .site-bell-button[aria-expanded=true]{background:#f0f2e9;color:#20251e}
+.app-shell.has-sidebar .site-bell-button:hover>svg,
+.app-shell.has-sidebar .site-bell-button[aria-expanded=true]>svg{color:#879300}
+.app-shell.has-sidebar .site-header .top-support-button{height:34px;border-color:transparent;background:transparent;color:#454b43}
+.app-shell.has-sidebar .site-header .top-support-button:hover,
+.app-shell.has-sidebar .site-header .top-support-button[aria-expanded=true]{border-color:transparent;background:#f0f2e9;color:#22271f}
+.app-shell.has-sidebar .site-header .user-menu-trigger{height:34px;border-color:transparent;background:transparent}
+.app-shell.has-sidebar .site-header .user-menu-trigger:hover{border-color:transparent;background:#f0f2e9}
+.app-shell.has-sidebar .site-header .header-wallet{height:34px;border-color:transparent;background:transparent;color:#454b43}
+.app-shell.has-sidebar .site-header .header-wallet:hover,
+.app-shell.has-sidebar .site-header .header-wallet[aria-expanded=true]{border-color:transparent;background:#f0f2e9;color:#22271f}
+.app-shell.has-sidebar .content-inset{
+  padding-top:0;
+  background:var(--color-bg-page);
+}
+.app-shell.has-sidebar .content-inset .main-content{padding-block-start:var(--shell-top-pad)}
+.app-shell.has-sidebar .uc-page-heading,
+.app-shell.has-sidebar .hp-head{
+  align-items:center;
+  min-height:var(--shell-head-h)!important;
+  border-bottom:1px solid #dfe2da!important;
+  padding-right:340px!important;
+  padding-bottom:var(--shell-head-pad-b)!important;
+}
+.app-shell.has-sidebar .uc-page-heading-meta{margin-top:7px;color:var(--color-text-secondary);font-size:12px;line-height:1.4}
+.app-shell.has-sidebar .card-module .uc-page-heading{margin-bottom:20px}
+.app-shell.has-sidebar .vcard-head-tools{gap:8px}
+.app-shell.has-sidebar .vcard-panel-meta{font-size:12px;color:var(--color-text-secondary);font-variant-numeric:tabular-nums}
+
+@media(min-width:1501px){
+  .app-shell.has-sidebar .uc-page-heading{position:relative!important}
+  .app-shell.has-sidebar .uc-page-heading-aside{
+    position:absolute;
+    top:50%;
+    right:340px;
+    transform:translateY(-50%);
+  }
+}
+
+@media(min-width:1025px) and (max-width:1500px){
+  .app-shell.has-sidebar .site-header .top-support-button{width:34px;justify-content:center;padding:0}
+  .app-shell.has-sidebar .site-header .top-support-button>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .app-shell.has-sidebar .site-header .user-menu-trigger{width:34px;justify-content:center;padding:0 3px}
+  .app-shell.has-sidebar .site-header .user-menu-trigger strong,
+  .app-shell.has-sidebar .site-header .user-menu-trigger>svg{display:none}
+  .app-shell.has-sidebar .uc-page-heading,
+  .app-shell.has-sidebar .hp-head{padding-right:142px!important}
+}
+
+/* 办理向导本身有工作区顶栏，保留原有工具栏布局，避免两个标题区发生遮挡。 */
+.app-shell.has-sidebar:has(.recharge-workspace) .site-header{
+  position:fixed;
+  inset:0 0 auto var(--sb-w);
+  height:56px;
+  background:var(--color-bg-page);
+  padding-inline:clamp(20px,2vw,40px);
+  pointer-events:auto;
+}
+.app-shell.has-sidebar:has(.recharge-workspace) .site-header .header-actions{position:static}
+.app-shell.has-sidebar .recharge-workspace-inset{padding-top:56px}
+
+@media(max-width:1024px){
+  .app-shell.has-sidebar .site-header{
+    position:fixed;
+    inset:0 0 auto;
+    height:56px;
+    background:var(--color-bg-page);
+    padding-inline:16px;
+    pointer-events:auto;
+  }
+  .app-shell.has-sidebar .site-header .header-left{display:flex}
+  .app-shell.has-sidebar .header-actions{position:static}
+  .app-shell.has-sidebar .content-inset{padding-top:56px}
+  .app-shell.has-sidebar .uc-page-heading,
+  .app-shell.has-sidebar .hp-head{padding-right:0!important}
+}
+
+@media(max-width:760px){
+  .app-shell.has-sidebar .content-inset .main-content{padding-block-start:24px}
+  .app-shell.has-sidebar .uc-page-heading,
+  .app-shell.has-sidebar .hp-head{align-items:flex-start;flex-direction:column;gap:16px}
+  .app-shell.has-sidebar .vcard-head-tools{width:100%;gap:7px}
+  .app-shell.has-sidebar .vcard-head-tools .vcard-view-toggle{margin-left:auto}
+}

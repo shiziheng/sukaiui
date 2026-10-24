@@ -15,7 +15,7 @@ export function formatMoney(value: number) {
 }
 
 export function PageHeading({
-  titleKey, subtitleKey, content, editMode, updateContent, aside, icon, titleSuffix, actions, tabs,
+  titleKey, subtitleKey, content, editMode, updateContent, aside, icon, titleSuffix, actions, tabs, meta,
 }: {
   titleKey: keyof DemoContent;
   subtitleKey: keyof DemoContent;
@@ -30,6 +30,8 @@ export function PageHeading({
   actions?: ReactNode;
   /** 页内页签条，渲染在说明文字下方，统一整站页头节奏。 */
   tabs?: ReactNode;
+  /** 说明文字下方的轻量补充信息，如列表数量或统计口径。 */
+  meta?: ReactNode;
 }) {
   return (
     <header className="uc-page-heading">
@@ -38,6 +40,7 @@ export function PageHeading({
         <div>
           <h1><EditableText active={editMode} value={content[titleKey]} onChange={(value) => updateContent(titleKey, value)} />{titleSuffix}</h1>
           <p><EditableText active={editMode} value={content[subtitleKey]} onChange={(value) => updateContent(subtitleKey, value)} /></p>
+          {meta ? <div className="uc-page-heading-meta">{meta}</div> : null}
           {tabs ? <div className="uc-page-heading-tabs">{tabs}</div> : null}
         </div>
       </div>

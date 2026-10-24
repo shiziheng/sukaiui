@@ -258,14 +258,16 @@ export function CardModule({
 
   return (
     <section className="card-module">
-      <PageHeading
-        titleKey={tab === "transactions" ? "cardTabTransactions" : "cardPageTitle"}
-        subtitleKey={tab === "transactions" ? "cardFlowsPageSubtitle" : "cardPageSubtitle"}
-        content={content}
-        editMode={editMode}
-        updateContent={updateContent}
-        icon={<CreditCard aria-hidden="true" />}
-      />
+      {detailCard || tab === "transactions" ? (
+        <PageHeading
+          titleKey={tab === "transactions" ? "cardTabTransactions" : "cardPageTitle"}
+          subtitleKey={tab === "transactions" ? "cardFlowsPageSubtitle" : "cardPageSubtitle"}
+          content={content}
+          editMode={editMode}
+          updateContent={updateContent}
+          icon={<CreditCard aria-hidden="true" />}
+        />
+      ) : null}
 
       {detailCard ? (
         <CardDetail

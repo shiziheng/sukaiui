@@ -12,6 +12,7 @@ import {
   CardVisual, copyText,
 } from "@/components/card-visual";
 import { EditableText } from "@/components/editable-text";
+import { PageHeading } from "@/components/user-center-shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -147,42 +148,52 @@ export function CardList({
 
   return (
     <section className="vcard-panel">
-      <header className="vcard-panel-head">
-        <p className="vcard-panel-meta">
-          {showClosed
-            ? `已注销 ${filtered.length} 张`
-            : `共 ${filtered.length} 张 · 卡内可用 ${money(filtered.reduce((sum, card) => sum + card.balance, 0))}`}
-        </p>
-        <div className="vcard-head-tools">
-          <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
-            <Download aria-hidden="true" />{editable("cardExport")}
-          </button>
-          <div className="vcard-view-toggle" role="group" aria-label="展示方式">
-            <button
-              type="button"
-              className={view === "cards" ? "is-active" : ""}
-              onClick={() => setView("cards")}
-              aria-pressed={view === "cards"}
-            >
-              <LayoutGrid aria-hidden="true" />{editable("cardViewCard")}
+      <PageHeading
+        titleKey="cardPageTitle"
+        subtitleKey="cardPageSubtitle"
+        content={content}
+        editMode={editMode}
+        updateContent={updateContent}
+        icon={<CreditCard aria-hidden="true" />}
+        meta={(
+          <span className="vcard-panel-meta">
+            {showClosed
+              ? `已注销 ${filtered.length} 张`
+              : `共 ${filtered.length} 张 · 卡内可用 ${money(filtered.reduce((sum, card) => sum + card.balance, 0))}`}
+          </span>
+        )}
+        actions={(
+          <div className="vcard-head-tools">
+            <button className="uc-secondary-action" type="button" onClick={() => setExportOpen(true)} disabled={!exportable.length} title={showClosed ? "已注销卡片不支持导出" : undefined}>
+              <Download aria-hidden="true" />{editable("cardExport")}
             </button>
-            <button
-              type="button"
-              className={view === "table" ? "is-active" : ""}
-              onClick={() => setView("table")}
-              aria-pressed={view === "table"}
-            >
-              <Table aria-hidden="true" />{editable("cardViewTable")}
-            </button>
+            <div className="vcard-view-toggle" role="group" aria-label="展示方式">
+              <button
+                type="button"
+                className={view === "cards" ? "is-active" : ""}
+                onClick={() => setView("cards")}
+                aria-pressed={view === "cards"}
+              >
+                <LayoutGrid aria-hidden="true" />{editable("cardViewCard")}
+              </button>
+              <button
+                type="button"
+                className={view === "table" ? "is-active" : ""}
+                onClick={() => setView("table")}
+                aria-pressed={view === "table"}
+              >
+                <Table aria-hidden="true" />{editable("cardViewTable")}
+              </button>
+            </div>
+            {!showClosed ? (
+              <Button className="vcard-open-entry" onClick={onOpenMarket}>
+                <PlusCircle aria-hidden="true" />
+                {editable("cardOpenAction")}
+              </Button>
+            ) : null}
           </div>
-          {!showClosed ? (
-            <Button className="vcard-open-entry" onClick={onOpenMarket}>
-              <PlusCircle aria-hidden="true" />
-              {editable("cardOpenAction")}
-            </Button>
-          ) : null}
-        </div>
-      </header>
+        )}
+      />
 
       <div className="vcard-filters">
         <div className="vbin-search vcard-search">
