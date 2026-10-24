@@ -424,9 +424,19 @@ export function OrdersPage({
         </>
       ) : (
         <>
-          <div className="uc-light-stats order-stat-filters" aria-label="订单统计快捷筛选">
-        {statCards.map((card) => { const Icon = card.icon; return <button type="button" data-active={quickFilter === card.id} onClick={() => selectQuickFilter(card.id)} key={card.id}><Icon aria-hidden="true" /><span><EditableText active={editMode} value={content[card.labelKey]} onChange={(value) => updateContent(card.labelKey, value)} /></span><strong>{card.count}</strong></button>; })}
-      </div>
+          <div className="bill-summary order-stat-filters" aria-label="订单统计快捷筛选">
+            {statCards.map((card) => {
+              const Icon = card.icon;
+              const active = quickFilter === card.id;
+              return (
+                <button type="button" className={`bill-summary-cell${active ? " is-active" : ""}`} data-active={active} onClick={() => selectQuickFilter(card.id)} key={card.id}>
+                  <span><Icon aria-hidden="true" /><EditableText active={editMode} value={content[card.labelKey]} onChange={(value) => updateContent(card.labelKey, value)} /></span>
+                  <strong>{card.count}</strong>
+                  <small>个订单</small>
+                </button>
+              );
+            })}
+          </div>
 
       <section className="uc-card order-management-panel">
         <div className="order-tabs-row">

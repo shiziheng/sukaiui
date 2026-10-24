@@ -1266,10 +1266,7 @@ export default function Home() {
                     </TabsList>
                   </Tabs>
                   <div className="panel-context">
-                    <strong>{currentBrand.name}</strong>
-                    <span>
-                      {productsBiz === "account" ? content.accountLabel : content.rechargeLabel} · {visibleProducts.length} {content.planUnit}
-                    </span>
+                    <span>{currentBrand.name} · {productsBiz === "account" ? content.accountLabel : content.rechargeLabel} · {visibleProducts.length} {content.planUnit}</span>
                   </div>
                 </div>
                 <section className="product-grid" aria-live="polite">

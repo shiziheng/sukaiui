@@ -79,3 +79,29 @@
   .bill-period-tab{flex:1;padding:0 8px}
   .bill-period-range{width:100%}
 }
+
+/* ===== 订单模式：统计摘要收进一张卡、头部两条合成一块，跟资金流水同构 ===== */
+
+/* 四格统计沿用账单摘要：一张白卡切四格，仍是可点的快捷筛选 */
+.order-stat-filters .bill-summary-cell{position:relative;display:block;text-align:left;font-family:inherit;color:inherit;background:#fff;border:0;border-left:1px solid #eef0e8;cursor:pointer;appearance:none;transition:background .16s ease}
+.order-stat-filters .bill-summary-cell:first-child{border-left:0}
+.order-stat-filters .bill-summary-cell:hover{background:#fafbf6}
+.order-stat-filters .bill-summary-cell.is-active{background:#fafbf5}
+.order-stat-filters .bill-summary-cell.is-active:after{content:"";position:absolute;right:0;bottom:0;left:0;height:2px;background:var(--color-brand)}
+.order-stat-filters .bill-summary-cell:focus-visible{outline:2px solid #cfd96a;outline-offset:-3px}
+.order-stat-filters .bill-summary-cell>strong{font-variant-numeric:tabular-nums}
+
+/* 页签行不再单独占一条浅底带，和查询条件并成一个头部块 */
+.orders-page .order-tabs-row{min-height:0;align-items:center;border-bottom:0;background:transparent;padding:16px 20px 10px}
+.orders-page .order-filter-toolbar{border-bottom:1px solid #eef0e8;padding:0 20px 14px}
+
+@media (max-width:900px){
+  .order-stat-filters .bill-summary-cell:nth-child(3){border-left:0;border-top:1px solid #eef0e8}
+  .order-stat-filters .bill-summary-cell:nth-child(4){border-top:1px solid #eef0e8}
+}
+
+@media (max-width:760px){
+  .orders-page .order-tabs-row{align-items:flex-start;flex-direction:column;gap:8px}
+  .orders-page .order-result-count{align-self:flex-end}
+}
+

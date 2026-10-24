@@ -57,3 +57,4 @@ _package*
 _package_report.txt
 build.log
 dev.log
+.tmp-edge*/

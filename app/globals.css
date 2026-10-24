@@ -2111,3 +2111,9 @@ button{font:inherit}
 
 /* 钱包页去掉操作行后，标题与概览之间补回间距（原来由操作行的下外边距提供）。 */
 .wallet-page .uc-page-heading{margin-bottom:20px}
+/* v0.36.2 代充/成品号：页签条不再套独立白卡，纵向节奏对齐账户页 */
+.commerce-panel{gap:var(--ds-space-5);min-height:0}
+.commerce-panel .panel-toolbar{border:0;border-radius:0;background:transparent;box-shadow:none;padding:0;gap:16px}
+.commerce-panel .panel-context{display:flex;align-items:baseline;gap:6px;text-align:right}
+.commerce-panel .panel-context span{font-size:13px;line-height:1.5;color:var(--color-text-tertiary)}
+.commerce-panel .panel-toolbar .brand-tabs-list{height:46px!important}
